@@ -1,0 +1,140 @@
+/* ============================================================
+   CarMods AI — Global Design System
+   Dark automotive theme with orange performance accents
+   ============================================================ */
+
+:root {
+  /* Surface palette */
+  --bg-base:       #0A0B0E;
+  --bg-surface:    #0F1015;
+  --bg-elevated:   #161820;
+  --bg-card:       #1A1C25;
+  --bg-input:      #1E2029;
+  --bg-hover:      #22242F;
+
+  /* Border */
+  --border:        rgba(255,255,255,0.06);
+  --border-hover:  rgba(255,255,255,0.12);
+  --border-focus:  rgba(255,140,0,0.5);
+
+  /* Text */
+  --text-primary:  #F0F1F5;
+  --text-secondary:#9BA3AF;
+  --text-muted:    #5C6370;
+  --text-link:     #FF8C00;
+
+  /* Brand / Accent */
+  --accent:        #FF8C00;
+  --accent-dim:    rgba(255,140,0,0.12);
+  --accent-bright: #FFA533;
+  --accent-glow:   rgba(255,140,0,0.2);
+
+  /* Semantic */
+  --success:       #22C55E;
+  --success-dim:   rgba(34,197,94,0.12);
+  --warning:       #F59E0B;
+  --warning-dim:   rgba(245,158,11,0.12);
+  --danger:        #EF4444;
+  --danger-dim:    rgba(239,68,68,0.12);
+  --info:          #3B82F6;
+  --info-dim:      rgba(59,130,246,0.12);
+
+  /* Stage colors */
+  --stage1:        #22C55E;
+  --stage2:        #F59E0B;
+  --stage3:        #EF4444;
+
+  /* Difficulty */
+  --easy:          #22C55E;
+  --medium:        #F59E0B;
+  --hard:          #EF4444;
+
+  /* Typography */
+  --font-sans:     'Inter', system-ui, sans-serif;
+  --font-display:  'Space Grotesk', sans-serif;
+  --font-mono:     'JetBrains Mono', monospace;
+
+  /* Radius */
+  --radius-sm:     6px;
+  --radius-md:     10px;
+  --radius-lg:     14px;
+  --radius-xl:     20px;
+  --radius-full:   9999px;
+
+  /* Shadows */
+  --shadow-sm:     0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg:     0 8px 32px rgba(0,0,0,0.6);
+  --shadow-glow:   0 0 20px rgba(255,140,0,0.15);
+
+  /* Transitions */
+  --transition:    all 0.18s ease;
+  --transition-slow: all 0.3s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-surface); }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── Selection ── */
+::selection { background: var(--accent-dim); color: var(--accent-bright); }
+
+/* ── Typography ── */
+h1,h2,h3,h4,h5,h6 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; }
+a { color: inherit; text-decoration: none; }
+code, pre { font-family: var(--font-mono); }
+
+/* ── Utility Classes ── */
+.container { max-width: 1140px; margin: 0 auto; padding: 0 1.5rem; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+/* ── Animations ── */
+@keyframes fadeUp    { from { opacity:0; transform: translateY(20px) } to { opacity:1; transform:none } }
+@keyframes fadeIn    { from { opacity:0 } to { opacity:1 } }
+@keyframes slideIn   { from { opacity:0; transform: translateX(-10px) } to { opacity:1; transform:none } }
+@keyframes pulse     { 0%,100% { opacity:1 } 50% { opacity:.5 } }
+@keyframes spin      { to { transform: rotate(360deg) } }
+@keyframes shimmer   { 0% { background-position: -200% 0 } 100% { background-position: 200% 0 } }
+@keyframes glow      { 0%,100% { box-shadow: 0 0 10px var(--accent-glow) } 50% { box-shadow: 0 0 25px var(--accent-glow) } }
+
+.animate-fade-up  { animation: fadeUp 0.4s ease both; }
+.animate-fade-in  { animation: fadeIn 0.3s ease both; }
+.animate-slide-in { animation: slideIn 0.3s ease both; }
+
+/* Stagger delays */
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+.delay-5 { animation-delay: 0.25s; }
+
+/* ── Grid Texture ── */
+.grid-texture {
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* ── Glass card ── */
+.glass {
+  background: rgba(26,28,37,0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
