@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
@@ -33,6 +33,46 @@ const EXPERIENCE_LEVELS = [
 ]
 
 const STEPS = ['Vehicle', 'Budget & Goals', 'Preferences', 'Review']
+
+const BUILD_MESSAGES = [
+  'Analyzing your build specs...',
+  'Researching real aftermarket parts...',
+  'Checking compatibility for your platform...',
+  'Calculating budget allocation...',
+  'Ranking mods by impact per dollar...',
+  'Staging your upgrade roadmap...',
+  'Cross-referencing brand recommendations...',
+  'Reviewing safety and difficulty ratings...',
+  'Finalizing your build plan...',
+]
+
+function BuildingOverlay({ vehicle }) {
+  const [idx, setIdx] = useState(0)
+
+  useEffect(() => {
+    const t = setInterval(() => setIdx(i => (i + 1) % BUILD_MESSAGES.length), 2600)
+    return () => clearInterval(t)
+  }, [])
+
+  return (
+    <div className={s.overlay}>
+      <div className={s.overlayCard}>
+        <div className={s.overlayOrb}>
+          <div className={s.overlayRing} />
+          <div className={s.overlayRing2} />
+          <span className={s.overlayGear}>⚙</span>
+        </div>
+        <h2 className={s.overlayTitle}>Generating Your Build</h2>
+        <p key={idx} className={s.overlayMsg}>
+          {vehicle ? BUILD_MESSAGES[idx].replace('your platform', `your ${vehicle}`) : BUILD_MESSAGES[idx]}
+        </p>
+        <div className={s.overlayDots}>
+          <span /><span /><span />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function Planner() {
   const navigate = useNavigate()
@@ -77,8 +117,11 @@ export default function Planner() {
     } catch (e) { setError(e.message); setLoading(false) }
   }
 
+  const vehicleLabel = [form.year, form.make, form.model].filter(Boolean).join(' ')
+
   return (
     <div className={s.page}>
+      {loading && <BuildingOverlay vehicle={vehicleLabel} />}
       <div className={`container ${s.inner}`}>
         {/* Header */}
         <div className={s.header}>

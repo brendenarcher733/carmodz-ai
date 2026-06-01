@@ -17,7 +17,7 @@ api.interceptors.response.use(
 )
 
 export const buildsApi = {
-  create:  (data)    => api.post('/api/builds/', data),
+  create:  (data)    => api.post('/api/builds/', data, { timeout: 90000 }),
   list:    ()        => api.get('/api/builds/'),
   get:     (id)      => api.get(`/api/builds/${id}`),
   getPlan: (id)      => api.get(`/api/builds/${id}/plan`),
