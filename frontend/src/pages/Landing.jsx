@@ -20,21 +20,28 @@ const EXAMPLE_MODS = [
   { name: 'Downpipe Upgrade',    price: '$300–$900',   stage: 2, diff: 'Hard'   },
 ]
 
-const DIFF_COLOR = { Easy: 'var(--easy)', Medium: 'var(--medium)', Hard: 'var(--hard)' }
+const DIFF_COLOR  = { Easy: 'var(--easy)', Medium: 'var(--medium)', Hard: 'var(--hard)' }
 const STAGE_COLOR = { 1: 'var(--stage1)', 2: 'var(--stage2)', 3: 'var(--stage3)' }
+
+const STATS = [
+  { num: '30+',  label: 'Mod Categories' },
+  { num: 'AI',   label: 'Powered by Claude' },
+  { num: '3',    label: 'Build Stages' },
+  { num: '∞',    label: 'Saved Builds' },
+]
 
 export default function Landing() {
   return (
     <div className={s.page}>
       {/* Hero */}
       <section className={s.hero}>
-        <div className={`${s.gridBg} grid-texture`} />
+        <div className={s.heroBg} />
         <div className={`container ${s.heroInner}`}>
           <div className={`${s.pill} animate-fade-up`}>
             <span className={s.pillDot} /> AI-Powered Car Modification Planner
           </div>
           <h1 className={`${s.headline} animate-fade-up delay-1`}>
-            Build Smarter.<br />
+            Build Smarter.
             <span className={s.headlineAccent}>Not Harder.</span>
           </h1>
           <p className={`${s.sub} animate-fade-up delay-2`}>
@@ -50,8 +57,17 @@ export default function Landing() {
             </Link>
           </div>
 
+          <div className={`${s.heroStats} animate-fade-up delay-4`}>
+            {STATS.map(({ num, label }) => (
+              <div key={label} className={s.stat}>
+                <span className={s.statNum}>{num}</span>
+                <span className={s.statLabel}>{label}</span>
+              </div>
+            ))}
+          </div>
+
           {/* Preview card */}
-          <div className={`${s.previewCard} animate-fade-up delay-4`}>
+          <div className={`${s.previewCard} animate-fade-up delay-5`}>
             <div className={s.previewHeader}>
               <span className={s.previewTitle}>Sample Build — 2020 Toyota Supra · $6,000 Budget</span>
               <span className={s.previewBudget}>$1,950 avg spend</span>
@@ -79,7 +95,7 @@ export default function Landing() {
       <section className={s.features}>
         <div className="container">
           <div className={s.sectionHead}>
-            <p className={s.eyebrow}>WHAT IT DOES</p>
+            <p className={s.eyebrow}>What It Does</p>
             <h2 className={s.sectionTitle}>Everything you need to plan a real build</h2>
           </div>
           <div className={s.featureGrid}>

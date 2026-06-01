@@ -1,4 +1,15 @@
-.page { padding-top: 60px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+.page {
+  padding-top: 62px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(8,9,12,0.78), rgba(8,9,12,0.78)),
+    url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center 25%;
+}
 .inner { flex: 1; display: grid; grid-template-columns: 280px 1fr; gap: 16px; padding: 16px 1.5rem; max-width: 1140px; width: 100%; min-height: 0; }
 @media(max-width: 768px) { .inner { grid-template-columns: 1fr; } .sidebar { display: none; } }
 
@@ -28,8 +39,8 @@
 .vehicleClear:hover { color: var(--text-secondary); }
 
 /* Chat */
-.chatPanel { display: flex; flex-direction: column; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; min-height: 0; }
-.chatHeader { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--bg-card); flex-shrink: 0; }
+.chatPanel { display: flex; flex-direction: column; background: rgba(13,14,19,0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.09); border-radius: var(--radius-xl); overflow: hidden; min-height: 0; }
+.chatHeader { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.03); flex-shrink: 0; }
 .onlineDot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
 .chatHeaderTitle { font-size: 14px; font-weight: 600; color: var(--text-primary); }
@@ -56,7 +67,7 @@
 @keyframes bounce { 0%,60%,100%{transform:none}30%{transform:translateY(-5px)} }
 
 /* Input */
-.inputBar { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border); background: var(--bg-card); flex-shrink: 0; }
-.input { flex: 1; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 10px 14px; font-size: 14px; color: var(--text-primary); font-family: var(--font-sans); outline: none; resize: none; transition: var(--transition); line-height: 1.5; }
+.inputBar { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.03); flex-shrink: 0; }
+.input { flex: 1; background: rgba(20,22,32,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-lg); padding: 10px 14px; font-size: 14px; color: var(--text-primary); font-family: var(--font-sans); outline: none; resize: none; transition: var(--transition); line-height: 1.5; }
 .input:focus { border-color: var(--border-focus); }
 .sendBtn { align-self: flex-end; width: 40px; height: 40px; padding: 0; border-radius: var(--radius-md); font-size: 18px; }
