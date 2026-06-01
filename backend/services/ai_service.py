@@ -258,6 +258,133 @@ Use car enthusiast terms naturally but explain them when needed.
 Keep responses focused and useful — 3-5 sentences per point maximum."""
 
 
+# ── Claude Build Recommendations ─────────────────────────────────────────────
+
+def generate_build_recommendations(build) -> Optional[list[dict]]:
+    """
+    Generate mod recommendations for a saved build using Claude.
+    Returns list of dicts on success, None if unavailable (caller falls back to mock).
+    """
+    if settings.anthropic_api_key:
+        return _claude_build_recommendations(build)
+    if settings.openai_api_key:
+        return _openai_build_recommendations(build)
+    return None
+
+
+def _claude_build_recommendations(build) -> Optional[list[dict]]:
+    try:
+        import anthropic, json, re
+        client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+
+        usage_label = "Daily Driver" if getattr(build, "is_daily", True) else "Project / Track Car"
+        categories  = ", ".join(build.categories) if build.categories else "performance, handling"
+        notes_line  = f"\nUser notes: {build.notes}" if getattr(build, "notes", "") else ""
+
+        prompt = f"""You are a car modification expert with deep knowledge of aftermarket parts.
+Generate a JSON array of realistic modification recommendations for this specific vehicle.
+
+Vehicle: {build.year} {build.make} {build.model}
+Budget: ${build.budget:,.0f} total
+Primary Goal: {build.goal}
+Experience Level: {build.experience}
+Usage: {usage_label}
+Categories: {categories}{notes_line}
+
+Return a JSON array where each object has EXACTLY these fields:
+- "name": specific aftermarket product name (e.g. "Injen SP Cold Air Intake", "Cobb Accessport V3")
+- "category": one of the categories listed above
+- "description": 2-3 sentences specific to this car — what it does, realistic power/handling gains, why it fits this build
+- "price_min": minimum realistic cost USD (parts only)
+- "price_max": maximum for quality options USD
+- "difficulty": "easy", "medium", or "hard"
+- "stage": 1, 2, or 3 (1 = do first, 3 = advanced)
+- "priority": integer, 1 = highest
+- "warnings": array of strings — important caveats or safety notes ([] if none)
+- "brand_tips": array of 2-4 specific brand or product names that fit this exact car
+
+Rules:
+- Be SPECIFIC to the {build.year} {build.make} {build.model} — name real parts that exist for this platform
+- Total price_min values must not exceed ${build.budget:,.0f}
+- 6-10 mods total
+- Stage 1 mods within first 50% of budget
+- Beginner builds: avoid stage 3 and hard difficulty
+- Foundation/reliability before power if high mileage or beginner
+- Use real brands: K&N, Borla, Cobb, KW, Brembo, Mishimoto, etc.
+
+Return ONLY a valid JSON array. No markdown, no explanation."""
+
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4000,
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        raw = response.content[0].text.strip()
+        # Strip markdown code fences if present
+        raw = re.sub(r'^```(?:json)?\s*', '', raw)
+        raw = re.sub(r'\s*```$', '', raw)
+        # Extract JSON array
+        match = re.search(r'\[.*\]', raw, re.DOTALL)
+        if match:
+            raw = match.group(0)
+        mods = json.loads(raw)
+
+        # Normalise + validate each mod
+        cleaned = []
+        for i, m in enumerate(mods):
+            cleaned.append({
+                "name":        str(m.get("name", "Unnamed Mod")),
+                "category":    str(m.get("category", "performance")),
+                "description": str(m.get("description", "")),
+                "price_min":   float(m.get("price_min", 0)),
+                "price_max":   float(m.get("price_max", 0)),
+                "difficulty":  str(m.get("difficulty", "medium")),
+                "stage":       int(m.get("stage", 1)),
+                "priority":    int(m.get("priority", i + 1)),
+                "warnings":    list(m.get("warnings", [])),
+                "brand_tips":  list(m.get("brand_tips", [])),
+            })
+        return cleaned
+
+    except Exception as e:
+        print(f"[Claude Recommendations] Failed: {e} — falling back to mock")
+        return None
+
+
+def _openai_build_recommendations(build) -> Optional[list[dict]]:
+    try:
+        import json
+        from openai import OpenAI
+        client = OpenAI(api_key=settings.openai_api_key)
+
+        usage_label = "Daily Driver" if getattr(build, "is_daily", True) else "Project / Track Car"
+        categories  = ", ".join(build.categories) if build.categories else "performance, handling"
+
+        prompt = f"""Generate aftermarket modification recommendations as a JSON array for:
+Vehicle: {build.year} {build.make} {build.model}
+Budget: ${build.budget:,.0f} | Goal: {build.goal} | Experience: {build.experience} | Usage: {usage_label}
+Categories: {categories}
+
+Each object needs: name, category, description, price_min, price_max, difficulty (easy/medium/hard),
+stage (1-3), priority (1=highest), warnings (array), brand_tips (array).
+6-10 mods, specific to this platform, total price_min <= ${build.budget:,.0f}.
+Return ONLY valid JSON array."""
+
+        resp = client.chat.completions.create(
+            model=settings.ai_model,
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
+            temperature=0.7,
+        )
+        data = json.loads(resp.choices[0].message.content)
+        mods = data if isinstance(data, list) else (data.get("mods") or list(data.values())[0])
+        return mods
+    except Exception as e:
+        print(f"[OpenAI Recommendations] Failed: {e} — falling back to mock")
+        return None
+
+
 # ── Recommendation Engine ─────────────────────────────────────────────────────
 
 def generate_recommendations(req: RecommendationRequest) -> list[dict]:
@@ -429,9 +556,11 @@ def generate_chat_response(
 ) -> str:
     """
     Generate a contextual chat response.
-    Uses real AI when key is configured, otherwise mock responses.
+    Tries Claude first, then OpenAI, then falls back to mock.
     """
-    if settings.use_real_ai:
+    if settings.anthropic_api_key:
+        return _claude_chat(message, session_history, vehicle)
+    if settings.openai_api_key:
         return _ai_chat(message, session_history, vehicle)
     return _mock_chat(message, vehicle)
 
@@ -473,6 +602,42 @@ def _mock_chat(message: str, vehicle: Optional[dict] = None) -> str:
         return response
 
     return random.choice(MOCK_CHAT_RESPONSES["default"])
+
+
+def _claude_chat(
+    message: str,
+    session_history: list[dict],
+    vehicle: Optional[dict] = None,
+) -> str:
+    """Real AI chat via Anthropic Claude."""
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+
+        system_content = ADVISOR_PERSONA
+        if vehicle:
+            yr = vehicle.get("year", "")
+            mk = vehicle.get("make", "")
+            mo = vehicle.get("model", "")
+            if yr or mk or mo:
+                system_content += f"\n\nThe user is working on a {yr} {mk} {mo}. Tailor all advice to this specific platform."
+
+        messages = []
+        for msg in session_history[-10:]:
+            messages.append({"role": msg["role"], "content": msg["content"]})
+        messages.append({"role": "user", "content": message})
+
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=600,
+            system=system_content,
+            messages=messages,
+        )
+        return response.content[0].text
+
+    except Exception as e:
+        print(f"[Claude Chat] Failed: {e} — falling back to mock")
+        return _mock_chat(message, vehicle)
 
 
 def _ai_chat(

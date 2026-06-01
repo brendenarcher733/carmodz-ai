@@ -4,7 +4,7 @@ Manages chat session history and delegates to the AI service.
 """
 
 from sqlalchemy.orm import Session
-from models.db_models import ChatMessage
+from models.chat import ChatMessage
 from models.schemas import ChatMessageIn
 from services.ai_service import generate_chat_response
 

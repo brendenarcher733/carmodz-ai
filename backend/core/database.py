@@ -32,5 +32,5 @@ def get_db():
 def init_db():
     """Create all tables on startup."""
     # Import models so SQLAlchemy sees them before creating tables
-    from models import build, recommendation  # noqa: F401
+    from models import build, recommendation, chat  # noqa: F401
     Base.metadata.create_all(bind=engine)

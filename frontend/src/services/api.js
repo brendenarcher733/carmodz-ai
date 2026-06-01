@@ -25,8 +25,14 @@ export const buildsApi = {
 }
 
 export const advisorApi = {
-  chat:       (message, context) => api.post('/api/mod-advisor/chat', { message, build_context: context }),
-  quickRecs:  (payload)          => api.post('/api/mod-advisor/quick-recs', payload),
+  chat: (message, sessionId, vehicle = null, buildId = null) =>
+    api.post('/api/mod-advisor/chat', {
+      message,
+      session_id: sessionId,
+      vehicle,
+      build_id: buildId,
+    }),
+  quickRecs: (payload) => api.post('/api/mod-advisor/quick-recs', payload),
 }
 
 export const healthApi = {
