@@ -14,9 +14,10 @@ class Settings(BaseSettings):
     # Database
     database_url: str = Field(default="sqlite:///./carmods.db", alias="DATABASE_URL")
 
-    # AI — leave blank to use mock service, set to use real OpenAI
+    # AI — set one of these to enable real AI responses
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4o", alias="OPENAI_MODEL")
+    anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")
 
     # Set to "openai" or "anthropic" to swap providers
     ai_provider: str = Field(default="mock", alias="AI_PROVIDER")
@@ -26,6 +27,14 @@ class Settings(BaseSettings):
         default=["http://localhost:5173", "http://localhost:4173"],
         alias="ALLOWED_ORIGINS"
     )
+
+    @property
+    def use_real_ai(self) -> bool:
+        return bool(self.anthropic_api_key or self.openai_api_key)
+
+    @property
+    def ai_model(self) -> str:
+        return self.openai_model
 
     class Config:
         env_file = ".env"

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useChat } from '../hooks/useChat'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
@@ -36,9 +36,20 @@ function TypingIndicator() {
   )
 }
 
+const QUICK_STARTERS = [
+  "Best mods under $1,000?",
+  "What should I do first on a turbo car?",
+  "Is a tune worth it?",
+  "Coilovers vs lowering springs?",
+  "How do I make my exhaust louder?",
+]
+
 export default function Advisor() {
-  const { messages, loading, sendMessage, bottomRef } = useChat()
-  const [input, setInput] = useState('')
+  const { messages, loading, sendMessage, updateVehicle, vehicle, bottomRef } = useChat()
+  const [input, setInput]       = useState('')
+  const [carYear, setCarYear]   = useState('')
+  const [carMake, setCarMake]   = useState('')
+  const [carModel, setCarModel] = useState('')
   const inputRef = useRef(null)
 
   function handleSend() {
@@ -53,19 +64,21 @@ export default function Advisor() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
 
-  // Handle suggestion clicks bubbled from Message component
   function handleClick(e) {
     const sug = e.target.dataset.sug
     if (sug) sendMessage(sug)
   }
 
-  const QUICK_STARTERS = [
-    "Best mods under $1,000?",
-    "What should I do first on a turbo car?",
-    "Is a tune worth it?",
-    "Coilovers vs lowering springs?",
-    "How do I make my exhaust louder?",
-  ]
+  function handleSetVehicle(e) {
+    e.preventDefault()
+    if (!carYear && !carMake && !carModel) return
+    const v = { year: carYear, make: carMake, model: carModel }
+    updateVehicle(v)
+    const intro = `I'm working on a ${[carYear, carMake, carModel].filter(Boolean).join(' ')}.`
+    sendMessage(intro)
+  }
+
+  const hasVehicle = vehicle && (vehicle.make || vehicle.model)
 
   return (
     <div className={s.page}>
@@ -80,6 +93,49 @@ export default function Advisor() {
               mod order, brand recommendations, tradeoffs, and what to avoid.
             </p>
           </Card>
+
+          {/* Vehicle context */}
+          <Card padding="md">
+            <p className={s.sidebarLabel}>Your Car</p>
+            {hasVehicle ? (
+              <div className={s.vehicleSet}>
+                <span className={s.vehicleName}>
+                  {[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}
+                </span>
+                <button
+                  className={s.vehicleClear}
+                  onClick={() => { updateVehicle(null); setCarYear(''); setCarMake(''); setCarModel('') }}
+                >
+                  Change
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSetVehicle} className={s.vehicleForm}>
+                <input
+                  className={s.vehicleInput}
+                  placeholder="Year (e.g. 2018)"
+                  value={carYear}
+                  onChange={e => setCarYear(e.target.value)}
+                />
+                <input
+                  className={s.vehicleInput}
+                  placeholder="Make (e.g. Subaru)"
+                  value={carMake}
+                  onChange={e => setCarMake(e.target.value)}
+                />
+                <input
+                  className={s.vehicleInput}
+                  placeholder="Model (e.g. WRX)"
+                  value={carModel}
+                  onChange={e => setCarModel(e.target.value)}
+                />
+                <Button type="submit" size="sm" className={s.vehicleBtn} disabled={loading || (!carYear && !carMake && !carModel)}>
+                  Set My Car
+                </Button>
+              </form>
+            )}
+          </Card>
+
           <Card padding="md">
             <p className={s.sidebarLabel}>Quick Starters</p>
             <div className={s.quickStarters}>
@@ -90,6 +146,7 @@ export default function Advisor() {
               ))}
             </div>
           </Card>
+
           <Card padding="md">
             <p className={s.sidebarLabel}>Topics I Know</p>
             <div className={s.topics}>
@@ -106,7 +163,11 @@ export default function Advisor() {
           <div className={s.chatHeader}>
             <div className={s.onlineDot} />
             <span className={s.chatHeaderTitle}>Mod Advisor</span>
-            <span className={s.chatHeaderSub}>Powered by CarMods AI</span>
+            <span className={s.chatHeaderSub}>
+              {hasVehicle
+                ? `Advising on your ${[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}`
+                : 'Powered by CarMods AI'}
+            </span>
           </div>
 
           <div className={s.messages} onClick={handleClick}>

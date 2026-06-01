@@ -3,8 +3,9 @@
 
 from sqlalchemy.orm import Session
 from models.build import Build, BuildCreate
-from models.recommendation import Recommendation
-from services.mock_ai import generate_recommendations, build_mod_plan
+from models.recommendation import Recommendation, ModRecommendation
+from services.mock_ai import generate_recommendations as mock_recommendations, build_mod_plan
+from services.ai_service import generate_build_recommendations
 from fastapi import HTTPException
 
 
@@ -25,8 +26,13 @@ def create_build(db: Session, data: BuildCreate) -> Build:
     db.commit()
     db.refresh(build)
 
-    # Auto-generate recommendations on build creation
-    mods = generate_recommendations(data)
+    # Auto-generate recommendations — Claude if key set, mock fallback
+    ai_mods = generate_build_recommendations(data)
+    if ai_mods is not None:
+        mods = [ModRecommendation(**m) for m in ai_mods]
+    else:
+        mods = mock_recommendations(data)
+
     for mod in mods:
         rec = Recommendation(
             build_id=build.id,
