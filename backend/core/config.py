@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     # Set to "openai" or "anthropic" to swap providers
     ai_provider: str = Field(default="mock", alias="AI_PROVIDER")
 
+    # Auth — set a strong random value in production .env
+    secret_key: str = Field(
+        default="dev-secret-change-in-production-set-SECRET_KEY-env-var",
+        alias="SECRET_KEY",
+    )
+
     # CORS
     allowed_origins: list[str] = Field(
         default=["http://localhost:5173", "http://localhost:4173"],

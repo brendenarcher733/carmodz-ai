@@ -1,9 +1,22 @@
 import clsx from 'clsx'
-import s from './Card.module.css'
 
-export function Card({ children, className, glow, hover, padding = 'md' }) {
+const PADDING = {
+  none: '',
+  sm:   'p-4',
+  md:   'p-5',
+  lg:   'p-6',
+  xl:   'p-8',
+}
+
+export function Card({ children, className, padding = 'md', hover = false, glow = false }) {
   return (
-    <div className={clsx(s.card, s[padding], glow && s.glow, hover && s.hover, className)}>
+    <div className={clsx(
+      'bg-surface border border-white/[0.07] rounded-2xl',
+      PADDING[padding],
+      hover && 'transition-all duration-200 cursor-pointer hover:border-white/[0.14] hover:bg-elevated hover:shadow-card',
+      glow && 'shadow-glow-sm border-accent/20',
+      className,
+    )}>
       {children}
     </div>
   )

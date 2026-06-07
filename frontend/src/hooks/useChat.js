@@ -12,8 +12,8 @@ export function useChat(initialVehicle = null) {
   const [messages, setMessages] = useState([
     {
       id: 1, role: 'assistant',
-      content: "What's up! I'm your Mod Advisor — tell me about your build. What car are you working with and what are you trying to do with it?",
-      suggestions: ["I want more performance", "Budget build on $2k", "What should I do first?"]
+      content: "I'm your Performance Advisor. Tell me what platform you're building and what you're chasing — more power, better handling, a specific target? I'll tell you exactly where to start and what to skip.",
+      suggestions: ["Where do I start with my WRX?", "Best mods under $1,500", "Is a tune worth it?"]
     }
   ])
   const [loading, setLoading]   = useState(false)
