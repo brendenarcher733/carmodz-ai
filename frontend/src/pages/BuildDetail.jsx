@@ -154,6 +154,7 @@ function StageTimeline({ stageMods }) {
 export default function BuildDetail() {
   const { id }                  = useParams()
   const { plan, loading, error } = useBuildPlan(id)
+  const [viewing3D, setViewing3D] = useState(null)
 
   if (loading) return (
     <div className="page-shell flex items-center justify-center gap-4">
@@ -173,8 +174,6 @@ export default function BuildDetail() {
   )
 
   if (!plan) return null
-
-  const [viewing3D, setViewing3D] = useState(null)
 
   const stageMods = { 1: [], 2: [], 3: [] }
   plan.mods.forEach(m => { if (stageMods[m.stage]) stageMods[m.stage].push(m) })
@@ -264,6 +263,45 @@ export default function BuildDetail() {
             </div>
           </div>
         </div>
+
+        {/* ── Visual Configurator launch ── */}
+        <Link
+          to={`/configurator?vehicle=${encodeURIComponent(`${plan.year} ${plan.make} ${plan.model}`)}`}
+          className="block mb-8 group"
+        >
+          <div
+            className="relative w-full rounded-2xl overflow-hidden transition-all duration-200 group-hover:scale-[1.01]"
+            style={{
+              height: 200,
+              background: 'linear-gradient(135deg, rgba(255,140,0,0.08) 0%, rgba(12,13,16,1) 60%)',
+              border: '1px solid rgba(255,140,0,0.2)',
+            }}
+          >
+            <div className="absolute inset-0 grid-texture opacity-20 pointer-events-none" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-accent/[0.12] border border-accent/25 flex items-center justify-center group-hover:bg-accent/[0.2] transition-all duration-200">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="text-accent">
+                  <path d="M12 2L22 7V17L12 22L2 17V7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                  <path d="M12 2v20M2 7l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div className="text-center">
+                <div className="font-display font-black text-white text-lg mb-1 group-hover:text-accent transition-colors">
+                  Open Visual Configurator
+                </div>
+                <div className="font-mono text-xs text-muted">
+                  Customize paint · tint · wheels · mods in real-time 3D
+                </div>
+              </div>
+              <div className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-bold text-sm px-6 py-2.5 rounded-xl group-hover:bg-amber-400 transition-colors duration-150">
+                Launch Configurator
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </Link>
 
         {/* ── Stage timeline + actions ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">

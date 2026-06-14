@@ -11,6 +11,7 @@ import Advisor         from './pages/Advisor'
 import Login           from './pages/Login'
 import Signup          from './pages/Signup'
 import ExampleBuild    from './pages/ExampleBuild'
+import Configurator    from './pages/Configurator'
 import './styles/globals.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -32,7 +33,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path="/builds"     element={<Builds />}      />
                   <Route path="/builds/:id" element={<BuildDetail />} />
                   <Route path="/advisor"       element={<Advisor />}      />
-                  <Route path="/example-build" element={<ExampleBuild />} />
+                  <Route path="/example-build"  element={<ExampleBuild />}  />
+                  <Route path="/configurator"   element={<Configurator />}  />
                 </Routes>
               </>
             }
