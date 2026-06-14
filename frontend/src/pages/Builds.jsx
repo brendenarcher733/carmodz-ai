@@ -34,7 +34,7 @@ function GarageBay({ build, onDelete }) {
           <div className="flex-1 min-w-0">
             {/* Goal badge */}
             <div
-              className="inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold uppercase tracking-[0.14em] px-2.5 py-1 rounded-lg mb-4"
+              className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold uppercase tracking-[0.14em] px-2.5 py-1 rounded-lg mb-4"
               style={{ color: meta.color, background: meta.dim, border: `1px solid ${meta.color}30` }}
             >
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
@@ -94,7 +94,7 @@ function GarageBay({ build, onDelete }) {
         {build.categories?.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-5 pt-5 border-t border-white/[0.05]">
             {build.categories.map(c => (
-              <span key={c} className="text-[11px] font-mono text-muted bg-white/[0.04] px-2.5 py-1 rounded-lg capitalize">
+              <span key={c} className="text-xs font-mono text-muted bg-white/[0.04] px-2.5 py-1 rounded-lg capitalize">
                 {c}
               </span>
             ))}
@@ -197,7 +197,7 @@ export default function Garage() {
                 <h2 className="font-display font-black text-white text-3xl mb-3 tracking-tight">
                   Your garage is empty.
                 </h2>
-                <p className="text-body text-[15px] leading-relaxed mb-10 max-w-sm mx-auto">
+                <p className="text-body text-base leading-relaxed mb-10 max-w-sm mx-auto">
                   Add your first vehicle and CarMods AI will build you
                   a personalized upgrade roadmap — stage by stage.
                 </p>

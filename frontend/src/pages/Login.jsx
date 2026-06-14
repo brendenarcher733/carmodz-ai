@@ -85,7 +85,7 @@ export default function Login() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="field-label mb-0">Password</label>
-              <span className="font-mono text-[11px] text-muted cursor-not-allowed">Forgot password?</span>
+              <span className="font-mono text-xs text-muted cursor-not-allowed">Forgot password?</span>
             </div>
             <input
               className="field-input"
@@ -107,7 +107,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={busy || !form.email || !form.password}
-            className="w-full flex items-center justify-center gap-2 bg-accent text-obsidian font-display font-black text-[15px] py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none mt-2"
+            className="w-full flex items-center justify-center gap-2 bg-accent text-obsidian font-display font-black text-base py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none mt-2"
           >
             {busy && <span className="w-4 h-4 rounded-full border-2 border-obsidian/30 border-t-obsidian animate-spin" />}
             Sign In

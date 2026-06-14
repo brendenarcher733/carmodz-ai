@@ -149,7 +149,7 @@ export default function Advisor() {
           backgroundPosition: 'center 35%',
         }}
       />
-      <div className="container-content py-10 h-[calc(100vh-64px)] flex flex-col lg:flex-row gap-5 relative z-10">
+      <div className="container-content py-10 h-[calc(100vh-80px)] flex flex-col lg:flex-row gap-5 relative z-10">
 
         {/* ── Sidebar ── */}
         <aside className="lg:w-72 flex-shrink-0 flex flex-col gap-4 overflow-y-auto">
@@ -168,7 +168,7 @@ export default function Advisor() {
                 <div className="font-display font-bold text-white text-sm">Performance Advisor</div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-stage-1 animate-pulse-dot" />
-                  <span className="font-mono text-[10px] text-muted">Ready</span>
+                  <span className="font-mono text-xs text-muted">Ready</span>
                 </div>
               </div>
             </div>
@@ -180,7 +180,7 @@ export default function Advisor() {
 
           {/* Vehicle context */}
           <div className="bg-surface border border-white/[0.07] rounded-2xl p-5">
-            <p className="font-mono text-[10px] text-muted uppercase tracking-wider mb-3">Your Vehicle</p>
+            <p className="font-mono text-xs text-muted uppercase tracking-wider mb-3">Your Vehicle</p>
             {hasVehicle ? (
               <div className="flex items-center justify-between">
                 <span className="text-white text-sm font-medium">
@@ -221,7 +221,7 @@ export default function Advisor() {
 
           {/* Quick starters */}
           <div className="bg-surface border border-white/[0.07] rounded-2xl p-5">
-            <p className="font-mono text-[10px] text-muted uppercase tracking-wider mb-3">Quick Questions</p>
+            <p className="font-mono text-xs text-muted uppercase tracking-wider mb-3">Quick Questions</p>
             <div className="space-y-1.5">
               {QUICK_STARTERS.map(q => (
                 <button
@@ -238,10 +238,10 @@ export default function Advisor() {
 
           {/* Topics */}
           <div className="bg-surface border border-white/[0.07] rounded-2xl p-5">
-            <p className="font-mono text-[10px] text-muted uppercase tracking-wider mb-3">Topics I Cover</p>
+            <p className="font-mono text-xs text-muted uppercase tracking-wider mb-3">Topics I Cover</p>
             <div className="flex flex-wrap gap-1.5">
               {TOPICS.map(t => (
-                <span key={t} className="bg-white/[0.05] text-muted text-[11px] font-mono px-2.5 py-1 rounded-lg">
+                <span key={t} className="bg-white/[0.05] text-muted text-xs font-mono px-2.5 py-1 rounded-lg">
                   {t}
                 </span>
               ))}

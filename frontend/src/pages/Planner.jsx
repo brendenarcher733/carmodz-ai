@@ -137,7 +137,7 @@ function StepBar({ current }) {
                   : i + 1}
               </div>
               <span className={clsx(
-                'text-[10px] font-mono uppercase tracking-wider hidden sm:block',
+                'text-xs font-mono uppercase tracking-wider hidden sm:block',
                 active ? 'text-accent' : done ? 'text-body' : 'text-muted',
               )}>
                 {label}
@@ -419,7 +419,7 @@ export default function Planner() {
           <h1 className="font-display font-black text-white text-4xl tracking-tight mb-2">
             Build your car.
           </h1>
-          <p className="text-body text-[15px]">
+          <p className="text-body text-base">
             Choose your platform and goals. We'll build the rest.
           </p>
         </div>
@@ -473,8 +473,8 @@ export default function Planner() {
                         : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.15] hover:bg-elevated',
                     )}
                   >
-                    <div className="font-display font-semibold text-[13px] mb-1 leading-snug">{g.label}</div>
-                    <div className="text-[11px] text-muted leading-snug">{g.desc}</div>
+                    <div className="font-display font-semibold text-sm mb-1 leading-snug">{g.label}</div>
+                    <div className="text-xs text-muted leading-snug">{g.desc}</div>
                   </button>
                 ))}
               </div>
@@ -585,7 +585,7 @@ export default function Planner() {
                   className="flex items-start justify-between px-6 py-4 hover:bg-white/[0.02] transition-colors"
                   style={i < REVIEW_ROWS.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.05)' } : undefined}
                 >
-                  <span className="font-mono text-[11px] text-muted uppercase tracking-wider pt-0.5">{k}</span>
+                  <span className="font-mono text-xs text-muted uppercase tracking-wider pt-0.5">{k}</span>
                   <span className="text-white text-sm font-medium text-right max-w-[60%] capitalize">{v}</span>
                 </div>
               ))}
@@ -633,7 +633,7 @@ export default function Planner() {
               type="button"
               onClick={submit}
               disabled={loading}
-              className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-[15px] px-8 py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {loading && <span className="w-4 h-4 rounded-full border-2 border-obsidian/30 border-t-obsidian animate-spin" />}
               Build My Garage

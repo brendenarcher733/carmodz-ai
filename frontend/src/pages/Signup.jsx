@@ -137,7 +137,7 @@ export default function Signup() {
           <button
             type="submit"
             disabled={busy || !canSubmit}
-            className="w-full flex items-center justify-center gap-2 bg-accent text-obsidian font-display font-black text-[15px] py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none mt-2"
+            className="w-full flex items-center justify-center gap-2 bg-accent text-obsidian font-display font-black text-base py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none mt-2"
           >
             {busy && <span className="w-4 h-4 rounded-full border-2 border-obsidian/30 border-t-obsidian animate-spin" />}
             Create Account

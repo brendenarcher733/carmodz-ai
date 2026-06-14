@@ -10,6 +10,7 @@ import BuildDetail     from './pages/BuildDetail'
 import Advisor         from './pages/Advisor'
 import Login           from './pages/Login'
 import Signup          from './pages/Signup'
+import ExampleBuild    from './pages/ExampleBuild'
 import './styles/globals.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -30,7 +31,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path="/planner"    element={<Planner />}     />
                   <Route path="/builds"     element={<Builds />}      />
                   <Route path="/builds/:id" element={<BuildDetail />} />
-                  <Route path="/advisor"    element={<Advisor />}     />
+                  <Route path="/advisor"       element={<Advisor />}      />
+                  <Route path="/example-build" element={<ExampleBuild />} />
                 </Routes>
               </>
             }
