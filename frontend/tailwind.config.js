@@ -27,6 +27,25 @@ export default {
         display: ['Space Grotesk', 'sans-serif'],
         mono:    ['JetBrains Mono', 'monospace'],
       },
+      // Bump the entire type scale up — everything reads larger
+      fontSize: {
+        xs:   ['13px', { lineHeight: '1.5'  }],
+        sm:   ['15px', { lineHeight: '1.6'  }],
+        base: ['17px', { lineHeight: '1.65' }],
+        lg:   ['19px', { lineHeight: '1.55' }],
+        xl:   ['21px', { lineHeight: '1.4'  }],
+        '2xl':['25px', { lineHeight: '1.3'  }],
+        '3xl':['31px', { lineHeight: '1.25' }],
+        '4xl':['38px', { lineHeight: '1.15' }],
+        '5xl':['48px', { lineHeight: '1.1'  }],
+        '6xl':['60px', { lineHeight: '1.05' }],
+        '7xl':['72px', { lineHeight: '1'    }],
+      },
+      spacing: {
+        // Slightly more generous base unit — bigger hit targets
+        '18': '4.5rem',
+        '22': '5.5rem',
+      },
       borderRadius: {
         '2xl': '16px',
         '3xl': '24px',

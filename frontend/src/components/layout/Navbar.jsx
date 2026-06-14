@@ -56,7 +56,7 @@ function UserMenu({ user, onLogout }) {
         >
           <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
             <div className="font-display font-semibold text-white text-sm truncate">{user.name}</div>
-            <div className="font-mono text-[11px] text-muted truncate">{user.email}</div>
+            <div className="font-mono text-xs text-muted truncate">{user.email}</div>
           </div>
           <div className="py-1">
             <Link
@@ -103,7 +103,7 @@ export function Navbar() {
     <header className="fixed top-0 inset-x-0 z-50">
       {/* Main bar */}
       <nav
-        className="h-16 flex items-center"
+        className="h-20 flex items-center"
         style={{
           background: 'rgba(8,9,11,0.85)',
           backdropFilter: 'blur(24px) saturate(180%)',
@@ -114,11 +114,11 @@ export function Navbar() {
         <div className="container-content w-full flex items-center justify-between">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
-            <div className="w-7 h-7 bg-accent rounded-[7px] flex items-center justify-center text-obsidian font-mono font-black text-sm leading-none select-none">
+          <Link to="/" className="flex items-center gap-3 flex-shrink-0">
+            <div className="w-9 h-9 bg-accent rounded-[9px] flex items-center justify-center text-obsidian font-mono font-black text-base leading-none select-none">
               C
             </div>
-            <span className="font-display font-bold text-[15px] text-white tracking-tight">
+            <span className="font-display font-bold text-lg text-white tracking-tight">
               CarMods<span className="text-accent">AI</span>
             </span>
           </Link>
@@ -130,7 +130,7 @@ export function Navbar() {
                 <Link
                   to={to}
                   className={clsx(
-                    'px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150',
+                    'px-5 py-2.5 text-base font-medium rounded-lg transition-all duration-150',
                     pathname === to
                       ? 'text-white bg-white/[0.08]'
                       : 'text-body hover:text-white hover:bg-white/[0.05]',
@@ -154,13 +154,13 @@ export function Navbar() {
               <div className="hidden md:flex items-center gap-2">
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-sm font-medium text-body hover:text-white transition-colors rounded-lg hover:bg-white/[0.05]"
+                  className="px-5 py-2.5 text-base font-medium text-body hover:text-white transition-colors rounded-lg hover:bg-white/[0.05]"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/signup"
-                  className="inline-flex items-center gap-1.5 bg-accent text-obsidian text-sm font-display font-bold px-5 py-2 rounded-xl hover:bg-accent-bright transition-colors duration-150 shadow-glow-sm"
+                  className="inline-flex items-center gap-2 bg-accent text-obsidian text-base font-display font-bold px-6 py-2.5 rounded-xl hover:bg-accent-bright transition-colors duration-150 shadow-glow-sm"
                 >
                   Get Started
                 </Link>

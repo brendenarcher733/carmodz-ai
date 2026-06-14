@@ -54,6 +54,14 @@ class RecommendationResponse(ModRecommendation):
 class ModPlan(BaseModel):
     """Full plan returned by the recommendation engine."""
     build_id:           int
+    # Vehicle identity — passed through so the frontend can display them
+    title:              str
+    year:               int
+    make:               str
+    model:              str
+    goal:               str
+    budget:             float
+    # Mod recommendations
     mods:               list[ModRecommendation]
     total_min:          float
     total_max:          float

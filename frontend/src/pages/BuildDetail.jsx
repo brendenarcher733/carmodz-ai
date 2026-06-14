@@ -1,7 +1,13 @@
+import { useState, lazy, Suspense } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useBuildPlan } from '../hooks/useBuilds'
 import { Badge } from '../components/ui/Badge'
 import { Spinner } from '../components/ui/Spinner'
+import { ShopLinks } from '../components/ui/ShopLinks'
+
+const CarViewer3D = lazy(() =>
+  import('../components/ui/CarViewer3D').then(m => ({ default: m.CarViewer3D }))
+)
 const DIFF_VARIANT  = { easy: 'easy',   medium: 'medium', hard: 'hard'   }
 const STAGE_VARIANT = { 1: 'stage1',    2: 'stage2',      3: 'stage3'    }
 
@@ -28,7 +34,7 @@ function estimateGains(mods) {
 }
 
 /* ─── Mod card ─── */
-function ModCard({ mod, index }) {
+function ModCard({ mod, index, vehicle, onView3D }) {
   const stage = STAGE_META[mod.stage] || STAGE_META[1]
   return (
     <div
@@ -40,10 +46,11 @@ function ModCard({ mod, index }) {
       }}
     >
       <div className="p-5">
+        {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div>
-            <h3 className="font-display font-semibold text-white text-[15px] leading-snug mb-0.5">{mod.name}</h3>
-            <span className="font-mono text-[11px] text-muted uppercase tracking-wider capitalize">{mod.category}</span>
+            <h3 className="font-display font-semibold text-white text-base leading-snug mb-0.5">{mod.name}</h3>
+            <span className="font-mono text-xs text-muted uppercase tracking-wider capitalize">{mod.category}</span>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Badge variant={DIFF_VARIANT[mod.difficulty] || 'default'} size="sm">{mod.difficulty}</Badge>
@@ -53,22 +60,38 @@ function ModCard({ mod, index }) {
 
         <p className="text-body text-sm leading-relaxed mb-4">{mod.description}</p>
 
+        {/* Investment + priority + 3D button */}
         <div className="flex items-center justify-between">
           <div>
-            <div className="font-mono text-[10px] text-muted uppercase tracking-wider mb-0.5">Investment</div>
+            <div className="font-mono text-xs text-muted uppercase tracking-wider mb-0.5">Investment</div>
             <div className="font-mono text-white text-sm font-semibold">
               ${mod.price_min.toLocaleString()} – ${mod.price_max.toLocaleString()}
             </div>
           </div>
-          <div className="text-right">
-            <div className="font-mono text-[10px] text-muted uppercase tracking-wider mb-0.5">Priority</div>
-            <div className="font-display font-black text-accent text-xl leading-none">#{mod.priority}</div>
+          <div className="flex items-center gap-3">
+            {/* View in 3D */}
+            <button
+              type="button"
+              onClick={() => onView3D(mod)}
+              className="inline-flex items-center gap-1.5 border border-white/[0.1] text-muted text-xs font-mono px-3 py-1.5 rounded-lg hover:border-accent/40 hover:text-accent transition-all duration-150"
+              title="View this mod on the car in 3D"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 1L11 3.5V8.5L6 11L1 8.5V3.5L6 1Z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
+                <path d="M6 1v10M1 3.5l5 2.5 5-2.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
+              </svg>
+              View 3D
+            </button>
+            <div className="text-right">
+              <div className="font-mono text-xs text-muted uppercase tracking-wider mb-0.5">Priority</div>
+              <div className="font-display font-black text-accent text-xl leading-none">#{mod.priority}</div>
+            </div>
           </div>
         </div>
 
         {mod.brand_tips?.length > 0 && (
           <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-            <span className="font-mono text-[10px] text-muted uppercase tracking-wider mr-2">Brands</span>
+            <span className="font-mono text-xs text-muted uppercase tracking-wider mr-2">Brands</span>
             <span className="text-xs text-body">{mod.brand_tips.join(' · ')}</span>
           </div>
         )}
@@ -86,6 +109,9 @@ function ModCard({ mod, index }) {
             ))}
           </div>
         )}
+
+        {/* Shop links */}
+        <ShopLinks modName={mod.name} vehicle={vehicle} />
       </div>
     </div>
   )
@@ -111,7 +137,7 @@ function StageTimeline({ stageMods }) {
               </div>
               <div className="text-center">
                 <div className="font-display font-bold text-white text-sm">{meta.label}</div>
-                <div className="font-mono text-[10px] text-muted">{count} upgrade{count !== 1 ? 's' : ''}</div>
+                <div className="font-mono text-xs text-muted">{count} upgrade{count !== 1 ? 's' : ''}</div>
               </div>
             </div>
             {i < stages.length - 1 && (
@@ -148,13 +174,27 @@ export default function BuildDetail() {
 
   if (!plan) return null
 
+  const [viewing3D, setViewing3D] = useState(null)
+
   const stageMods = { 1: [], 2: [], 3: [] }
   plan.mods.forEach(m => { if (stageMods[m.stage]) stageMods[m.stage].push(m) })
   const { min: hpMin, max: hpMax } = estimateGains(plan.mods)
   const stagesUsed = [1, 2, 3].filter(n => stageMods[n].length > 0)
 
+  const vehicle = { year: plan.year, make: plan.make, model: plan.model }
+
   return (
     <div className="page-shell">
+      {/* ── 3D Viewer modal ── */}
+      {viewing3D && (
+        <Suspense fallback={null}>
+          <CarViewer3D
+            mod={viewing3D}
+            vehicle={vehicle}
+            onClose={() => setViewing3D(null)}
+          />
+        </Suspense>
+      )}
       <div className="container-content pt-10 pb-16">
 
         {/* ── Vehicle Hero ── */}
@@ -197,7 +237,7 @@ export default function BuildDetail() {
                     style={{ fontSize: '1.75rem' }}>
                     +{hpMin}–{hpMax} HP
                   </div>
-                  <div className="font-mono text-[10px] text-muted uppercase tracking-wider">Est. Performance Gain</div>
+                  <div className="font-mono text-xs text-muted uppercase tracking-wider">Est. Performance Gain</div>
                 </div>
               )}
               <div>
@@ -205,21 +245,21 @@ export default function BuildDetail() {
                   style={{ fontSize: '1.75rem' }}>
                   ${plan.total_min.toLocaleString()}–${plan.total_max.toLocaleString()}
                 </div>
-                <div className="font-mono text-[10px] text-muted uppercase tracking-wider">Build Investment</div>
+                <div className="font-mono text-xs text-muted uppercase tracking-wider">Build Investment</div>
               </div>
               <div>
                 <div className="font-display font-black text-white leading-none mb-1"
                   style={{ fontSize: '1.75rem' }}>
                   {plan.mods.length}
                 </div>
-                <div className="font-mono text-[10px] text-muted uppercase tracking-wider">Planned Upgrades</div>
+                <div className="font-mono text-xs text-muted uppercase tracking-wider">Planned Upgrades</div>
               </div>
               <div>
                 <div className="font-display font-black text-white leading-none mb-1"
                   style={{ fontSize: '1.75rem' }}>
                   {stagesUsed.length} of 3
                 </div>
-                <div className="font-mono text-[10px] text-muted uppercase tracking-wider">Stages Active</div>
+                <div className="font-mono text-xs text-muted uppercase tracking-wider">Stages Active</div>
               </div>
             </div>
           </div>
@@ -229,13 +269,13 @@ export default function BuildDetail() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
           {/* Timeline */}
           <div className="md:col-span-2 bg-surface border border-white/[0.07] rounded-2xl p-6">
-            <p className="font-mono text-[10px] text-muted uppercase tracking-wider mb-6">Build Timeline</p>
+            <p className="font-mono text-xs text-muted uppercase tracking-wider mb-6">Build Timeline</p>
             <StageTimeline stageMods={stageMods} />
           </div>
 
           {/* Quick actions */}
           <div className="bg-surface border border-white/[0.07] rounded-2xl p-6 flex flex-col gap-3">
-            <p className="font-mono text-[10px] text-muted uppercase tracking-wider mb-2">Quick Actions</p>
+            <p className="font-mono text-xs text-muted uppercase tracking-wider mb-2">Quick Actions</p>
             <Link
               to="/advisor"
               className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07] hover:border-accent/30 hover:bg-accent/[0.05] transition-all duration-150 group"
@@ -292,7 +332,7 @@ export default function BuildDetail() {
                 <div className="font-display font-semibold text-white text-sm">Performance Advisor</div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-stage-1" />
-                  <span className="font-mono text-[10px] text-muted">AI analysis complete</span>
+                  <span className="font-mono text-xs text-muted">AI analysis complete</span>
                 </div>
               </div>
             </div>
@@ -317,7 +357,9 @@ export default function BuildDetail() {
                 <span className="font-mono text-xs text-muted">{mods.length} upgrade{mods.length !== 1 ? 's' : ''}</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {mods.map((mod, i) => <ModCard key={mod.name} mod={mod} index={i} />)}
+                {mods.map((mod, i) => (
+                  <ModCard key={mod.name} mod={mod} index={i} vehicle={vehicle} onView3D={setViewing3D} />
+                ))}
               </div>
             </section>
           )

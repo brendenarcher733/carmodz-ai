@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 
+/* ─── Feature grid data ─── */
 const FEATURES = [
   {
     num: '01',
@@ -14,7 +15,7 @@ const FEATURES = [
   {
     num: '03',
     title: 'Staged Build Roadmap',
-    desc: 'Stage 1 → 2 → 3. Start with the highest-impact, most affordable mods first. Scale up when you\'re ready.',
+    desc: "Stage 1 → 2 → 3. Start with the highest-impact, most affordable mods first. Scale up when you're ready.",
   },
   {
     num: '04',
@@ -33,26 +34,127 @@ const FEATURES = [
   },
 ]
 
-const EXAMPLE_MODS = [
-  { name: 'Cold Air Intake',     price: '$150–$400',   stage: 1, diff: 'Easy',   diffCls: 'text-stage-1' },
-  { name: 'Cat-Back Exhaust',    price: '$400–$1,400', stage: 1, diff: 'Medium', diffCls: 'text-stage-2' },
-  { name: 'Coilover Suspension', price: '$700–$2,800', stage: 1, diff: 'Medium', diffCls: 'text-stage-2' },
-  { name: 'ECU Tune',            price: '$400–$900',   stage: 2, diff: 'Easy',   diffCls: 'text-stage-1' },
-  { name: 'Downpipe Upgrade',    price: '$300–$900',   stage: 2, diff: 'Hard',   diffCls: 'text-stage-3' },
-]
-
-const STAGE_DOT = {
-  1: 'bg-stage-1',
-  2: 'bg-stage-2',
-  3: 'bg-stage-3',
+/* ─── Example build used in hero card ─── */
+const EXAMPLE = {
+  vehicle:  '2018 Honda Civic Si',
+  goal:     'Fun Daily Driver',
+  budget:   '$2,500',
+  hpGain:   '+35–55 HP',
+  stage:    'Stage 1 of 2',
+  mods: [
+    { rank: 1, name: 'Performance Tires',  cost: '$600–$900',  diff: 'Easy',   diffCls: 'text-stage-1', stage: 1 },
+    { rank: 2, name: 'Rear Motor Mount',   cost: '$80–$150',   diff: 'Easy',   diffCls: 'text-stage-1', stage: 1 },
+    { rank: 3, name: 'Cold Air Intake',    cost: '$180–$350',  diff: 'Easy',   diffCls: 'text-stage-1', stage: 1 },
+    { rank: 4, name: 'Cat-Back Exhaust',   cost: '$450–$900',  diff: 'Medium', diffCls: 'text-stage-2', stage: 1 },
+    { rank: 5, name: 'ECU Tune',           cost: '$400–$650',  diff: 'Easy',   diffCls: 'text-stage-1', stage: 2 },
+  ],
 }
 
 const STATS = [
   { num: '30+', label: 'Mod Categories' },
   { num: 'AI',  label: 'Claude Powered' },
   { num: '3',   label: 'Build Stages'   },
-  { num: '∞',   label: 'Saved Builds'  },
+  { num: '∞',   label: 'Saved Builds'   },
 ]
+
+const VALUE_BULLETS = [
+  'Get a step-by-step mod roadmap built for your car',
+  'See cost, install difficulty, and performance gains upfront',
+  'Avoid mismatched parts and money wasted on wrong mods',
+]
+
+/* ─── Example build card ─── */
+function ExampleCard() {
+  return (
+    <div
+      id="example-build"
+      className="w-full rounded-2xl overflow-hidden shadow-card-lg animate-fade-up anim-delay-3"
+      style={{
+        background: 'rgba(16,18,24,0.88)',
+        backdropFilter: 'blur(32px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+        border: '1px solid rgba(255,255,255,0.09)',
+      }}
+    >
+      {/* Card header — vehicle + meta */}
+      <div
+        className="px-5 py-4"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.025)' }}
+      >
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <div className="font-display font-black text-white text-base leading-tight">{EXAMPLE.vehicle}</div>
+            <div className="font-mono text-xs text-muted mt-0.5">{EXAMPLE.goal}</div>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <div className="font-display font-black text-accent text-base leading-tight">{EXAMPLE.budget}</div>
+            <div className="font-mono text-xs text-muted mt-0.5">total budget</div>
+          </div>
+        </div>
+
+        {/* Stats strip */}
+        <div className="flex items-center gap-4 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot flex-shrink-0" />
+            <span className="font-mono text-xs text-accent font-semibold">{EXAMPLE.hpGain} est.</span>
+          </div>
+          <div className="w-px h-3 bg-white/10" />
+          <span className="font-mono text-xs text-muted">{EXAMPLE.stage}</span>
+          <div className="w-px h-3 bg-white/10" />
+          <span className="font-mono text-xs text-muted">{EXAMPLE.mods.length} upgrades planned</span>
+        </div>
+      </div>
+
+      {/* Mod list header */}
+      <div
+        className="grid px-5 py-2"
+        style={{
+          gridTemplateColumns: '24px 1fr auto auto auto',
+          gap: '0 12px',
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          background: 'rgba(255,255,255,0.015)',
+        }}
+      >
+        <span className="font-mono text-xs text-muted">#</span>
+        <span className="font-mono text-xs text-muted">Modification</span>
+        <span className="font-mono text-xs text-muted text-right">Cost</span>
+        <span className="font-mono text-xs text-muted text-right">Difficulty</span>
+        <span className="font-mono text-xs text-muted text-right">Stage</span>
+      </div>
+
+      {/* Mod rows */}
+      {EXAMPLE.mods.map((mod, i) => (
+        <div
+          key={mod.name}
+          className="grid px-5 py-3 hover:bg-white/[0.03] transition-colors items-center"
+          style={{
+            gridTemplateColumns: '24px 1fr auto auto auto',
+            gap: '0 12px',
+            borderBottom: i < EXAMPLE.mods.length - 1 ? '1px solid rgba(255,255,255,0.04)' : undefined,
+          }}
+        >
+          <span className="font-mono text-xs font-bold text-accent">#{mod.rank}</span>
+          <span className="text-sm text-white font-medium">{mod.name}</span>
+          <span className="font-mono text-xs text-muted text-right whitespace-nowrap">{mod.cost}</span>
+          <span className={`font-mono text-xs font-semibold text-right ${mod.diffCls}`}>{mod.diff}</span>
+          <span className="font-mono text-xs text-muted bg-white/[0.05] px-2 py-0.5 rounded text-right">S{mod.stage}</span>
+        </div>
+      ))}
+
+      {/* Footer */}
+      <div
+        className="flex items-center justify-between px-5 py-3"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.015)' }}
+      >
+        <span className="font-mono text-xs text-muted">Generated by CarMods AI</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-stage-1" />
+          <span className="font-mono text-xs text-stage-1">Stage 1 ready</span>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function Landing() {
   return (
@@ -61,131 +163,134 @@ export default function Landing() {
       {/* ─── Hero ─── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
 
-        {/* Background photo + gradient overlay */}
+        {/* Background — GT-R with exhaust flame glow effect */}
         <div
           className="absolute inset-0"
           style={{
             backgroundImage: `
               linear-gradient(105deg,
                 rgba(8,9,11,1)    0%,
-                rgba(8,9,11,0.97) 28%,
-                rgba(8,9,11,0.75) 52%,
-                rgba(8,9,11,0.25) 78%,
-                rgba(8,9,11,0.1)  100%
+                rgba(8,9,11,0.98) 35%,
+                rgba(8,9,11,0.85) 55%,
+                rgba(8,9,11,0.55) 75%,
+                rgba(8,9,11,0.3)  100%
               ),
               linear-gradient(to bottom,
-                rgba(8,9,11,0.4) 0%,
-                transparent 20%,
-                transparent 70%,
-                rgba(8,9,11,1) 100%
+                rgba(8,9,11,0.5) 0%,
+                transparent      20%,
+                transparent      65%,
+                rgba(8,9,11,1)   100%
               ),
-              url('https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=1920&q=85')
+              url('https://images.unsplash.com/photo-1614200187524-dc4b892acf16?auto=format&fit=crop&w=1920&q=85')
             `,
             backgroundSize: 'cover',
-            backgroundPosition: 'center 35%',
+            backgroundPosition: 'center 45%',
           }}
         />
 
-        {/* Subtle orange radial glow bottom-right */}
+        {/* Exhaust flame glow — simulates fire spitting from the GT-R */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse 55% 40% at 80% 25%, rgba(255,140,0,0.04) 0%, transparent 65%)',
+            background: `
+              radial-gradient(ellipse 30% 20% at 82% 88%, rgba(255,60,0,0.5)  0%, rgba(255,110,0,0.2)  45%, transparent 70%),
+              radial-gradient(ellipse 20% 14% at 78% 92%, rgba(255,30,0,0.35) 0%, rgba(255,80,0,0.15)   40%, transparent 65%),
+              radial-gradient(ellipse 40% 15% at 80% 95%, rgba(255,100,0,0.15) 0%, transparent 60%)
+            `,
           }}
         />
 
-        {/* Grid texture overlay */}
-        <div className="absolute inset-0 grid-texture opacity-40 pointer-events-none" />
+        {/* Accent glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse 45% 50% at 85% 35%, rgba(255,140,0,0.05) 0%, transparent 65%)',
+          }}
+        />
 
-        {/* Content */}
-        <div className="container-content relative z-10 pt-36 pb-28 w-full">
-          <div className="max-w-2xl">
+        {/* Grid texture */}
+        <div className="absolute inset-0 grid-texture opacity-30 pointer-events-none" />
 
-            {/* Pill badge */}
-            <div className="animate-fade-up anim-delay-1 inline-flex items-center gap-2.5 bg-accent/[0.08] border border-accent/25 text-accent-bright text-[11px] font-mono font-semibold tracking-[0.18em] uppercase px-4 py-2 rounded-full mb-10 backdrop-blur-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot" />
-              AI-Powered Car Modification Planner
-            </div>
+        {/* ── Two-column content ── */}
+        <div className="container-content relative z-10 w-full pt-32 pb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-16 items-center">
 
-            {/* Headline */}
-            <h1
-              className="animate-fade-up anim-delay-2 font-display font-black text-white leading-[0.94] tracking-[-0.03em] mb-8"
-              style={{ fontSize: 'clamp(3.8rem, 8.5vw, 7.5rem)' }}
-            >
-              Build Smarter.
-              <br />
-              <span
-                className="text-accent"
-                style={{ textShadow: '0 0 80px rgba(255,140,0,0.35), 0 0 160px rgba(255,140,0,0.12)' }}
-              >
-                Not Harder.
-              </span>
-            </h1>
-
-            {/* Subheading */}
-            <p className="animate-fade-up anim-delay-3 text-body text-[1.15rem] leading-[1.75] max-w-[480px] mb-12">
-              Your digital garage. AI-powered build plans, staged upgrade roadmaps,
-              and a performance advisor that knows your platform — not generic advice.
-            </p>
-
-            {/* CTA buttons */}
-            <div className="animate-fade-up anim-delay-4 flex flex-wrap gap-4 mb-24">
-              <Link
-                to="/planner"
-                className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-[15px] px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow"
-              >
-                Start Your Build
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Link>
-              <Link
-                to="/advisor"
-                className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/[0.1] text-white font-display font-semibold text-[15px] px-8 py-4 rounded-xl hover:bg-white/[0.09] hover:border-white/[0.18] transition-all duration-150 backdrop-blur-sm"
-              >
-                Talk to Advisor
-              </Link>
-            </div>
-
-            {/* Preview card — sample build */}
-            <div
-              className="animate-fade-up anim-delay-5 max-w-[560px] rounded-2xl overflow-hidden shadow-card-lg"
-              style={{
-                background: 'rgba(19,21,25,0.82)',
-                backdropFilter: 'blur(28px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(28px) saturate(180%)',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}
-            >
-              {/* Card header */}
-              <div
-                className="flex items-center justify-between px-5 py-3"
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
-              >
-                <span className="font-mono text-muted text-xs">2020 Toyota Supra · $6,000 budget</span>
-                <span className="font-mono text-accent text-xs font-semibold">~$1,950 avg</span>
+            {/* ── LEFT: Copy ── */}
+            <div>
+              {/* Pill */}
+              <div className="animate-fade-up anim-delay-1 inline-flex items-center gap-2.5 bg-accent/[0.08] border border-accent/25 text-accent-bright text-xs font-mono font-semibold tracking-[0.16em] uppercase px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot" />
+                AI Car Modification Planner
               </div>
 
-              {/* Mod rows */}
-              {EXAMPLE_MODS.map((mod, i) => (
-                <div
-                  key={mod.name}
-                  className="flex items-center justify-between px-5 py-3 hover:bg-white/[0.03] transition-colors"
-                  style={i < EXAMPLE_MODS.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.04)' } : undefined}
+              {/* Headline — outcome-driven */}
+              <h1
+                className="animate-fade-up anim-delay-2 font-display font-black text-white leading-[0.96] tracking-[-0.03em] mb-6"
+                style={{ fontSize: 'clamp(2.6rem, 5.5vw, 4.4rem)' }}
+              >
+                Plan Your Car Build
+                <br />
+                <span
+                  className="text-accent"
+                  style={{ textShadow: '0 0 60px rgba(255,140,0,0.3), 0 0 120px rgba(255,140,0,0.1)' }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${STAGE_DOT[mod.stage]}`} />
-                    <span className="text-sm text-white/90 font-medium">{mod.name}</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className="font-mono text-[11px] text-muted">{mod.price}</span>
-                    <span className={`font-mono text-[11px] font-semibold ${mod.diffCls}`}>{mod.diff}</span>
-                    <span className="font-mono text-[10px] text-muted bg-white/[0.06] px-2 py-0.5 rounded">
-                      S{mod.stage}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                  Before You Waste Money.
+                </span>
+              </h1>
+
+              {/* Subheadline */}
+              <p className="animate-fade-up anim-delay-3 text-body text-lg leading-relaxed max-w-lg mb-8">
+                CarMods AI creates a personalized mod roadmap for your car, budget, goals, and skill level —
+                including upgrade order, estimated costs, install difficulty, and performance impact.
+              </p>
+
+              {/* Value bullets */}
+              <ul className="animate-fade-up anim-delay-4 space-y-3 mb-10">
+                {VALUE_BULLETS.map((b) => (
+                  <li key={b} className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full bg-accent/[0.12] border border-accent/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 5l2.5 2.5 3.5-4" stroke="#FF8C00" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <span className="text-body text-base leading-snug">{b}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTAs */}
+              <div className="animate-fade-up anim-delay-5 flex flex-wrap gap-4 mb-6">
+                <Link
+                  to="/planner"
+                  className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow"
+                >
+                  Start My Build
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
+                <Link
+                  to="/example-build"
+                  className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/[0.12] text-white font-display font-semibold text-base px-8 py-4 rounded-xl hover:bg-white/[0.09] hover:border-white/[0.2] transition-all duration-150 backdrop-blur-sm"
+                >
+                  See Example Build
+                </Link>
+              </div>
+
+              {/* Trust line */}
+              <p className="animate-fade-up anim-delay-5 text-muted text-sm font-mono">
+                Built for real car enthusiasts — from daily drivers to full performance builds.
+              </p>
+            </div>
+
+            {/* ── RIGHT: Example build card ── */}
+            <div className="relative">
+              {/* Subtle glow behind the card */}
+              <div
+                className="absolute -inset-4 rounded-3xl pointer-events-none"
+                style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255,140,0,0.07) 0%, transparent 70%)' }}
+              />
+              <ExampleCard />
             </div>
 
           </div>
@@ -195,11 +300,11 @@ export default function Landing() {
       {/* ─── Stats bar ─── */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(19,21,25,0.5)' }}>
         <div className="container-content">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x" style={{ '--tw-divide-opacity': '1' }}>
+          <div className="grid grid-cols-2 md:grid-cols-4" style={{ borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
             {STATS.map(({ num, label }) => (
-              <div key={label} className="text-center py-6 px-4" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                <div className="font-display font-black text-accent text-3xl leading-none mb-1.5">{num}</div>
-                <div className="font-mono text-[10px] text-muted uppercase tracking-[0.16em]">{label}</div>
+              <div key={label} className="text-center py-6 px-4" style={{ borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+                <div className="font-display font-black text-accent text-3xl leading-none mb-2">{num}</div>
+                <div className="font-mono text-xs text-muted uppercase tracking-[0.14em]">{label}</div>
               </div>
             ))}
           </div>
@@ -209,7 +314,6 @@ export default function Landing() {
       {/* ─── Features grid ─── */}
       <section className="py-28">
         <div className="container-content">
-          {/* Section header */}
           <div className="mb-16">
             <p className="eyebrow mb-4">The platform</p>
             <h2
@@ -220,7 +324,6 @@ export default function Landing() {
             </h2>
           </div>
 
-          {/* Grid — separated by hairlines, editorial numbered style */}
           <div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 rounded-2xl overflow-hidden"
             style={{ border: '1px solid rgba(255,255,255,0.06)' }}
@@ -231,10 +334,10 @@ export default function Landing() {
                 className="p-8 group hover:bg-elevated transition-colors duration-200"
                 style={{ borderRight: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
               >
-                <div className="font-mono text-muted text-xs mb-6 group-hover:text-accent transition-colors duration-200">
+                <div className="font-mono text-xs text-muted mb-6 group-hover:text-accent transition-colors duration-200">
                   {f.num}
                 </div>
-                <h3 className="font-display font-semibold text-white text-[17px] mb-3 leading-snug">
+                <h3 className="font-display font-semibold text-white text-base mb-3 leading-snug">
                   {f.title}
                 </h3>
                 <p className="text-body text-sm leading-relaxed">{f.desc}</p>
@@ -244,11 +347,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ─── CTA section ─── */}
-      <section
-        className="py-24"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
-      >
+      {/* ─── CTA strip ─── */}
+      <section className="py-24" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         <div className="container-content">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-10">
             <div>
@@ -263,13 +363,13 @@ export default function Landing() {
             <div className="flex gap-3 flex-shrink-0">
               <Link
                 to="/planner"
-                className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-sm px-7 py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow"
+                className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-7 py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow"
               >
-                Build My Garage
+                Start My Build
               </Link>
               <Link
                 to="/advisor"
-                className="inline-flex items-center gap-2 border border-white/[0.1] text-body font-display font-medium text-sm px-7 py-3.5 rounded-xl hover:border-white/[0.22] hover:text-white transition-all duration-150"
+                className="inline-flex items-center gap-2 border border-white/[0.1] text-body font-display font-medium text-base px-7 py-3.5 rounded-xl hover:border-white/[0.22] hover:text-white transition-all duration-150"
               >
                 Talk to Advisor
               </Link>

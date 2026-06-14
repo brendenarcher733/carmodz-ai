@@ -456,6 +456,12 @@ def build_mod_plan(build_id: int, build: BuildCreate, mods: list[ModRecommendati
 
     return ModPlan(
         build_id=build_id,
+        title=build.title,
+        year=build.year,
+        make=build.make,
+        model=build.model,
+        goal=build.goal,
+        budget=build.budget,
         mods=mods,
         total_min=total_min,
         total_max=total_max,

@@ -29,6 +29,8 @@
 
   body {
     @apply bg-obsidian text-white font-sans antialiased min-h-screen;
+    font-size: 17px;
+    line-height: 1.65;
   }
 
   /* Background root glow */
@@ -60,16 +62,16 @@
 @layer components {
   /* ── Layout ── */
   .page-shell {
-    @apply min-h-screen pt-16;
+    @apply min-h-screen pt-20;
   }
 
   .container-content {
-    @apply max-w-[1140px] mx-auto px-6;
+    @apply max-w-[1200px] mx-auto px-8;
   }
 
   /* ── Typography ── */
   .eyebrow {
-    @apply font-mono text-[11px] tracking-[0.18em] uppercase text-accent;
+    @apply font-mono text-xs tracking-[0.18em] uppercase text-accent;
   }
 
   /* ── Glass surfaces ── */
@@ -89,19 +91,19 @@
 
   /* ── Form inputs — shared across pages ── */
   .field-label {
-    @apply block font-mono text-[11px] tracking-[0.14em] uppercase text-muted mb-2;
+    @apply block font-mono text-xs tracking-[0.14em] uppercase text-muted mb-2;
   }
 
   .field-input {
-    @apply w-full bg-surface border border-white/[0.08] rounded-xl px-4 py-3
-           text-white text-sm placeholder:text-muted
+    @apply w-full bg-surface border border-white/[0.08] rounded-xl px-5 py-3.5
+           text-white text-base placeholder:text-muted
            focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20
            transition-all duration-150;
   }
 
   .field-textarea {
-    @apply w-full bg-surface border border-white/[0.08] rounded-xl px-4 py-3
-           text-white text-sm placeholder:text-muted resize-none
+    @apply w-full bg-surface border border-white/[0.08] rounded-xl px-5 py-3.5
+           text-white text-base placeholder:text-muted resize-none
            focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20
            transition-all duration-150;
   }
