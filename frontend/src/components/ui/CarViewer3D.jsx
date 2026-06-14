@@ -107,7 +107,7 @@ function buildScene(mount, onLoad, onError) {
   loader.setDRACOLoader(draco)
 
   const MODEL_URL =
-    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb'
+    'https://threejs.org/examples/models/gltf/ferrari.glb'
 
   loader.load(
     MODEL_URL,
@@ -162,7 +162,48 @@ function buildScene(mount, onLoad, onError) {
   }
 }
 
-/* ─── Component ─── */
+/* ─── Inline (non-modal) viewer ─── */
+export function InlineCarViewer({ height = 360 }) {
+  const mountRef            = useRef(null)
+  const [status, setStatus] = useState('loading')
+
+  useEffect(() => {
+    if (!mountRef.current) return
+    return buildScene(mountRef.current, () => setStatus('ready'), () => setStatus('error'))
+  }, [])
+
+  return (
+    <div
+      ref={mountRef}
+      className="relative w-full rounded-2xl overflow-hidden"
+      style={{ height, border: '1px solid rgba(255,255,255,0.07)' }}
+    >
+      {status === 'loading' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
+          <div className="w-8 h-8 rounded-full border-2 border-white/10 border-t-accent animate-spin" />
+          <p className="text-body text-xs font-mono">Rendering 3D model…</p>
+        </div>
+      )}
+      {status === 'error' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
+          <p className="text-muted text-sm font-mono">3D preview unavailable</p>
+        </div>
+      )}
+      {status === 'ready' && (
+        <div className="absolute bottom-3 left-3 z-10 pointer-events-none">
+          <span
+            className="font-mono text-xs text-muted"
+            style={{ background: 'rgba(8,9,11,0.6)', backdropFilter: 'blur(4px)', padding: '4px 8px', borderRadius: '6px' }}
+          >
+            drag to rotate · scroll to zoom
+          </span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Modal viewer (per-mod) ─── */
 export function CarViewer3D({ mod, vehicle, onClose }) {
   const mountRef              = useRef(null)
   const [status, setStatus]   = useState('loading') // loading | ready | error

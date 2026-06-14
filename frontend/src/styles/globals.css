@@ -136,4 +136,89 @@
       linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
     background-size: 48px 48px;
   }
+
+  /* ── Scroll-reveal ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1),
+                transform 0.7s cubic-bezier(0.22,1,0.36,1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-left {
+    opacity: 0;
+    transform: translateX(-40px);
+    transition: opacity 0.75s cubic-bezier(0.22,1,0.36,1),
+                transform 0.75s cubic-bezier(0.22,1,0.36,1);
+  }
+  .reveal-left.visible { opacity: 1; transform: translateX(0); }
+
+  .reveal-right {
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.75s cubic-bezier(0.22,1,0.36,1),
+                transform 0.75s cubic-bezier(0.22,1,0.36,1);
+  }
+  .reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+  /* Stagger children inside a reveal parent */
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1),
+                transform 0.6s cubic-bezier(0.22,1,0.36,1);
+  }
+  .reveal-stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay:0ms; }
+  .reveal-stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay:80ms; }
+  .reveal-stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay:160ms; }
+  .reveal-stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay:240ms; }
+  .reveal-stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay:320ms; }
+  .reveal-stagger.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay:400ms; }
+}
+
+/* ── Exhaust flame keyframes ── */
+@keyframes flameFlicker {
+  0%, 100% { opacity: 1;    transform: scale(1,1)    skewX(0deg);   }
+  15%       { opacity: 0.82; transform: scale(1.06,0.93) skewX(1.5deg);  }
+  30%       { opacity: 0.95; transform: scale(0.94,1.08) skewX(-1deg);   }
+  45%       { opacity: 0.75; transform: scale(1.10,0.88) skewX(2deg);    }
+  60%       { opacity: 0.90; transform: scale(0.97,1.05) skewX(-0.5deg); }
+  75%       { opacity: 0.68; transform: scale(1.08,0.91) skewX(1deg);    }
+  90%       { opacity: 0.88; transform: scale(1.02,1.02) skewX(-1.5deg); }
+}
+
+@keyframes flameCore {
+  0%, 100% { opacity: 0.9; transform: scaleX(1)    scaleY(1);    }
+  20%       { opacity: 0.6; transform: scaleX(1.12) scaleY(0.85); }
+  40%       { opacity: 1.0; transform: scaleX(0.88) scaleY(1.18); }
+  60%       { opacity: 0.7; transform: scaleX(1.16) scaleY(0.80); }
+  80%       { opacity: 0.95;transform: scaleX(0.92) scaleY(1.10); }
+}
+
+@keyframes emberDrift {
+  0%   { transform: translate(0, 0) scale(1);          opacity: 1; }
+  50%  { transform: translate(-20px,-30px) scale(0.7); opacity: 0.6; }
+  100% { transform: translate(-35px,-60px) scale(0.3); opacity: 0; }
+}
+
+@keyframes videoGlow {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 0.75; }
+}
+
+/* ── Keyframes already defined in tailwind config (kept as CSS fallback) ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1;   transform: scale(1);   }
+  50%       { opacity: 0.4; transform: scale(0.85);}
 }
