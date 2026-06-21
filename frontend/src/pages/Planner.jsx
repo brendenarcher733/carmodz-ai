@@ -1,37 +1,267 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { buildsApi } from '../services/api'
 import clsx from 'clsx'
 
 /* ─── Vehicle data ─── */
 
-const MAKES = [
-  'Toyota', 'Subaru', 'Honda', 'BMW',
-  'Nissan', 'Ford', 'Mazda', 'Audi',
-  'Chevrolet', 'Volkswagen', 'Mitsubishi', 'Porsche',
-  'Hyundai', 'Kia', 'Dodge', 'Mercedes',
+const MAKE_GROUPS = [
+  {
+    label: 'Supercars & Exotics',
+    makes: ['Ferrari', 'Lamborghini', 'McLaren', 'Aston Martin', 'Bugatti', 'Koenigsegg', 'Pagani', 'Rimac'],
+  },
+  {
+    label: 'European Premium',
+    makes: ['Porsche', 'Jaguar', 'Bentley', 'Rolls-Royce', 'Maserati', 'Alfa Romeo', 'Lotus'],
+  },
+  {
+    label: 'German',
+    makes: ['BMW', 'Mercedes-Benz', 'Audi', 'Volkswagen'],
+  },
+  {
+    label: 'American',
+    makes: ['Ford', 'Chevrolet', 'Dodge', 'Cadillac', 'Jeep', 'Ram', 'Tesla'],
+  },
+  {
+    label: 'Japanese',
+    makes: ['Toyota', 'Honda', 'Nissan', 'Subaru', 'Mazda', 'Mitsubishi', 'Lexus', 'Acura', 'Infiniti'],
+  },
+  {
+    label: 'Korean & Other',
+    makes: ['Hyundai', 'Kia', 'Genesis', 'Land Rover', 'Volvo', 'MINI'],
+  },
 ]
 
+const ALL_MAKES = MAKE_GROUPS.flatMap(g => g.makes)
+
 const MODELS = {
-  Toyota:     ['Supra', 'GR86', 'GR Corolla', 'Camry TRD', '86', '4Runner', 'Tacoma', 'Tundra TRD', 'Corolla'],
-  Subaru:     ['WRX', 'WRX STI', 'BRZ', 'Forester XT', 'Impreza', 'Outback', 'Crosstrek'],
-  Honda:      ['Civic Si', 'Civic Type R', 'Accord', 'Integra', 'CR-Z', 'S2000', 'Fit'],
-  BMW:        ['M2', 'M3', 'M4', 'M5', '3 Series', '2 Series', '1M', 'X5 M'],
-  Nissan:     ['370Z', '350Z', 'GT-R', 'Altima', 'Frontier PRO-4X', 'Armada'],
-  Ford:       ['Mustang GT', 'Mustang GT500', 'Focus RS', 'Fiesta ST', 'F-150 Raptor', 'Bronco'],
-  Mazda:      ['MX-5 Miata', 'RX-8', 'Mazdaspeed3', 'Mazda3', 'CX-5', 'MX-30'],
-  Audi:       ['RS3', 'S3', 'TT', 'A4', 'S4', 'RS5', 'R8'],
-  Chevrolet:  ['Camaro SS', 'Camaro ZL1', 'Corvette Stingray', 'Corvette Z06', 'Colorado ZR2'],
-  Volkswagen: ['GTI', 'Golf R', 'Jetta GLI', 'Passat', 'Arteon'],
-  Mitsubishi: ['Lancer Evo', 'Eclipse', '3000GT', 'Outlander', 'Eclipse Cross'],
-  Porsche:    ['911 Carrera', '911 GT3', 'Cayman GT4', 'Boxster', 'Macan GTS'],
-  Hyundai:    ['Elantra N', 'Veloster N', 'Sonata N-Line', 'Tucson N', 'Ioniq 5 N'],
-  Kia:        ['Stinger GT', 'K5 GT', 'EV6 GT', 'Forte GT'],
-  Dodge:      ['Challenger', 'Charger', 'Viper', 'Durango SRT'],
-  Mercedes:   ['AMG C63', 'AMG A45', 'AMG E63', 'C-Class', 'GLA45'],
+  // ── Supercars & Exotics ──────────────────────────────────────────────────────
+  Ferrari: [
+    '488 GTB', '488 Pista', 'F8 Tributo', 'F8 Spider', 'SF90 Stradale', 'SF90 XX',
+    '296 GTB', '296 GTS', 'Roma', 'Roma Spider', 'Portofino M',
+    '812 Superfast', '812 GTS', 'GTC4Lusso',
+    '430 Scuderia', '458 Italia', '458 Speciale', '360 Modena', '360 Challenge Stradale',
+    '599 GTO', 'F430', 'Enzo', 'LaFerrari',
+  ],
+  Lamborghini: [
+    'Huracán EVO', 'Huracán EVO Spyder', 'Huracán STO', 'Huracán Tecnica',
+    'Urus', 'Urus Performante', 'Urus S',
+    'Aventador S', 'Aventador SVJ', 'Aventador Ultimae', 'Revuelto',
+    'Gallardo LP570-4 Superleggera', 'Murciélago LP670-4 SuperVeloce', 'Sesto Elemento',
+  ],
+  McLaren: [
+    '720S', '720S Spider', '750S', '750S Spider',
+    '765LT', '765LT Spider', '570S', '570GT', '600LT',
+    'Artura', 'Artura Spider', 'GT',
+    'Senna', 'Speedtail', '675LT', '650S', 'P1',
+  ],
+  'Aston Martin': [
+    'DB11', 'DB11 AMR', 'DB11 Volante',
+    'DBX', 'DBX707',
+    'Vantage', 'Vantage Roadster', 'Vantage F1 Edition',
+    'DBS Superleggera', 'DBS 770 Ultimate',
+    'Valkyrie', 'Valour', 'Vanquish S', 'DB9 GT', 'V8 Vantage GT4',
+  ],
+  Bugatti: [
+    'Chiron', 'Chiron Sport', 'Chiron Super Sport 300+', 'Chiron Pur Sport',
+    'Divo', 'Bolide', 'Tourbillon',
+    'Veyron 16.4', 'Veyron Super Sport',
+  ],
+  Koenigsegg: [
+    'Jesko', 'Jesko Absolut', 'Regera', 'CC850',
+    'Agera RS', 'One:1', 'Gemera', 'CCX',
+  ],
+  Pagani: [
+    'Huayra', 'Huayra R', 'Huayra BC', 'Huayra Roadster BC',
+    'Utopia', 'Zonda Cinque', 'Zonda R',
+  ],
+  Rimac: [
+    'Nevera', 'Nevera R', 'Concept_One',
+  ],
+
+  // ── European Premium ─────────────────────────────────────────────────────────
+  Porsche: [
+    '911 Carrera', '911 Carrera 4S', '911 GT3', '911 GT3 RS', '911 GT3 Touring', '911 Turbo S',
+    '718 Cayman GT4 RS', '718 Boxster Spyder', '718 Cayman', '718 GTS 4.0',
+    'Cayenne Turbo GT', 'Panamera Turbo S', 'Macan GTS',
+  ],
+  Jaguar: [
+    'F-Type', 'F-Type R', 'F-Type P450', 'F-Type SVR',
+    'F-Pace SVR', 'F-Pace P400e', 'E-Pace',
+    'XE SV Project 8', 'XKR-S', 'XK', 'XFR-S',
+  ],
+  Bentley: [
+    'Continental GT Speed', 'Continental GT V8', 'Continental GT Mulliner',
+    'Continental GTC Speed', 'Flying Spur Speed', 'Flying Spur Mulliner',
+    'Bentayga Speed', 'Bentayga EWB', 'Mulliner Batur',
+    'Continental GT3-R', 'Supersports',
+  ],
+  'Rolls-Royce': [
+    'Ghost', 'Ghost Extended', 'Spectre', 'Cullinan', 'Cullinan Series II',
+    'Phantom', 'Phantom VIII', 'Wraith', 'Dawn', 'Black Badge Wraith',
+  ],
+  Maserati: [
+    'GranTurismo', 'GranTurismo Folgore', 'GranTurismo Trofeo',
+    'MC20', 'MC20 Cielo',
+    'Grecale Trofeo', 'Ghibli Trofeo', 'Levante Trofeo', 'Quattroporte Trofeo',
+    '4200 GT', 'GranSport',
+  ],
+  'Alfa Romeo': [
+    'Giulia Quadrifoglio', 'Giulia GTA', 'Giulia Sprint',
+    'Stelvio Quadrifoglio', 'Stelvio Veloce',
+    '4C Spider', '33 Stradale', 'GTV', '156 GTA',
+  ],
+  Lotus: [
+    'Emira V6 First Edition', 'Emira i4 First Edition',
+    'Evija', 'Emeya',
+    'Exige Sport 410', 'Exige Cup 430', 'Elise Cup 250', 'Elise Sport 220',
+    'Evora GT', '3-Eleven', 'Esprit V8',
+  ],
+
+  // ── German ───────────────────────────────────────────────────────────────────
+  BMW: [
+    'M2', 'M2 CS', 'M3', 'M3 CS', 'M3 Competition', 'M3 Touring',
+    'M4', 'M4 CS', 'M4 GTS', 'M4 Competition Convertible',
+    'M5', 'M5 CS', 'M5 Competition', 'M8 Competition',
+    'M1000RR (Concept)', '1M Coupe', '2 Series Gran Coupe',
+    'X5 M Competition', 'X6 M Competition',
+  ],
+  'Mercedes-Benz': [
+    'AMG GT Black Series', 'AMG GT R Pro', 'AMG GT S', 'AMG GT 63 S',
+    'AMG C63 S', 'AMG C63 SE Performance', 'AMG A45 S', 'AMG CLA45 S',
+    'AMG E63 S', 'AMG S63', 'AMG GLE63 S', 'AMG G63',
+    'AMG SL 55', 'AMG SL 63', 'AMG SLS', 'AMG One',
+    'C-Class', 'E-Class', 'S-Class', 'G-Class',
+  ],
+  Audi: [
+    'RS3', 'RS3 Sportback', 'S3', 'TT RS', 'TT',
+    'RS4 Avant', 'RS5', 'RS5 Sportback', 'S4', 'S5',
+    'RS6 Avant', 'RS7 Sportback', 'RS Q8', 'SQ8',
+    'R8 V10 Performance', 'R8 GT', 'e-tron GT RS',
+    'A4', 'A6', 'Q5', 'Q7', 'Q8',
+  ],
+  Volkswagen: [
+    'Golf GTI', 'Golf R', 'Golf R 20 Years', 'Golf GTD',
+    'Jetta GLI', 'Arteon R', 'Touareg R', 'T-Roc R',
+    'Polo GTI', 'ID.4 GTX', 'Tiguan R',
+  ],
+
+  // ── American ─────────────────────────────────────────────────────────────────
+  Ford: [
+    'Mustang GT', 'Mustang GT500', 'Mustang Dark Horse', 'Mustang Mach 1',
+    'Mustang EcoBoost HP', 'GT350', 'GT350R', 'Mustang Bullitt',
+    'F-150 Raptor', 'F-150 Raptor R', 'F-150 Lightning Pro',
+    'Bronco Raptor', 'Bronco Wildtrak', 'Focus RS', 'Fiesta ST',
+  ],
+  Chevrolet: [
+    'Corvette Stingray', 'Corvette Z06', 'Corvette ZR1', 'Corvette E-Ray',
+    'Camaro SS', 'Camaro ZL1', 'Camaro 1LE', 'Camaro ZL1 1LE',
+    'Colorado ZR2', 'Silverado Trail Boss', 'Silverado 1500 LTZ',
+    'Tahoe RST', 'Blazer RS',
+  ],
+  Dodge: [
+    'Challenger SRT Hellcat', 'Challenger SRT Hellcat Redeye', 'Challenger SRT Demon 170',
+    'Challenger SRT Super Stock', 'Charger SRT Hellcat', 'Charger SRT Hellcat Redeye',
+    'Viper ACR', 'Viper GTC', 'Durango SRT 392',
+  ],
+  Cadillac: [
+    'CT5-V Blackwing', 'CT4-V Blackwing', 'CT5-V', 'CT4-V',
+    'Escalade V', 'Escalade', 'XT6',
+    'CTS-V Wagon', 'ATS-V', 'XLR-V',
+  ],
+  Jeep: [
+    'Wrangler Rubicon 392', 'Wrangler Rubicon', 'Wrangler Sahara 4xe',
+    'Grand Cherokee Trackhawk', 'Grand Cherokee SRT', 'Grand Cherokee 4xe',
+    'Gladiator Mojave', 'Gladiator Rubicon',
+  ],
+  Ram: [
+    'RAM 1500 TRX', 'RAM 1500 Rebel', 'RAM 2500 Power Wagon',
+    'RAM 3500 Limited Longhorn', 'TRX Launch Edition',
+  ],
+  Tesla: [
+    'Model S Plaid', 'Model S Long Range', 'Model 3 Performance',
+    'Model X Plaid', 'Model Y Performance', 'Model Y Long Range',
+    'Roadster', 'Cybertruck Cyberbeast',
+  ],
+
+  // ── Japanese ─────────────────────────────────────────────────────────────────
+  Toyota: [
+    'GR Supra A91 MT', 'GR Supra 3.0', 'GR86', 'GR Corolla Circuit Edition',
+    'GR Corolla', 'Camry TRD', 'Corolla GR Sport', '86',
+    '4Runner TRD Pro', 'Tacoma TRD Pro', 'Tundra TRD Pro', 'Sequoia TRD Pro',
+    'Land Cruiser 300 GR Sport',
+  ],
+  Honda: [
+    'Civic Type R', 'Civic Si', 'Civic Sport', 'Integra Type S',
+    'Accord Sport', 'NSX Type S', 'S2000 CR', 'S2000 Club Racer',
+    'CR-Z', 'Fit RS', 'Fit GK5 RS (JDM)', 'HR-V Sport',
+  ],
+  Nissan: [
+    'GT-R Nismo', 'GT-R Track Edition', 'GT-R Premium',
+    '370Z Nismo', '370Z', '350Z Track', '240SX',
+    'Ariya e-4orce', 'Frontier PRO-4X', 'Armada', 'Sentra SR Turbo',
+  ],
+  Subaru: [
+    'WRX STI S209', 'WRX STI Type RA', 'WRX STI', 'WRX',
+    'BRZ tS', 'BRZ Limited', 'Forester XT', 'Impreza WRX',
+    'Outback XT', 'Crosstrek Sport', 'Levorg STI Sport',
+  ],
+  Mazda: [
+    'MX-5 RF', 'MX-5 Club', 'MX-5 Grand Touring RS',
+    'RX-7 FD3S', 'RX-7 FC3S', 'RX-8 R3',
+    'Mazdaspeed3', 'Mazdaspeed6', 'CX-5 Turbo', 'Mazda3 Turbo',
+  ],
+  Mitsubishi: [
+    'Lancer Evolution X MR', 'Lancer Evolution X GSR',
+    'Lancer Evo IX MR', 'Lancer Evo VI TME',
+    'Eclipse GSX', '3000GT VR-4', '3000GT SL',
+    'Galant VR-4', 'Starion ESi-R',
+  ],
+  Lexus: [
+    'LFA', 'LC 500 Inspiration', 'LC 500',
+    'RC F Track Edition', 'RC F', 'IS 500 F Sport Performance', 'IS 350 F Sport',
+    'GS F', 'LS 500h', 'LX 600 F Sport', 'GX 550 Premium Plus',
+  ],
+  Acura: [
+    'NSX Type S', 'NSX', 'Integra Type S', 'TLX Type S A-Spec',
+    'MDX Type S Advance', 'RDX A-Spec Advance', 'RSX Type-S', 'TSX',
+  ],
+  Infiniti: [
+    'Q50 Red Sport 400', 'Q50 RS400', 'Q60 Project Black S', 'Q60 Red Sport 400',
+    'G37 S Coupe', 'G35 Coupe 6MT', 'FX50 S', 'QX80',
+  ],
+
+  // ── Korean & Other ───────────────────────────────────────────────────────────
+  Hyundai: [
+    'Elantra N', 'Elantra N Line', 'Veloster N Performance Package',
+    'Sonata N-Line', 'Tucson N', 'Ioniq 5 N', 'Ioniq 6 N',
+    'i30 N Project C', 'i20 N',
+  ],
+  Kia: [
+    'Stinger GT2 V6', 'Stinger 400 GT', 'K5 GT', 'EV6 GT',
+    'Forte GT', 'ProCeed GT', 'Ceed GT',
+  ],
+  Genesis: [
+    'G70 3.3T Sport', 'G70.4e', 'G80 Sport 3.5T', 'G90 Sport',
+    'GV70 Sport 3.5T', 'GV80 Coupe 3.5T',
+  ],
+  'Land Rover': [
+    'Range Rover Sport SVR', 'Range Rover Sport SV', 'Range Rover SV Autobiography',
+    'Defender 110 V8', 'Defender 90 V8 Carpathian', 'Discovery SVX', 'Discovery 4',
+    'Freelander 2 SD4',
+  ],
+  Volvo: [
+    'S60 Polestar Engineered', 'V60 Polestar Engineered', 'XC60 T8 R-Design',
+    'XC90 T8 Excellence', 'C40 Recharge', 'EX90 Twin Motor Performance',
+  ],
+  MINI: [
+    'Cooper S JCW GP', 'Cooper S Works', 'John Cooper Works',
+    'Countryman JCW ALL4', 'Clubman JCW ALL4', 'Cooper SE',
+    'Paceman S ALL4', 'Coupe JCW',
+  ],
 }
 
-// Quick year picks — current year down 6
+// Quick year picks — current year down 6, plus a wider manual option
 const CURRENT_YEAR = new Date().getFullYear()
 const QUICK_YEARS  = Array.from({ length: 7 }, (_, i) => CURRENT_YEAR - i)
 
@@ -157,19 +387,23 @@ function StepBar({ current }) {
 /* ─── Step 0: Vehicle Platform Selector ─── */
 
 function VehicleSelector({ form, set }) {
-  const [yearMode, setYearMode] = useState('quick') // 'quick' | 'manual'
+  const [yearMode, setYearMode] = useState('quick')
+  const [search, setSearch]     = useState('')
+
+  const filteredGroups = useMemo(() => {
+    if (!search.trim()) return MAKE_GROUPS
+    const q = search.toLowerCase()
+    return MAKE_GROUPS
+      .map(g => ({ ...g, makes: g.makes.filter(m => m.toLowerCase().includes(q)) }))
+      .filter(g => g.makes.length > 0)
+  }, [search])
+
   const selectedModels = form.make ? (MODELS[form.make] || []) : []
 
   const selectMake = (make) => {
     set('make', make)
-    set('model', '')   // reset model when make changes
-  }
-
-  const selectModel = (model) => set('model', model)
-
-  const selectYear = (year) => {
-    set('year', String(year))
-    setYearMode('quick')
+    set('model', '')
+    setSearch('')
   }
 
   return (
@@ -177,54 +411,87 @@ function VehicleSelector({ form, set }) {
       <h2 className="font-display font-black text-white text-2xl tracking-tight mb-2">
         Pick your platform.
       </h2>
-      <p className="text-body text-sm mb-8">Choose your make, then your model.</p>
+      <p className="text-body text-sm mb-8">40+ manufacturers — supercars, JDM, muscle, and everything in between.</p>
 
-      {/* ── Make grid ── */}
-      <div className="mb-8">
-        <label className="field-label mb-3">Make</label>
-        <div className="grid grid-cols-4 gap-2">
-          {MAKES.map(make => (
-            <button
-              key={make}
-              type="button"
-              onClick={() => selectMake(make)}
-              className={clsx(
-                'px-3 py-3 rounded-xl border text-sm font-display font-semibold transition-all duration-150 text-left',
-                form.make === make
-                  ? 'bg-accent/10 border-accent/40 text-accent'
-                  : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.18] hover:text-white',
-              )}
-            >
-              {make}
-            </button>
-          ))}
-        </div>
-
-        {/* Custom make fallback */}
-        {!MAKES.includes(form.make) || form.make === '' ? (
-          <div className="mt-3">
-            <input
-              className="field-input text-sm"
-              placeholder="Other make (type here)…"
-              value={MAKES.includes(form.make) ? '' : form.make}
-              onChange={e => selectMake(e.target.value)}
-            />
-          </div>
-        ) : null}
+      {/* ── Search ── */}
+      <div className="relative mb-6">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
+          <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.3"/>
+          <path d="M10 10l3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+        </svg>
+        <input
+          className="field-input pl-9 text-sm"
+          placeholder="Search makes — Ferrari, Lamborghini, Supra…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        {search && (
+          <button
+            type="button"
+            onClick={() => setSearch('')}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-body"
+          >
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M2 2l9 9M11 2L2 11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+            </svg>
+          </button>
+        )}
       </div>
 
-      {/* ── Model grid — appears after make is chosen ── */}
+      {/* ── Make groups ── */}
+      <div className="mb-8 space-y-5">
+        {filteredGroups.map(group => (
+          <div key={group.label}>
+            <p className="font-mono text-[10px] text-muted uppercase tracking-[0.14em] mb-2 px-0.5">
+              {group.label}
+            </p>
+            <div className="grid grid-cols-4 gap-2">
+              {group.makes.map(make => (
+                <button
+                  key={make}
+                  type="button"
+                  onClick={() => selectMake(make)}
+                  className={clsx(
+                    'px-3 py-2.5 rounded-xl border text-sm font-display font-semibold transition-all duration-150 text-left leading-tight',
+                    form.make === make
+                      ? 'bg-accent/10 border-accent/40 text-accent'
+                      : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.18] hover:text-white',
+                  )}
+                >
+                  {make}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        {/* Custom make fallback */}
+        {filteredGroups.length === 0 && (
+          <div>
+            <p className="text-muted text-sm mb-3">No match — enter manually:</p>
+            <input
+              className="field-input text-sm"
+              placeholder="Type make name…"
+              value={search}
+              onChange={e => { setSearch(e.target.value); selectMake(e.target.value) }}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* ── Model grid ── */}
       {form.make && selectedModels.length > 0 && (
         <div className="mb-8 animate-fade-in">
           <label className="field-label mb-3">Model <span className="text-accent">·</span> {form.make}</label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
             {selectedModels.map(model => (
               <button
                 key={model}
                 type="button"
-                onClick={() => selectModel(model)}
+                onClick={() => set('model', model)}
                 className={clsx(
-                  'px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-150 text-left',
+                  'px-4 py-2.5 rounded-xl border text-sm font-medium transition-all duration-150 text-left leading-snug',
                   form.model === model
                     ? 'bg-accent/10 border-accent/40 text-white'
                     : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.14] hover:text-white',
@@ -245,7 +512,7 @@ function VehicleSelector({ form, set }) {
         </div>
       )}
 
-      {/* If make typed but not in list */}
+      {/* Make typed manually (no model list) */}
       {form.make && !MODELS[form.make] && (
         <div className="mb-8">
           <label className="field-label mb-3">Model</label>
@@ -258,7 +525,7 @@ function VehicleSelector({ form, set }) {
         </div>
       )}
 
-      {/* ── Year — appears after model chosen ── */}
+      {/* ── Year ── */}
       {form.make && form.model && (
         <div className="animate-fade-in">
           <label className="field-label mb-3">Year</label>
@@ -268,7 +535,7 @@ function VehicleSelector({ form, set }) {
                 <button
                   key={y}
                   type="button"
-                  onClick={() => selectYear(y)}
+                  onClick={() => { set('year', String(y)); setYearMode('quick') }}
                   className={clsx(
                     'px-4 py-2.5 rounded-xl border text-sm font-mono font-semibold transition-all duration-150',
                     form.year === String(y)
@@ -299,11 +566,7 @@ function VehicleSelector({ form, set }) {
                 onChange={e => set('year', e.target.value)}
                 autoFocus
               />
-              <button
-                type="button"
-                onClick={() => setYearMode('quick')}
-                className="text-muted text-sm hover:text-body transition-colors"
-              >
+              <button type="button" onClick={() => setYearMode('quick')} className="text-muted text-sm hover:text-body transition-colors">
                 ← Quick pick
               </button>
             </div>
@@ -311,7 +574,7 @@ function VehicleSelector({ form, set }) {
         </div>
       )}
 
-      {/* ── Selected vehicle confirmation chip ── */}
+      {/* ── Confirmation chip ── */}
       {form.year && form.make && form.model && (
         <div className="mt-6 animate-fade-in">
           <div className="inline-flex items-center gap-3 bg-accent/[0.08] border border-accent/25 rounded-2xl px-5 py-3">
@@ -381,11 +644,11 @@ export default function Planner() {
   const vehicleLabel = [form.year, form.make, form.model].filter(Boolean).join(' ')
 
   const REVIEW_ROWS = [
-    ['Vehicle',    `${form.year} ${form.make} ${form.model}`],
-    ['Budget',     `$${parseFloat(form.budget || 0).toLocaleString()}`],
-    ['Goal',       form.goal],
-    ['Experience', form.experience],
-    ['Use',        form.is_daily ? 'Daily Driver' : 'Project Car'],
+    ['Vehicle',     `${form.year} ${form.make} ${form.model}`],
+    ['Budget',      `$${parseFloat(form.budget || 0).toLocaleString()}`],
+    ['Goal',        form.goal],
+    ['Experience',  form.experience],
+    ['Use',         form.is_daily ? 'Daily Driver' : 'Project Car'],
     ['Focus Areas', form.categories.length ? form.categories.join(', ') : 'All categories'],
     ...(form.notes ? [['Notes', form.notes]] : []),
   ]
@@ -412,8 +675,6 @@ export default function Planner() {
       />
 
       <div className="container-content py-16 max-w-[760px] relative z-10">
-
-        {/* Page header */}
         <div className="mb-10">
           <p className="eyebrow mb-3">Build Configurator</p>
           <h1 className="font-display font-black text-white text-4xl tracking-tight mb-2">
@@ -515,7 +776,7 @@ export default function Planner() {
             <div className="mb-8">
               <label className="field-label mb-3">
                 Focus Areas
-                <span className="text-muted ml-1.5 normal-case tracking-normal">(optional — all if none selected)</span>
+                <span className="text-muted ml-1.5 normal-case tracking-normal">(optional)</span>
               </label>
               <div className="flex flex-wrap gap-2">
                 {CATEGORIES.map(c => (
@@ -562,7 +823,7 @@ export default function Planner() {
               <textarea
                 className="field-textarea"
                 rows={3}
-                placeholder="Anything specific? 'Want 400whp eventually' or 'Only highway driving'"
+                placeholder="Anything specific? 'Want 700whp' or 'Track days on Michelin Cup 2s'"
                 value={form.notes}
                 onChange={e => set('notes', e.target.value)}
               />

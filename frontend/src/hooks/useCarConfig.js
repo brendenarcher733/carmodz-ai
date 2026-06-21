@@ -2,11 +2,14 @@ import { useState, useCallback, useMemo } from 'react'
 import { MODIFICATIONS } from '../data/modifications'
 
 const DEFAULTS = {
-  paint: 'oxfordWhite',
-  tint: 'none',
-  wheels: 'stock',
+  paint:       'oxfordWhite',
+  tint:        'none',
+  wheels:      'stock',
   performance: [],
-  exterior: [],
+  suspension:  [],
+  brakes:      [],
+  exterior:    [],
+  interior:    [],
   customColor: '#c41230',
 }
 
@@ -44,11 +47,14 @@ export function useCarConfig(initial = {}) {
       }
     }
 
-    add('paint', config.paint)
-    add('tint', config.tint)
+    add('paint',  config.paint)
+    add('tint',   config.tint)
     add('wheels', config.wheels)
     config.performance.forEach(id => add('performance', id))
-    config.exterior.forEach(id => add('exterior', id))
+    config.suspension.forEach(id  => add('suspension',  id))
+    config.brakes.forEach(id      => add('brakes',      id))
+    config.exterior.forEach(id    => add('exterior',    id))
+    config.interior.forEach(id    => add('interior',    id))
 
     return { items, total }
   }, [config])

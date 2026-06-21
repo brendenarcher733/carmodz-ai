@@ -2,22 +2,27 @@ import { useState } from 'react'
 import clsx from 'clsx'
 import { MODIFICATIONS } from '../../data/modifications'
 
-const CATEGORY_ORDER = ['paint', 'tint', 'wheels', 'performance', 'exterior']
+const CATEGORY_ORDER = ['paint', 'tint', 'wheels', 'performance', 'suspension', 'brakes', 'exterior', 'interior']
 
 const ICONS = {
   paint:       <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" strokeWidth="1.3"/><path d="M7.5 4.5a3 3 0 1 1 0 6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>,
   tint:        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2" y="4" width="11" height="7" rx="1" stroke="currentColor" strokeWidth="1.3"/><path d="M2 7h11" stroke="currentColor" strokeWidth="1.3"/></svg>,
   wheels:      <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" strokeWidth="1.3"/><circle cx="7.5" cy="7.5" r="2" stroke="currentColor" strokeWidth="1.3"/><path d="M7.5 2v2M7.5 11v2M2 7.5h2M11 7.5h2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>,
   performance: <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 11L5 5l3 4 2-3 3 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  suspension:  <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3 12V6M12 12V6M3 6l4.5-4 4.5 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M1 12h13" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>,
+  brakes:      <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="5" stroke="currentColor" strokeWidth="1.3"/><circle cx="7.5" cy="7.5" r="2" stroke="currentColor" strokeWidth="1.3"/><path d="M7.5 2.5v2M7.5 10.5v2M2.5 7.5h2M10.5 7.5h2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>,
   exterior:    <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M1 9l2-4h9l2 4H1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/><path d="M3 9v2h9V9" stroke="currentColor" strokeWidth="1.3"/><circle cx="4.5" cy="11.5" r="1" fill="currentColor"/><circle cx="10.5" cy="11.5" r="1" fill="currentColor"/></svg>,
+  interior:    <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2" y="3" width="11" height="9" rx="1" stroke="currentColor" strokeWidth="1.3"/><path d="M5 3v3h5V3M2 9h11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>,
 }
 
 /* Paint swatch color map */
 const SWATCH = {
-  oxfordWhite:     '#f4f0eb', glossBlack: '#0a0a0a', matteBlack: '#181818',
-  satinBlack:      '#2a2a2a', performanceBlue: '#0c2d7c', rapidRed: '#8b1a1a',
-  magneticGray:    '#3a3a42', grabberYellow: '#c8a800', deepViolet: '#0e1f52',
-  carbonWrap:      '#111111', customColor: null,
+  oxfordWhite:     '#f4f0eb', glossBlack:    '#0a0a0a', matteBlack:  '#181818',
+  satinBlack:      '#141414', rossaCorsa:    '#cc0000', rapidRed:    '#8b1a1a',
+  performanceBlue: '#0c2d7c', bielaAvus:     '#e8e4de', magneticGray:'#3a3a42',
+  nardoGray:       '#8a8d8f', gialloOrion:   '#d4a017', verdeMantis: '#3a7a25',
+  blu:             '#0a3d7a', deepViolet:    '#2e0e4f', carbonWrap:  '#111111',
+  satingoldwrap:   '#a07020', chromewrap:    '#b0b8c0', customColor: null,
 }
 
 export function ConfigPanel({ config, setSingle, toggleMulti, setCustomColor }) {
