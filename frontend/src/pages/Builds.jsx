@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useBuilds } from '../hooks/useBuilds'
 import { useAuth } from '../contexts/AuthContext'
 import { Spinner } from '../components/ui/Spinner'
+
 /* ─── Goal metadata ─── */
 const GOAL_META = {
   'daily driver upgrades':    { label: 'Daily Driver',       color: '#22C55E', dim: 'rgba(34,197,94,0.08)'    },
@@ -14,8 +15,63 @@ const GOAL_META = {
   'max power':                { label: 'Max Power',          color: '#EF4444', dim: 'rgba(239,68,68,0.08)'    },
 }
 
+/* ─── Stats banner ─── */
+function GarageStats({ stats }) {
+  if (!stats || stats.total_builds === 0) return null
+
+  const items = [
+    { label: 'Builds',        value: stats.total_builds },
+    { label: 'Total Budget',  value: `$${stats.total_budget.toLocaleString()}` },
+    { label: 'Avg Budget',    value: `$${stats.avg_budget.toLocaleString()}` },
+    { label: 'Favourites',    value: stats.favourites },
+    { label: 'Top Make',      value: stats.top_make ?? '—' },
+    { label: 'Total Mods',    value: stats.total_mods },
+  ]
+
+  return (
+    <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-10">
+      {items.map(({ label, value }) => (
+        <div
+          key={label}
+          className="rounded-xl border border-white/[0.07] px-4 py-3 text-center"
+          style={{ background: 'rgba(19,21,25,0.6)' }}
+        >
+          <div className="font-display font-black text-white text-xl leading-none mb-1">
+            {value}
+          </div>
+          <div className="text-muted text-xs font-mono uppercase tracking-widest">{label}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ─── Star button ─── */
+function StarButton({ active, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      title={active ? 'Remove from favourites' : 'Add to favourites'}
+      className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150"
+      style={{
+        background: active ? 'rgba(255,200,0,0.12)' : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${active ? 'rgba(255,200,0,0.35)' : 'rgba(255,255,255,0.08)'}`,
+      }}
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill={active ? '#ffc800' : 'none'}>
+        <path
+          d="M7 1l1.6 3.4L12 5l-2.5 2.4.6 3.4L7 9.2 3.9 10.8l.6-3.4L2 5l3.4-.6L7 1z"
+          stroke={active ? '#ffc800' : '#6b7280'}
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  )
+}
+
 /* ─── Vehicle bay card ─── */
-function GarageBay({ build, onDelete }) {
+function GarageBay({ build, onDelete, onToggleFavourite }) {
   const meta  = GOAL_META[build.goal] || { label: build.goal, color: '#FF8C00', dim: 'rgba(255,140,0,0.08)' }
   const since = new Date(build.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 
@@ -32,16 +88,19 @@ function GarageBay({ build, onDelete }) {
 
           {/* ── Left: Vehicle Identity ── */}
           <div className="flex-1 min-w-0">
-            {/* Goal badge */}
-            <div
-              className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold uppercase tracking-[0.14em] px-2.5 py-1 rounded-lg mb-4"
-              style={{ color: meta.color, background: meta.dim, border: `1px solid ${meta.color}30` }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
-              {meta.label}
+            {/* Goal badge + star row */}
+            <div className="flex items-center gap-3 mb-4">
+              <div
+                className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold uppercase tracking-[0.14em] px-2.5 py-1 rounded-lg"
+                style={{ color: meta.color, background: meta.dim, border: `1px solid ${meta.color}30` }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
+                {meta.label}
+              </div>
+              <StarButton active={build.is_favourite} onClick={() => onToggleFavourite(build.id)} />
             </div>
 
-            {/* Vehicle name — THIS is the hero */}
+            {/* Vehicle name */}
             <h2
               className="font-display font-black text-white leading-[0.92] tracking-tight mb-1"
               style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)' }}
@@ -107,7 +166,7 @@ function GarageBay({ build, onDelete }) {
 
 /* ─── Main Garage ─── */
 export default function Garage() {
-  const { builds, loading, error, deleteBuild } = useBuilds()
+  const { builds, stats, loading, error, deleteBuild, toggleFavourite } = useBuilds()
   const { user } = useAuth()
 
   const firstName = user?.name?.split(' ')[0] || null
@@ -134,7 +193,7 @@ export default function Garage() {
       <div className="container-content py-12 relative z-10">
 
         {/* ── Header ── */}
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex items-end justify-between mb-8">
           <div>
             {firstName && (
               <p className="eyebrow mb-2">Welcome back, {firstName}</p>
@@ -160,6 +219,9 @@ export default function Garage() {
           </Link>
         </div>
 
+        {/* ── Stats Banner ── */}
+        {!loading && <GarageStats stats={stats} />}
+
         {/* ── Loading ── */}
         {loading && (
           <div className="flex items-center gap-3 py-24">
@@ -182,10 +244,8 @@ export default function Garage() {
               className="max-w-xl mx-auto text-center rounded-3xl border border-white/[0.06] py-20 px-10 relative overflow-hidden"
               style={{ background: 'rgba(19,21,25,0.5)' }}
             >
-              {/* Decorative grid */}
               <div className="absolute inset-0 grid-texture opacity-50 pointer-events-none" />
 
-              {/* Car icon */}
               <div className="relative z-10">
                 <div className="w-20 h-20 rounded-2xl bg-accent/[0.08] border border-accent/20 flex items-center justify-center mx-auto mb-8">
                   <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="text-accent">
@@ -220,10 +280,14 @@ export default function Garage() {
         {!loading && builds.length > 0 && (
           <div className="flex flex-col gap-4">
             {builds.map(b => (
-              <GarageBay key={b.id} build={b} onDelete={deleteBuild} />
+              <GarageBay
+                key={b.id}
+                build={b}
+                onDelete={deleteBuild}
+                onToggleFavourite={toggleFavourite}
+              />
             ))}
 
-            {/* Add another vehicle nudge */}
             <Link
               to="/planner"
               className="flex items-center justify-center gap-3 rounded-2xl border border-dashed border-white/[0.1] py-6 text-muted text-sm hover:border-accent/30 hover:text-accent transition-all duration-200 group"

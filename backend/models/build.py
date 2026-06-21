@@ -2,7 +2,7 @@
 # SQLAlchemy ORM model + Pydantic schemas for Build
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, JSON, DateTime, Text
+from sqlalchemy import Column, Integer, String, Float, JSON, DateTime, Text, Boolean
 from sqlalchemy.orm import relationship
 from core.database import Base
 from pydantic import BaseModel, Field
@@ -24,6 +24,7 @@ class Build(Base):
     experience    = Column(String(50), nullable=False)   # beginner|intermediate|advanced
     categories    = Column(JSON, default=list)           # ["performance", "sound", ...]
     is_daily      = Column(Integer, default=1)           # 1=daily, 0=project car
+    is_favourite  = Column(Boolean, default=False)
     notes         = Column(Text, default="")
     created_at    = Column(DateTime, default=datetime.utcnow)
     updated_at    = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -68,19 +69,20 @@ class BuildCreate(BaseModel):
 
 
 class BuildResponse(BaseModel):
-    id:          int
-    title:       str
-    year:        int
-    make:        str
-    model:       str
-    budget:      float
-    goal:        str
-    experience:  str
-    categories:  list[str]
-    is_daily:    bool
-    notes:       str
-    created_at:  datetime
-    updated_at:  datetime
+    id:           int
+    title:        str
+    year:         int
+    make:         str
+    model:        str
+    budget:       float
+    goal:         str
+    experience:   str
+    categories:   list[str]
+    is_daily:     bool
+    is_favourite: bool = False
+    notes:        str
+    created_at:   datetime
+    updated_at:   datetime
 
     class Config:
         from_attributes = True

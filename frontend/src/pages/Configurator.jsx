@@ -4,10 +4,20 @@ import { CarScene }    from '../components/configurator/CarScene'
 import { ConfigPanel } from '../components/configurator/ConfigPanel'
 import { BuildSummary } from '../components/configurator/BuildSummary'
 import { useCarConfig } from '../hooks/useCarConfig'
+import { classifyVehicle } from '../lib/vehicleUtils'
 
 export default function Configurator() {
   const [searchParams] = useSearchParams()
-  const vehicleName = searchParams.get('vehicle') ?? 'Ford Mustang Shelby GT500'
+  const make  = searchParams.get('make')  ?? ''
+  const model = searchParams.get('model') ?? ''
+  const year  = searchParams.get('year')  ?? ''
+  // Fallback display name from legacy ?vehicle= param
+  const legacyName  = searchParams.get('vehicle') ?? ''
+  const vehicleName = (make && model)
+    ? `${year} ${make} ${model}`.trim()
+    : legacyName || 'Ford Mustang Shelby GT500'
+
+  const vehicleClass = classifyVehicle(make || legacyName, model, year)
 
   const { config, setSingle, toggleMulti, setCustomColor, summary } = useCarConfig()
 
@@ -90,7 +100,7 @@ export default function Configurator() {
 
         {/* Center — 3D viewer */}
         <div style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex', flexDirection: 'column' }}>
-          <CarScene config={config} />
+          <CarScene config={config} make={make || legacyName} model={model} year={year} />
 
           {/* Floating controls hint */}
           <div style={{
@@ -104,14 +114,18 @@ export default function Configurator() {
             </span>
           </div>
 
-          {/* Live config badge */}
+          {/* Vehicle class badge */}
           <div style={{
             position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
-            background: 'rgba(255,140,0,0.12)', border: '1px solid rgba(255,140,0,0.25)',
-            borderRadius: 20, padding: '4px 12px',
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'rgba(8,9,15,0.72)', backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255,140,0,0.22)',
+            borderRadius: 20, padding: '5px 14px',
+            whiteSpace: 'nowrap',
           }}>
-            <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#ff8c00', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              Live Preview
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ff8c00', flexShrink: 0, boxShadow: '0 0 6px #ff8c00' }} />
+            <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#ff8c00', letterSpacing: '0.10em', textTransform: 'uppercase' }}>
+              {vehicleClass.label}
             </span>
           </div>
         </div>

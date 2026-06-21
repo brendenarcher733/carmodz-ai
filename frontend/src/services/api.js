@@ -24,11 +24,13 @@ api.interceptors.response.use(
 )
 
 export const buildsApi = {
-  create:  (data)    => api.post('/api/builds/', data, { timeout: 90000 }),
-  list:    ()        => api.get('/api/builds/'),
-  get:     (id)      => api.get(`/api/builds/${id}`),
-  getPlan: (id)      => api.get(`/api/builds/${id}/plan`),
-  delete:  (id)      => api.delete(`/api/builds/${id}`),
+  create:          (data) => api.post('/api/builds/', data, { timeout: 90000 }),
+  list:            ()     => api.get('/api/builds/'),
+  get:             (id)   => api.get(`/api/builds/${id}`),
+  getPlan:         (id)   => api.get(`/api/builds/${id}/plan`),
+  delete:          (id)   => api.delete(`/api/builds/${id}`),
+  toggleFavourite: (id)   => api.patch(`/api/builds/${id}/favourite`),
+  stats:           ()     => api.get('/api/builds/stats'),
 }
 
 export const advisorApi = {

@@ -9,8 +9,8 @@ import { Link } from 'react-router-dom'
    in the video where the flames appear.
 ───────────────────────────────────────────── */
 const VIDEO_ID = 'FOD2I-YuQ0c'
-const START_S  = 12   // seek to this second on load & after each loop
-const END_S    = 22   // stop and restart at START_S
+const START_S  = 95   // 1:35 — McLaren driving
+const END_S    = 109  // 1:49
 
 function YouTubeClipBg() {
   const divRef = useRef(null)
@@ -48,15 +48,17 @@ function YouTubeClipBg() {
         },
       })
 
-      // Fallback poll in case onStateChange misses the end
+      // Poll at 100 ms — tighter than the default 500 ms so the
+      // clip cuts back before overshooting END_S noticeably
       interval = setInterval(() => {
-        if (!player.current?.getCurrentTime) return
-        const t = player.current.getCurrentTime()
-        if (t >= END_S) {
-          player.current.seekTo(START_S, true)
-          player.current.playVideo()
-        }
-      }, 500)
+        try {
+          const t = player.current?.getCurrentTime?.()
+          if (t != null && t >= END_S) {
+            player.current.seekTo(START_S, true)
+            player.current.playVideo()
+          }
+        } catch (_) { /* player not ready yet */ }
+      }, 100)
     }
 
     if (window.YT?.Player) {
