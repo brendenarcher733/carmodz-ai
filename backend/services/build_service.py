@@ -65,6 +65,46 @@ def get_all_builds(db: Session, skip: int = 0, limit: int = 50) -> list[Build]:
     return db.query(Build).order_by(Build.created_at.desc()).offset(skip).limit(limit).all()
 
 
+def toggle_favourite(db: Session, build_id: int) -> Build:
+    build = get_build(db, build_id)
+    build.is_favourite = not build.is_favourite
+    db.commit()
+    db.refresh(build)
+    return build
+
+
+def get_garage_stats(db: Session) -> dict:
+    from sqlalchemy import func
+
+    builds = db.query(Build).all()
+    if not builds:
+        return {
+            "total_builds": 0, "total_budget": 0, "avg_budget": 0,
+            "favourites": 0, "top_make": None, "top_goal": None,
+            "total_mods": 0, "avg_mods_per_build": 0,
+        }
+
+    total_budget = sum(b.budget for b in builds)
+    make_counts: dict[str, int] = {}
+    goal_counts: dict[str, int] = {}
+    for b in builds:
+        make_counts[b.make] = make_counts.get(b.make, 0) + 1
+        goal_counts[b.goal] = goal_counts.get(b.goal, 0) + 1
+
+    total_mods = db.query(func.count(Recommendation.id)).scalar() or 0
+
+    return {
+        "total_builds":       len(builds),
+        "total_budget":       round(total_budget, 2),
+        "avg_budget":         round(total_budget / len(builds), 2),
+        "favourites":         sum(1 for b in builds if getattr(b, 'is_favourite', False)),
+        "top_make":           max(make_counts, key=make_counts.get),
+        "top_goal":           max(goal_counts, key=goal_counts.get),
+        "total_mods":         total_mods,
+        "avg_mods_per_build": round(total_mods / len(builds), 1),
+    }
+
+
 def delete_build(db: Session, build_id: int) -> None:
     build = get_build(db, build_id)
     db.delete(build)

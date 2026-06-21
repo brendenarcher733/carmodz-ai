@@ -266,7 +266,7 @@ export default function BuildDetail() {
 
         {/* ── Visual Configurator launch ── */}
         <Link
-          to={`/configurator?vehicle=${encodeURIComponent(`${plan.year} ${plan.make} ${plan.model}`)}`}
+          to={`/configurator?make=${encodeURIComponent(plan.make)}&model=${encodeURIComponent(plan.model)}&year=${plan.year}`}
           className="block mb-8 group"
         >
           <div
