@@ -9,8 +9,9 @@ from services.ai_service import generate_build_recommendations
 from fastapi import HTTPException
 
 
-def create_build(db: Session, data: BuildCreate) -> Build:
+def create_build(db: Session, data: BuildCreate, user_id: int) -> Build:
     build = Build(
+        user_id=user_id,
         title=data.title,
         year=data.year,
         make=data.make,
@@ -54,29 +55,36 @@ def create_build(db: Session, data: BuildCreate) -> Build:
     return build
 
 
-def get_build(db: Session, build_id: int) -> Build:
-    build = db.query(Build).filter(Build.id == build_id).first()
+def get_build(db: Session, build_id: int, user_id: int) -> Build:
+    build = db.query(Build).filter(Build.id == build_id, Build.user_id == user_id).first()
     if not build:
         raise HTTPException(status_code=404, detail=f"Build {build_id} not found")
     return build
 
 
-def get_all_builds(db: Session, skip: int = 0, limit: int = 50) -> list[Build]:
-    return db.query(Build).order_by(Build.created_at.desc()).offset(skip).limit(limit).all()
+def get_all_builds(db: Session, user_id: int, skip: int = 0, limit: int = 50) -> list[Build]:
+    return (
+        db.query(Build)
+        .filter(Build.user_id == user_id)
+        .order_by(Build.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
-def toggle_favourite(db: Session, build_id: int) -> Build:
-    build = get_build(db, build_id)
+def toggle_favourite(db: Session, build_id: int, user_id: int) -> Build:
+    build = get_build(db, build_id, user_id)
     build.is_favourite = not build.is_favourite
     db.commit()
     db.refresh(build)
     return build
 
 
-def get_garage_stats(db: Session) -> dict:
+def get_garage_stats(db: Session, user_id: int) -> dict:
     from sqlalchemy import func
 
-    builds = db.query(Build).all()
+    builds = db.query(Build).filter(Build.user_id == user_id).all()
     if not builds:
         return {
             "total_builds": 0, "total_budget": 0, "avg_budget": 0,
@@ -91,7 +99,12 @@ def get_garage_stats(db: Session) -> dict:
         make_counts[b.make] = make_counts.get(b.make, 0) + 1
         goal_counts[b.goal] = goal_counts.get(b.goal, 0) + 1
 
-    total_mods = db.query(func.count(Recommendation.id)).scalar() or 0
+    build_ids = [b.id for b in builds]
+    total_mods = (
+        db.query(func.count(Recommendation.id))
+        .filter(Recommendation.build_id.in_(build_ids))
+        .scalar() or 0
+    )
 
     return {
         "total_builds":       len(builds),
@@ -105,14 +118,14 @@ def get_garage_stats(db: Session) -> dict:
     }
 
 
-def delete_build(db: Session, build_id: int) -> None:
-    build = get_build(db, build_id)
+def delete_build(db: Session, build_id: int, user_id: int) -> None:
+    build = get_build(db, build_id, user_id)
     db.delete(build)
     db.commit()
 
 
-def get_build_plan(db: Session, build_id: int):
-    build = get_build(db, build_id)
+def get_build_plan(db: Session, build_id: int, user_id: int):
+    build = get_build(db, build_id, user_id)
     recs = db.query(Recommendation).filter(Recommendation.build_id == build_id).all()
 
     from models.recommendation import ModRecommendation

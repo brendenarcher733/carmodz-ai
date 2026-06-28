@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Signup() {
   const { signup }  = useAuth()
   const navigate    = useNavigate()
+  const location    = useLocation()
   const [form,  setForm]  = useState({ name: '', email: '', password: '', confirm: '' })
   const [error, setError] = useState(null)
   const [busy,  setBusy]  = useState(false)
@@ -21,7 +22,8 @@ export default function Signup() {
     setError(null)
     try {
       await signup(form.name, form.email, form.password)
-      navigate('/builds')
+      const dest = location.state?.from?.pathname || '/builds'
+      navigate(dest, { replace: true })
     } catch (err) {
       setError(err.message)
     } finally {

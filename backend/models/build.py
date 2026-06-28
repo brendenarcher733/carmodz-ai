@@ -2,7 +2,7 @@
 # SQLAlchemy ORM model + Pydantic schemas for Build
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, JSON, DateTime, Text, Boolean
+from sqlalchemy import Column, Integer, String, Float, JSON, DateTime, Text, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from core.database import Base
 from pydantic import BaseModel, Field
@@ -15,6 +15,7 @@ class Build(Base):
     __tablename__ = "builds"
 
     id            = Column(Integer, primary_key=True, index=True)
+    user_id       = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     title         = Column(String(200), nullable=False)
     year          = Column(Integer, nullable=False)
     make          = Column(String(100), nullable=False)
@@ -44,12 +45,12 @@ class BuildCreate(BaseModel):
     year:       int        = Field(..., ge=1950, le=2026)
     make:       str        = Field(..., min_length=1, max_length=100)
     model:      str        = Field(..., min_length=1, max_length=100)
-    budget:     float      = Field(..., gt=0)
-    goal:       str        = Field(..., min_length=1)
+    budget:     float      = Field(..., gt=0, le=10_000_000)
+    goal:       str        = Field(..., min_length=1, max_length=200)
     experience: str        = Field(..., pattern="^(beginner|intermediate|advanced)$")
-    categories: list[str]  = Field(default=[])
+    categories: list[str]  = Field(default=[], max_length=10)
     is_daily:   bool       = Field(default=True)
-    notes:      str        = Field(default="")
+    notes:      str        = Field(default="", max_length=2000)
 
     class Config:
         json_schema_extra = {

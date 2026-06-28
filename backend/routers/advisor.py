@@ -4,10 +4,14 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from sqlalchemy.orm import Session
 from core.database import get_db
+from core.rate_limit import RateLimiter
 from models.schemas import ChatMessageIn
 from services.chat_service import handle_chat
 
 router = APIRouter(prefix="/api/mod-advisor", tags=["Mod Advisor"])
+
+# Public, unauthenticated endpoint that can call paid AI APIs — throttle hard.
+chat_rate_limit = RateLimiter(times=20, seconds=60, scope="advisor-chat")
 
 
 class ChatRequest(BaseModel):
@@ -38,7 +42,7 @@ def _suggestions_for(message: str, response: str) -> Optional[list[str]]:
     return None
 
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("/chat", response_model=ChatResponse, dependencies=[Depends(chat_rate_limit)])
 def chat_with_advisor(payload: ChatRequest, db: Session = Depends(get_db)):
     data = ChatMessageIn(
         session_id=payload.session_id,

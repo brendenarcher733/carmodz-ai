@@ -7,10 +7,15 @@ from sqlalchemy.orm import Session
 
 from core.database import get_db
 from core.security import hash_password, verify_password, create_access_token, decode_access_token
+from core.rate_limit import RateLimiter
 from models.user import User, UserCreate, UserLogin, UserResponse, Token
 
 router  = APIRouter(prefix="/api/auth", tags=["Auth"])
 bearer  = HTTPBearer(auto_error=False)
+
+# Brute-force protection: 10 attempts per 5 minutes per IP, per endpoint
+login_rate_limit  = RateLimiter(times=10, seconds=300, scope="login")
+signup_rate_limit = RateLimiter(times=5,  seconds=300, scope="signup")
 
 
 # ── Dependency: current user from token ────────────────────────────────────────
@@ -32,7 +37,7 @@ def get_current_user(
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-@router.post("/signup", response_model=Token, status_code=201)
+@router.post("/signup", response_model=Token, status_code=201, dependencies=[Depends(signup_rate_limit)])
 def signup(data: UserCreate, db: Session = Depends(get_db)):
     """Create a new account and return an access token."""
     existing = db.query(User).filter(User.email == data.email).first()
@@ -56,7 +61,7 @@ def signup(data: UserCreate, db: Session = Depends(get_db)):
     )
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=Token, dependencies=[Depends(login_rate_limit)])
 def login(data: UserLogin, db: Session = Depends(get_db)):
     """Authenticate and return an access token."""
     user = db.query(User).filter(User.email == data.email.strip().lower()).first()

@@ -42,14 +42,27 @@ class Settings(BaseSettings):
     def ai_model(self) -> str:
         return self.openai_model
 
+    @property
+    def is_production(self) -> bool:
+        return self.environment.lower() == "production"
+
     class Config:
         env_file = ".env"
         populate_by_name = True
 
 
+_DEV_SECRET_KEY = "dev-secret-change-in-production-set-SECRET_KEY-env-var"
+
+
 @lru_cache()
 def get_settings() -> Settings:
-    return Settings()
+    s = Settings()
+    if s.is_production and s.secret_key == _DEV_SECRET_KEY:
+        raise RuntimeError(
+            "Refusing to start: ENVIRONMENT=production but SECRET_KEY is still the "
+            "insecure default. Set a strong random SECRET_KEY in the environment."
+        )
+    return s
 
 
 settings = get_settings()
