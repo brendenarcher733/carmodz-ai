@@ -1,0 +1,162 @@
+{
+  "case_id": "reliability_first_high_mileage",
+  "model": "claude-sonnet-4-6",
+  "recorded_at": "2026-06-28T22:45:16Z",
+  "tool_input": {
+    "recommendations": [
+      {
+        "name": "OEM-Spec Spark Plug Replacement (Iridium)",
+        "category": "reliability",
+        "description": "At 180,000 miles, spark plugs are almost certainly due for replacement. Swap to NGK Iridium IX or Denso Iridium Power plugs for the 2AR-FE or 2GR-FE engine. Iridium tips provide better ignition efficiency, improved fuel economy, and longer service life than standard copper plugs. This is the single most impactful tune-up item for a high-mileage Camry.",
+        "price_min": 30.0,
+        "price_max": 60.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 1,
+        "warnings": [],
+        "brand_tips": [
+          "NGK Iridium IX (Part: ILKAR7L11 for 4-cyl)",
+          "Denso Iridium Power (Part: IK20)"
+        ]
+      },
+      {
+        "name": "Serpentine Belt & Tensioner Replacement",
+        "category": "reliability",
+        "description": "The serpentine belt drives the alternator, power steering pump, and A/C compressor. At this mileage, the belt and tensioner spring are worn and at risk of snapping \u2014 leaving you stranded. Replace both as a set. Gates and Dayco make direct-fit OEM-quality kits for the 2012 Camry.",
+        "price_min": 40.0,
+        "price_max": 80.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 2,
+        "warnings": [],
+        "brand_tips": [
+          "Gates 38406K Serpentine Belt Kit",
+          "Dayco 89454 Drive Belt Tensioner"
+        ]
+      },
+      {
+        "name": "Engine Air Filter Upgrade (K&N Drop-In)",
+        "category": "reliability",
+        "description": "A K&N High-Flow drop-in replacement filter improves airflow over the stock paper filter and is cleanable/reusable for up to 50,000 miles. For a daily driver at 180k, it ensures the engine breathes clean air without the commitment of a full cold-air intake. Simply swaps into the factory airbox \u2014 no tools needed.",
+        "price_min": 55.0,
+        "price_max": 65.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 3,
+        "warnings": [],
+        "brand_tips": [
+          "K&N 33-2362 (2012 Camry 2.5L)",
+          "K&N 33-2395 (2012 Camry 3.5L V6)"
+        ]
+      },
+      {
+        "name": "Transmission Fluid Flush & Upgraded Fluid",
+        "category": "reliability",
+        "description": "The U660E/U760E automatic transmission fluid is often never changed by previous owners. A full drain-and-fill with fresh Toyota WS-compatible synthetic ATF dramatically reduces wear on clutch packs and valve body internals. At 180k, this is critical for transmission longevity. Do 2\u20133 partial drain-and-fills if a flush machine isn't available.",
+        "price_min": 40.0,
+        "price_max": 80.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 4,
+        "warnings": [],
+        "brand_tips": [
+          "Idemitsu ATF Type-WS (Toyota-approved)",
+          "Valvoline MaxLife Multi-Vehicle ATF"
+        ]
+      },
+      {
+        "name": "Coolant Flush & Mishimoto Radiator Cap Upgrade",
+        "category": "reliability",
+        "description": "Old coolant loses its anti-corrosion and anti-boil properties over time. Flush and refill with Toyota Super Long Life Coolant (pink/red). Pair with a Mishimoto billet aluminum radiator cap for a secure, pressure-rated seal that prevents coolant loss under heat cycling \u2014 a common issue on aging 2012 Camrys.",
+        "price_min": 50.0,
+        "price_max": 90.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 5,
+        "warnings": [],
+        "brand_tips": [
+          "Toyota Genuine Super Long Life Coolant (pink)",
+          "Mishimoto MMRC-190 Billet Radiator Cap"
+        ]
+      },
+      {
+        "name": "OEM-Quality Timing Cover & Valve Cover Gasket Inspection/Replacement",
+        "category": "reliability",
+        "description": "At 180,000 miles, rubber valve cover gaskets on the 2AR-FE/2GR-FE are prone to oil seeping onto exhaust manifolds \u2014 a fire and smoke risk. Inspect and replace with Fel-Pro or Toyota OEM gaskets. This is a moderate DIY job but well within reach for a beginner with basic hand tools and a YouTube guide.",
+        "price_min": 25.0,
+        "price_max": 60.0,
+        "difficulty": "medium",
+        "stage": 1,
+        "priority": 6,
+        "warnings": [],
+        "brand_tips": [
+          "Fel-Pro VS 50638 R Valve Cover Gasket Set",
+          "Toyota OEM Gasket (Part: 11213-0V010)"
+        ]
+      },
+      {
+        "name": "Synthetic Engine Oil Conversion (Full Synthetic 0W-20)",
+        "category": "reliability",
+        "description": "If not already on full synthetic, switch the 2012 Camry to a 0W-20 full synthetic oil on the next oil change. At high mileage, consider a high-mileage formula with seal conditioners to reduce minor seepage. This reduces cold-start wear significantly and extends engine life at 180k+ miles.",
+        "price_min": 45.0,
+        "price_max": 75.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 7,
+        "warnings": [],
+        "brand_tips": [
+          "Mobil 1 High Mileage 0W-20",
+          "Castrol GTX High Mileage 0W-20"
+        ]
+      },
+      {
+        "name": "Fuel System Cleaner & Injector Service",
+        "category": "reliability",
+        "description": "After 180k miles, fuel injectors and intake valves accumulate carbon deposits that hurt fuel economy and idle quality. Use a concentrated fuel system cleaner through the tank for mild buildup, or have a professional run an injector cleaning kit through the fuel rail. Chevron Techron is well-regarded for Toyota engines.",
+        "price_min": 15.0,
+        "price_max": 30.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 8,
+        "warnings": [],
+        "brand_tips": [
+          "Chevron Techron Concentrate Plus (12oz)",
+          "BG 44K Fuel System Cleaner (professional-grade)"
+        ]
+      },
+      {
+        "name": "Brake Fluid Flush (DOT 3/4 Replacement)",
+        "category": "reliability",
+        "description": "Brake fluid is hygroscopic \u2014 it absorbs moisture over time, lowering its boiling point and creating a spongy pedal. After years of use on a high-mileage daily driver, a full brake fluid flush with fresh DOT 3 or DOT 4 fluid restores braking confidence and protects ABS module internals from corrosion.",
+        "price_min": 15.0,
+        "price_max": 40.0,
+        "difficulty": "medium",
+        "stage": 2,
+        "priority": 9,
+        "warnings": [],
+        "brand_tips": [
+          "Motul RBF 600 DOT 4 (high-performance, track-safe)",
+          "ATE Original DOT 4 Brake Fluid"
+        ]
+      },
+      {
+        "name": "Battery & Charging System Test + Battery Replacement",
+        "category": "reliability",
+        "description": "A 2012 Camry battery is likely original or near end-of-life. Test the battery and alternator output with a multimeter or free test at AutoZone/O'Reilly. If voltage is below spec, replace with an Optima or OdysseyGroup 35 AGM battery for superior cold-crank amps, vibration resistance, and longer service life on a daily driver.",
+        "price_min": 130.0,
+        "price_max": 200.0,
+        "difficulty": "easy",
+        "stage": 2,
+        "priority": 10,
+        "warnings": [],
+        "brand_tips": [
+          "Optima RedTop 35 AGM Battery",
+          "Odyssey PC1500DT Performance Battery"
+        ]
+      }
+    ]
+  },
+  "input_tokens": 1284,
+  "output_tokens": 1750,
+  "latency_ms": 36860.2
+}

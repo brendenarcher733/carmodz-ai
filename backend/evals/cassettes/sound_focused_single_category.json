@@ -1,0 +1,191 @@
+{
+  "case_id": "sound_focused_single_category",
+  "model": "claude-sonnet-4-6",
+  "recorded_at": "2026-06-28T22:45:54Z",
+  "tool_input": {
+    "recommendations": [
+      {
+        "name": "Flyin' Miata / Racing Beat Header (4-2-1 Design)",
+        "category": "sound",
+        "description": "A 4-2-1 stainless steel exhaust manifold/header dramatically improves exhaust note at mid-range RPMs, giving the Miata's 2.0L SkyActiv-G a deeper, more aggressive tone. Racing Beat and Flyin' Miata both offer well-fitment-tested headers for the ND2 platform. Pairs excellently with a cat-back system for maximum sound gains.",
+        "price_min": 450.0,
+        "price_max": 650.0,
+        "difficulty": "medium",
+        "stage": 1,
+        "priority": 1,
+        "warnings": [],
+        "brand_tips": [
+          "Racing Beat",
+          "Flyin' Miata",
+          "Corksport (budget option)"
+        ]
+      },
+      {
+        "name": "Borla S-Type Cat-Back Exhaust System",
+        "category": "sound",
+        "description": "The Borla S-Type cat-back for the 2019 ND2 MX-5 is a bolt-on, 304 stainless steel system that produces an aggressive, raspy exhaust note without drone at highway speeds. It uses the stock hangers and bumper cutouts for a clean install. Borla's ATAK variant is louder if more volume is desired.",
+        "price_min": 750.0,
+        "price_max": 950.0,
+        "difficulty": "medium",
+        "stage": 1,
+        "priority": 2,
+        "warnings": [],
+        "brand_tips": [
+          "Borla S-Type",
+          "Borla ATAK (louder)",
+          "Racing Beat (more subtle)",
+          "Flyin' Miata (aggressive)"
+        ]
+      },
+      {
+        "name": "Cusco / UltraRacing Strut Tower Brace (resonance improvement)",
+        "category": "sound",
+        "description": "While primarily a handling upgrade, a front strut tower brace on the MX-5 reduces body flex noise and chassis vibration, cleaning up the acoustic character inside the cabin. It also tightens the mechanical feel, which enhances the overall driving soundtrack experience.",
+        "price_min": 180.0,
+        "price_max": 280.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 3,
+        "warnings": [],
+        "brand_tips": [
+          "Cusco",
+          "Ultraracing",
+          "Flyin' Miata"
+        ]
+      },
+      {
+        "name": "K&N 57-Series Typhoon Short Ram Intake",
+        "category": "sound",
+        "description": "K&N's 57-Series intake for the 2019 MX-5 replaces the restrictive airbox with a high-flow cone filter and mandrel-bent aluminum tube, amplifying induction roar under acceleration. The result is a crisp, mechanical intake growl that complements the exhaust tone nicely. Compatible with the ND2 2.0L without a tune.",
+        "price_min": 280.0,
+        "price_max": 350.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 4,
+        "warnings": [],
+        "brand_tips": [
+          "K&N 57-Series Typhoon",
+          "Corksport Cold Air Intake",
+          "Mishimoto Performance Air Intake"
+        ]
+      },
+      {
+        "name": "Corksport Resonator Delete Pipe",
+        "category": "sound",
+        "description": "Replacing the mid-pipe resonator on the ND MX-5 with a Corksport straight-through delete pipe removes a major sound deadening component from the exhaust path. This is a budget-friendly mod that noticeably increases exhaust volume and sharpness, especially at mid-to-high RPMs, and pairs perfectly with a cat-back system.",
+        "price_min": 120.0,
+        "price_max": 180.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 5,
+        "warnings": [],
+        "brand_tips": [
+          "Corksport",
+          "MazdaSpeed Parts",
+          "GoodWin Racing"
+        ]
+      },
+      {
+        "name": "Mishimoto Sound Symposer Delete Kit",
+        "category": "sound",
+        "description": "The 2019 MX-5 uses Mazda's Active Sound Symposer, a plastic hose that artificially pipes engine noise into the cabin. Deleting it with a block-off plate removes the fake synthetic tone and allows the real mechanical exhaust and intake sounds to dominate the cabin experience \u2014 a must-do for purists.",
+        "price_min": 25.0,
+        "price_max": 50.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 6,
+        "warnings": [],
+        "brand_tips": [
+          "Corksport Symposer Delete",
+          "GoodWin Racing Block-off Kit",
+          "CorkSport (OEM quality fitment)"
+        ]
+      },
+      {
+        "name": "Vibrant Performance High-Flow Catalytic Converter",
+        "category": "sound",
+        "description": "Swapping the factory cat for a Vibrant Performance high-flow 200-cell catalytic converter reduces exhaust backpressure without fully deleting emissions hardware. This opens up exhaust flow, deepens the overall tone, and reduces restriction \u2014 producing a more authentic sports car sound character while remaining street legal in most states.",
+        "price_min": 220.0,
+        "price_max": 350.0,
+        "difficulty": "medium",
+        "stage": 2,
+        "priority": 7,
+        "warnings": [],
+        "brand_tips": [
+          "Vibrant Performance",
+          "Random Technology",
+          "Corksport"
+        ]
+      },
+      {
+        "name": "Dynamat Xtreme Door Kit (Cabin Sound Tuning)",
+        "category": "sound",
+        "description": "Installing Dynamat Xtreme butyl rubber sound deadening material inside the MX-5's thin door skins dramatically reduces road noise and wind buffeting, allowing the exhaust and intake sounds to be heard more clearly inside the cabin without competing with NVH. Especially worthwhile for a daily driver Miata.",
+        "price_min": 120.0,
+        "price_max": 180.0,
+        "difficulty": "medium",
+        "stage": 2,
+        "priority": 8,
+        "warnings": [],
+        "brand_tips": [
+          "Dynamat Xtreme",
+          "Fatmat (budget)",
+          "HushMat (thermal+sound)"
+        ]
+      },
+      {
+        "name": "GoodWin Racing Axle-Back Exhaust Upgrade (Secondary Muffler Delete)",
+        "category": "sound",
+        "description": "GoodWin Racing offers an axle-back system specifically for the ND MX-5 that replaces the rear muffler section with a straight-through or perforated core design. This is a great standalone option if you want more tone from the tail section without replacing the full cat-back, and is notably easier to install.",
+        "price_min": 280.0,
+        "price_max": 420.0,
+        "difficulty": "easy",
+        "stage": 2,
+        "priority": 9,
+        "warnings": [],
+        "brand_tips": [
+          "GoodWin Racing",
+          "Flyin' Miata",
+          "MagnaFlow"
+        ]
+      },
+      {
+        "name": "Focal Integration ISU165 Component Speaker Upgrade",
+        "category": "sound",
+        "description": "The Bose audio system in the 2019 MX-5 can limit aftermarket speaker compatibility, but Focal's ISU165 6.5\" component speakers are designed as direct-fit Bose integration replacements. They deliver dramatically improved audio fidelity, allowing your exhaust soundtrack and music to both be enjoyed at the highest quality while daily driving.",
+        "price_min": 250.0,
+        "price_max": 380.0,
+        "difficulty": "medium",
+        "stage": 2,
+        "priority": 10,
+        "warnings": [],
+        "brand_tips": [
+          "Focal Integration ISU165",
+          "Hertz Energy Series",
+          "Kicker KSS65.3 (budget)"
+        ]
+      },
+      {
+        "name": "Borla Exhaust Mid-Pipe (Optional Connecting Piece)",
+        "category": "sound",
+        "description": "If mixing and matching exhaust components (e.g., Racing Beat header + Borla cat-back), a stainless steel connecting mid-pipe ensures leak-free fitment between sections. Borla and Racing Beat both offer ND-specific mid-pipe connectors that maintain proper exhaust velocity and eliminate ticking or popping from exhaust leaks.",
+        "price_min": 80.0,
+        "price_max": 150.0,
+        "difficulty": "easy",
+        "stage": 2,
+        "priority": 11,
+        "warnings": [
+          "Only needed if using non-matching header and cat-back brands \u2014 check fitment before purchasing"
+        ],
+        "brand_tips": [
+          "Borla",
+          "Racing Beat",
+          "GoodWin Racing"
+        ]
+      }
+    ]
+  },
+  "input_tokens": 1285,
+  "output_tokens": 1953,
+  "latency_ms": 38194.3
+}

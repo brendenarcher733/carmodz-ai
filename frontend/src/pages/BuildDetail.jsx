@@ -1,6 +1,7 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { useBuildPlan } from '../hooks/useBuilds'
+import { useBuildPlan, useBuildStatus } from '../hooks/useBuilds'
+import { buildsApi } from '../services/api'
 import { Badge } from '../components/ui/Badge'
 import { Spinner } from '../components/ui/Spinner'
 import { ShopLinks } from '../components/ui/ShopLinks'
@@ -150,11 +151,105 @@ function StageTimeline({ stageMods }) {
   )
 }
 
+/* ─── Generating state — recommendation job is still pending/running ─── */
+const GENERATING_MSGS = [
+  'Analyzing your platform…',
+  'Sourcing real aftermarket parts…',
+  'Checking platform compatibility…',
+  'Calculating budget allocation…',
+  'Ranking upgrades by impact-per-dollar…',
+  'Mapping your stage roadmap…',
+]
+
+function GeneratingState({ vehicleLabel }) {
+  const [idx, setIdx] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => setIdx(i => (i + 1) % GENERATING_MSGS.length), 2600)
+    return () => clearInterval(t)
+  }, [])
+  return (
+    <div className="page-shell flex items-center justify-center" style={{ minHeight: '60vh' }}>
+      <div className="text-center max-w-sm px-8">
+        <div className="relative w-20 h-20 mx-auto mb-8">
+          <div className="absolute inset-0 rounded-full border border-accent/30 animate-ping" style={{ animationDuration: '2s' }} />
+          <div className="absolute inset-2 rounded-full border border-accent/20 animate-spin-slow" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="text-accent">
+              <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        <h2 className="font-display font-black text-white text-xl mb-2 tracking-tight">Building your plan</h2>
+        {vehicleLabel && <p className="font-mono text-xs text-muted uppercase tracking-widest mb-5">{vehicleLabel}</p>}
+        <p key={idx} className="text-body text-sm leading-relaxed animate-fade-in">{GENERATING_MSGS[idx]}</p>
+        <p className="font-mono text-xs text-muted mt-6">This usually takes 20-45 seconds.</p>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Failed state — generation exhausted retries with no usable result ─── */
+function FailedState({ errorMessage, onRetry, retrying }) {
+  return (
+    <div className="page-shell flex items-center justify-center" style={{ minHeight: '60vh' }}>
+      <div className="text-center max-w-md px-8">
+        <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/25 flex items-center justify-center mx-auto mb-6">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" className="text-red-400">
+            <path d="M11 2l9 17H2L11 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+            <path d="M11 8.5v5M11 16.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </div>
+        <h2 className="font-display font-black text-white text-xl mb-2 tracking-tight">Plan generation failed</h2>
+        <p className="text-body text-sm mb-6">{errorMessage || 'Something went wrong generating your recommendations.'}</p>
+        <button
+          type="button"
+          onClick={onRetry}
+          disabled={retrying}
+          className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-bold text-sm px-6 py-3 rounded-xl hover:bg-accent-bright transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {retrying && <span className="w-4 h-4 rounded-full border-2 border-obsidian/30 border-t-obsidian animate-spin" />}
+          Try Again
+        </button>
+        <div className="mt-5">
+          <Link to="/builds" className="text-muted text-sm hover:text-body transition-colors">← Back to Garage</Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ─── Main page ─── */
 export default function BuildDetail() {
-  const { id }                  = useParams()
-  const { plan, loading, error } = useBuildPlan(id)
+  const { id } = useParams()
+  const { status, retry } = useBuildStatus(id)
+  const [retrying, setRetrying] = useState(false)
+  const [build, setBuild] = useState(null)
   const [viewing3D, setViewing3D] = useState(null)
+
+  // Fetched once for vehicle context during the generating state —
+  // useBuildStatus intentionally only returns the lightweight status shape,
+  // not the full build, to keep poll payloads small.
+  useEffect(() => {
+    if (!id) return
+    buildsApi.get(id).then(setBuild).catch(() => {})
+  }, [id])
+
+  const isReady = status?.status === 'ready'
+  const { plan, loading, error } = useBuildPlan(id, { enabled: isReady })
+
+  const handleRetry = async () => {
+    setRetrying(true)
+    await retry()
+    setRetrying(false)
+  }
+
+  if (!status || status.status === 'pending' || status.status === 'generating') {
+    return <GeneratingState vehicleLabel={build ? `${build.year} ${build.make} ${build.model}` : ''} />
+  }
+
+  if (status.status === 'failed') {
+    return <FailedState errorMessage={status.error_message} onRetry={handleRetry} retrying={retrying} />
+  }
 
   if (loading) return (
     <div className="page-shell flex items-center justify-center gap-4">
@@ -369,8 +464,19 @@ export default function BuildDetail() {
               <div>
                 <div className="font-display font-semibold text-white text-sm">Performance Advisor</div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-stage-1" />
-                  <span className="font-mono text-xs text-muted">AI analysis complete</span>
+                  {plan.used_mock_fallback ? (
+                    <>
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                      <span className="font-mono text-xs text-amber-400" title="The AI was unavailable when this build was generated, so this plan came from our quick-match engine instead.">
+                        Generated with quick-match engine
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-1.5 h-1.5 rounded-full bg-stage-1" />
+                      <span className="font-mono text-xs text-muted">AI analysis complete</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

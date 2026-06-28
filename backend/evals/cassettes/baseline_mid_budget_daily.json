@@ -1,0 +1,165 @@
+{
+  "case_id": "baseline_mid_budget_daily",
+  "model": "claude-sonnet-4-6",
+  "recorded_at": "2026-06-28T22:41:36Z",
+  "tool_input": {
+    "recommendations": [
+      {
+        "name": "COBB Accessport V3 ECU Tune",
+        "category": "performance",
+        "description": "The cornerstone of any STI build. The COBB Accessport V3 is the industry-standard handheld ECU flashing device for the FA20/EJ257 platform. Flash an OTS (Off-The-Shelf) Stage 1 map to optimize fuel, ignition timing, and boost for significant gains in power and torque. Acts as a prerequisite for nearly all other performance mods.",
+        "price_min": 700.0,
+        "price_max": 750.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 1,
+        "warnings": [],
+        "brand_tips": [
+          "COBB Tuning \u2014 the gold standard for Subaru ECU management",
+          "Consider a local pro tune via COBB Protuner for maximum gains (~$400\u2013$600 extra)"
+        ]
+      },
+      {
+        "name": "Mishimoto Cold Side Intercooler Piping Kit",
+        "category": "performance",
+        "description": "Replace the factory plastic and silicone intercooler piping with Mishimoto's aluminium cold-side kit for the 2015\u20132021 WRX STI. Reduces heat soak, improves charge air flow, and eliminates the risk of factory boost tube blow-offs under hard driving. A foundational reliability and performance upgrade.",
+        "price_min": 200.0,
+        "price_max": 280.0,
+        "difficulty": "medium",
+        "stage": 1,
+        "priority": 2,
+        "warnings": [],
+        "brand_tips": [
+          "Mishimoto MMICP-STI-15",
+          "IAG Performance also offers a highly regarded equivalent kit"
+        ]
+      },
+      {
+        "name": "COBB SF Intake / Perrin Cold Air Intake",
+        "category": "performance",
+        "description": "An open-element performance intake replaces the restrictive OEM airbox, improving throttle response and adding a modest power gain when paired with an Accessport tune. The COBB SF Intake or Perrin Cold Air Intake are specifically engineered for the 2018\u20132021 STI's FA20DIT / EJ257 engine bay layout.",
+        "price_min": 300.0,
+        "price_max": 400.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 3,
+        "warnings": [],
+        "brand_tips": [
+          "COBB SF Intake (part #715500)",
+          "Perrin Performance PSP-INT-322BK",
+          "K&N 69-8516TS is a budget-friendly alternative"
+        ]
+      },
+      {
+        "name": "Mishimoto Performance Aluminum Radiator",
+        "category": "reliability",
+        "description": "The 2020 STI's EJ257 boxer engine runs warm under spirited street driving. Mishimoto's direct-fit all-aluminum radiator for the 2015+ STI offers a massive thermal capacity upgrade, reducing coolant temps under hard use and protecting the engine long-term. Essential for a daily-driven performance build.",
+        "price_min": 450.0,
+        "price_max": 550.0,
+        "difficulty": "medium",
+        "stage": 1,
+        "priority": 4,
+        "warnings": [],
+        "brand_tips": [
+          "Mishimoto MMRAD-STI-08 (fits 2015+ STI)",
+          "Radium Engineering is another premium option"
+        ]
+      },
+      {
+        "name": "KW Variant 3 Coilover Suspension Kit",
+        "category": "handling",
+        "description": "The KW V3 is a dual-adjustable (rebound and compression independently) coilover kit with a proven street/track pedigree, specifically valved for the 2015\u20132021 WRX STI. Lowers the car 0.6\u20131.4 inches, dramatically sharpens turn-in, reduces body roll, and is compliant enough for daily driving. The best single handling upgrade available for this platform.",
+        "price_min": 1800.0,
+        "price_max": 2200.0,
+        "difficulty": "hard",
+        "stage": 2,
+        "priority": 5,
+        "warnings": [],
+        "brand_tips": [
+          "KW Variant 3 #35258004",
+          "BC Racing BR Series is a more budget-conscious alternative (~$900)"
+        ]
+      },
+      {
+        "name": "Whiteline Rear Sway Bar Upgrade (22mm)",
+        "category": "handling",
+        "description": "The stock STI rear sway bar is already decent, but Whiteline's adjustable 22mm heavy-duty rear sway bar significantly reduces oversteer tendency and tightens up cornering balance for street driving. Bolt-on installation with no cutting required. Works synergistically with coilovers.",
+        "price_min": 220.0,
+        "price_max": 280.0,
+        "difficulty": "easy",
+        "stage": 2,
+        "priority": 6,
+        "warnings": [],
+        "brand_tips": [
+          "Whiteline BSR54XZ (22mm adjustable)",
+          "Perrin Performance also offers a comparable adjustable bar"
+        ]
+      },
+      {
+        "name": "Whiteline Front & Rear Endlinks",
+        "category": "handling",
+        "description": "Upgraded adjustable end links complement any sway bar upgrade, eliminating slop and bind in the suspension geometry. Whiteline's heavy-duty adjustable endlinks allow proper preload setting with the new sway bar and coilovers, ensuring precise and predictable handling on the street.",
+        "price_min": 150.0,
+        "price_max": 220.0,
+        "difficulty": "easy",
+        "stage": 2,
+        "priority": 7,
+        "warnings": [],
+        "brand_tips": [
+          "Whiteline W23170 (front) + W23172 (rear)",
+          "Perrin Performance endlinks are a solid alternative"
+        ]
+      },
+      {
+        "name": "Stoptech Sport Brake Pads (Front & Rear)",
+        "category": "handling",
+        "description": "Upgraded brake pads are essential when increasing power and improving chassis capability on a daily driver. Stoptech Sport pads offer dramatically improved bite and fade resistance versus OEM pads, while remaining quiet and street-friendly enough for daily use. A must-have safety-first upgrade.",
+        "price_min": 150.0,
+        "price_max": 200.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 8,
+        "warnings": [],
+        "brand_tips": [
+          "Stoptech 309 series for street/sport",
+          "Hawk HPS or HPS 5.0 are equally popular for this platform",
+          "Brembo is OEM supplier \u2014 genuine Brembo pads are also excellent"
+        ]
+      },
+      {
+        "name": "Kartboy Short Throw Shifter Kit",
+        "category": "performance",
+        "description": "The STI's 6-speed transmission has a notoriously long and vague stock throw. The Kartboy short throw shifter reduces shift throw by ~35%, with a solid-feel positive gate. Includes bushings and a shift stop for a completely transformed driving feel \u2014 ideal for spirited street driving. Direct bolt-on, no cutting or welding.",
+        "price_min": 200.0,
+        "price_max": 280.0,
+        "difficulty": "medium",
+        "stage": 1,
+        "priority": 9,
+        "warnings": [],
+        "brand_tips": [
+          "Kartboy KB-006 (most popular STI STS kit)",
+          "Perrin PSP-DRV-101 is a direct competitor at a similar price"
+        ]
+      },
+      {
+        "name": "Perrin Performance Pitch Stop Mount (Transmission Mount Insert)",
+        "category": "handling",
+        "description": "The factory transmission pitch stop mount is filled with soft rubber that allows significant drivetrain movement under acceleration and braking, causing imprecise throttle response and wheel hop. Perrin's billet aluminum replacement with 70A polyurethane bushing dramatically tightens drivetrain feel and reduces torque steer on aggressive street launches \u2014 without being too harsh for daily driving.",
+        "price_min": 130.0,
+        "price_max": 160.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 10,
+        "warnings": [],
+        "brand_tips": [
+          "Perrin PSP-DRV-102RD",
+          "IAG Performance also makes an excellent equivalent",
+          "Avoid 95A hardness for a daily driver \u2014 stick with 70A"
+        ]
+      }
+    ]
+  },
+  "input_tokens": 1280,
+  "output_tokens": 1853,
+  "latency_ms": 39755.4
+}

@@ -1,0 +1,169 @@
+{
+  "case_id": "high_budget_advanced_track",
+  "model": "claude-sonnet-4-6",
+  "recorded_at": "2026-06-28T22:44:04Z",
+  "tool_input": {
+    "recommendations": [
+      {
+        "name": "Michelin Pilot Sport Cup 2 R Track Tires (Front + Rear Set)",
+        "category": "handling",
+        "description": "The Cup 2 R is the gold standard for track-day grip on the C8 Z06. Sized 275/30ZR20 front and 345/25ZR21 rear to match OEM wheel specs. Offers dramatically improved cornering grip, braking distances, and lap time consistency over the stock Michelin Pilot Sport 4S. Essential first purchase for any Z06 track build.",
+        "price_min": 2200.0,
+        "price_max": 2800.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 1,
+        "warnings": [],
+        "brand_tips": [
+          "Michelin Pilot Sport Cup 2 R",
+          "Pirelli P Zero Trofeo R (alternative)"
+        ]
+      },
+      {
+        "name": "Brembo GT Big Brake Kit \u2013 Front 6-Piston / Rear 4-Piston",
+        "category": "handling",
+        "description": "The Z06's stock Brembo brakes are capable but fade under repeated hard lapping. The Brembo GT BBK for the C8 Z06 upgrades to 15.0\" front 6-piston and 14.0\" rear 4-piston slotted rotors with high-temp calipers. Eliminates brake fade during long track sessions and dramatically improves pedal feel and modulation under threshold braking.",
+        "price_min": 5500.0,
+        "price_max": 7000.0,
+        "difficulty": "medium",
+        "stage": 1,
+        "priority": 2,
+        "warnings": [],
+        "brand_tips": [
+          "Brembo GT Series",
+          "AP Racing Pro5000R (alternative club-spec option)"
+        ]
+      },
+      {
+        "name": "KW Clubsport 3-Way Coilover Kit",
+        "category": "handling",
+        "description": "The KW Clubsport 3-Way is purpose-built for track use on the C8 platform. Provides independent high-speed, low-speed compression and rebound damping adjustment. Allows precise corner weighting, roll stiffness tuning, and ride-height adjustment for front/rear aero balance. Replaces the Magnetic Ride Control shocks with motorsport-grade internals while retaining usable driveability for trailering to events.",
+        "price_min": 4800.0,
+        "price_max": 5800.0,
+        "difficulty": "hard",
+        "stage": 1,
+        "priority": 3,
+        "warnings": [],
+        "brand_tips": [
+          "KW Clubsport 3-Way",
+          "\u00d6hlins Road & Track TTX (premium alternative)"
+        ]
+      },
+      {
+        "name": "Halltech / Vararam Cold Air Intake System",
+        "category": "performance",
+        "description": "Purpose-built high-flow intake for the LT6 5.5L flat-plane-crank V8. Replaces the restrictive OEM airbox with a large-diameter mandrel-bent tube and high-flow filter, reducing inlet air temperatures and increasing airflow volume. Pairs well with an ECU tune for measurable top-end power gains (8\u201315 hp range) given the LT6's naturally aspirated, free-revving character.",
+        "price_min": 650.0,
+        "price_max": 950.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 4,
+        "warnings": [],
+        "brand_tips": [
+          "Halltech Killer Bee",
+          "Vararam VR-Z06",
+          "K&N 69-Series (budget option)"
+        ]
+      },
+      {
+        "name": "Borla ATAK Cat-Back Exhaust System",
+        "category": "performance",
+        "description": "The Borla ATAK for the C8 Z06 is a direct-fit cat-back that maximizes the LT6's naturally aspirated exhaust note \u2014 widely regarded as one of the greatest-sounding production engines ever made. Features larger-diameter T304 stainless tubing for improved exhaust flow, reduced backpressure, and a dramatic, race-derived sound character. Adds 10\u201318 rwhp at peak RPM without sacrificing torque at lower revs.",
+        "price_min": 2800.0,
+        "price_max": 3400.0,
+        "difficulty": "medium",
+        "stage": 1,
+        "priority": 5,
+        "warnings": [],
+        "brand_tips": [
+          "Borla ATAK",
+          "Corsa Extreme",
+          "Kooks Long Tube Headers (stage 2 upgrade path)"
+        ]
+      },
+      {
+        "name": "GM / Pfadt Performance Front & Rear Sway Bar Upgrade Kit",
+        "category": "handling",
+        "description": "Uprated hollow front and rear sway bars engineered specifically for the C8 Z06 chassis. Reduces body roll and improves the car's cornering balance, addressing the stock setup's slight tendency toward understeer at the limit. Adjustable end-link positions allow tuning of front/rear roll couple distribution. A cost-effective handling upgrade with very high return on investment for lap times.",
+        "price_min": 900.0,
+        "price_max": 1300.0,
+        "difficulty": "medium",
+        "stage": 1,
+        "priority": 6,
+        "warnings": [],
+        "brand_tips": [
+          "Pfadt Racing",
+          "Eibach Anti-Roll Kit for C8"
+        ]
+      },
+      {
+        "name": "ECU Performance Tune (HPE / Katech / Lingenfelter)",
+        "category": "performance",
+        "description": "A professional dyno tune recalibrates the LT6's fuel maps, ignition timing, rev limiter, and throttle response to complement the intake and exhaust mods. Given the Z06's flat-plane crank architecture and aggressive factory calibration, a skilled tuner can safely extract an additional 20\u201330 hp while optimizing the powerband for track use (prioritizing top-end breathing). Also enables removal of speed limiters for open-track events.",
+        "price_min": 1200.0,
+        "price_max": 1800.0,
+        "difficulty": "medium",
+        "stage": 2,
+        "priority": 7,
+        "warnings": [],
+        "brand_tips": [
+          "Katech Performance",
+          "Lingenfelter Performance Engineering",
+          "HPE (Hennessey)",
+          "EFI Live / HP Tuners platform"
+        ]
+      },
+      {
+        "name": "Kooks Long Tube Headers with High-Flow Catalytic Converters",
+        "category": "performance",
+        "description": "Kooks 1-7/8\" long tube headers are one of the most impactful naturally aspirated power upgrades available for the LT6. Significantly reduces exhaust backpressure across the entire RPM range, with the biggest gains above 6,000 RPM where the flat-plane crank truly breathes. Paired with high-flow 200-cell cats to maintain some emissions compliance while freeing up 25\u201340 rwhp when combined with a supporting tune.",
+        "price_min": 2800.0,
+        "price_max": 3500.0,
+        "difficulty": "hard",
+        "stage": 2,
+        "priority": 8,
+        "warnings": [],
+        "brand_tips": [
+          "Kooks Custom Headers",
+          "American Racing Headers (ARH)",
+          "Stainless Works"
+        ]
+      },
+      {
+        "name": "Forgeline GA1R or HRE FF21 Forged Aluminum Wheels",
+        "category": "handling",
+        "description": "Swapping the OEM cast aluminum wheels for a set of forged monoblock or flow-formed wheels dramatically reduces unsprung and rotating mass. The Z06's stock wheels weigh approximately 30\u201332 lbs each; forged alternatives come in at 18\u201322 lbs. Lighter wheels improve acceleration, braking, and steering response. A dedicated track wheel set also lets you run Cup 2 R tires while keeping street tires on OEM wheels.",
+        "price_min": 3800.0,
+        "price_max": 5200.0,
+        "difficulty": "easy",
+        "stage": 2,
+        "priority": 9,
+        "warnings": [],
+        "brand_tips": [
+          "Forgeline GA1R",
+          "HRE FF21",
+          "Apex SM-10 (budget forged option)"
+        ]
+      },
+      {
+        "name": "Mishimoto Performance Radiator & Coolant Additive Kit",
+        "category": "performance",
+        "description": "The LT6 generates significant heat under sustained track use and can trigger thermal protection modes that derate power during extended sessions. A Mishimoto direct-fit aluminum racing radiator increases coolant capacity and heat rejection efficiency. Combined with a Water Wetter or Evans NPG coolant additive, this keeps the LT6 operating in its optimal temperature window for entire race sessions without power-robbing thermal cutbacks.",
+        "price_min": 650.0,
+        "price_max": 900.0,
+        "difficulty": "medium",
+        "stage": 2,
+        "priority": 10,
+        "warnings": [],
+        "brand_tips": [
+          "Mishimoto Performance Aluminum Radiator",
+          "Evans NPG Waterless Coolant",
+          "Red Line Water Wetter"
+        ]
+      }
+    ]
+  },
+  "input_tokens": 1286,
+  "output_tokens": 2046,
+  "latency_ms": 43423.9
+}

@@ -33,10 +33,16 @@ api.interceptors.response.use(
 )
 
 export const buildsApi = {
-  create:          (data) => api.post('/api/builds/', data, { timeout: 90000 }),
+  // create now returns near-instantly (status='pending') — recommendation
+  // generation happens async on a worker. No more 90s timeout override;
+  // the old one existed specifically to survive the blocking Claude call
+  // this endpoint used to make inline.
+  create:          (data) => api.post('/api/builds/', data),
   list:            ()     => api.get('/api/builds/'),
   get:             (id)   => api.get(`/api/builds/${id}`),
+  getStatus:       (id)   => api.get(`/api/builds/${id}/status`),
   getPlan:         (id)   => api.get(`/api/builds/${id}/plan`),
+  retry:           (id)   => api.post(`/api/builds/${id}/retry`),
   delete:          (id)   => api.delete(`/api/builds/${id}`),
   toggleFavourite: (id)   => api.patch(`/api/builds/${id}/favourite`),
   stats:           ()     => api.get('/api/builds/stats'),
