@@ -1,0 +1,73 @@
+name: AI Eval Suite
+
+# Two genuinely different jobs, not one job with a flag:
+#
+# eval-replay runs on every PR that touches AI-relevant code. It's fast, free,
+# and deterministic — it replays recorded cassettes through the real
+# validation/business-rule code path, so it catches regressions in checks.py,
+# ai_service.py's validation, or the Pydantic schema, without spending a
+# token or depending on the Anthropic API being reachable from CI.
+#
+# eval-live actually calls the model. It costs money and can be flaky (model
+# behavior drifts, the API can be slow), so it does NOT gate every PR — it
+# runs nightly and on demand, and reports drift rather than blocking merges.
+# This mirrors how most teams treat live-model evals in practice: a quality
+# signal you watch, not a hard gate on every commit.
+
+on:
+  pull_request:
+    paths:
+      - "backend/services/ai_service.py"
+      - "backend/models/recommendation.py"
+      - "backend/evals/**"
+  schedule:
+    - cron: "0 7 * * *"   # nightly, 07:00 UTC
+  workflow_dispatch: {}    # manual trigger button in the Actions tab
+
+jobs:
+  eval-replay:
+    name: Replay (cassettes, no API cost)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run eval suite against recorded cassettes
+        run: python -m evals.cli run --mode replay --output evals/reports/replay_latest.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-report-replay
+          path: backend/evals/reports/replay_latest.json
+
+  eval-live:
+    name: Live (real API calls, scheduled/manual only)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run eval suite live, including LLM-judge plausibility checks
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python -m evals.cli run --mode live --judge --output evals/reports/live_latest.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-report-live
+          path: backend/evals/reports/live_latest.json
+      # A real setup would post pass-rate/cost deltas to Slack here on
+      # failure or significant drift. Out of scope for this repo, but this is
+      # the seam where that hook would go.

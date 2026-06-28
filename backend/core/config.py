@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     # Database
     database_url: str = Field(default="sqlite:///./carmods.db", alias="DATABASE_URL")
 
+    # Job queue — backs the async recommendation-generation worker
+    redis_url: str = Field(default="redis://localhost:6379", alias="REDIS_URL")
+
     # AI — set one of these to enable real AI responses
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4o", alias="OPENAI_MODEL")

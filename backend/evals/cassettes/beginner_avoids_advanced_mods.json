@@ -1,0 +1,132 @@
+{
+  "case_id": "beginner_avoids_advanced_mods",
+  "model": "claude-sonnet-4-6",
+  "recorded_at": "2026-06-28T22:43:21Z",
+  "tool_input": {
+    "recommendations": [
+      {
+        "name": "Cold Air Intake (K&N 69-Series Typhoon)",
+        "category": "performance",
+        "description": "A direct bolt-on cold air intake for the 2015 Honda Civic Si's K24Z7 engine. Replaces the restrictive factory airbox with a high-flow cone filter and heat shield, improving throttle response and adding a sporty induction sound. Dyno-proven gains of 5\u20138 whp on this platform.",
+        "price_min": 250.0,
+        "price_max": 320.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 1,
+        "warnings": [],
+        "brand_tips": [
+          "K&N 69-3531TS",
+          "Injen SP1476P (short ram alternative)"
+        ]
+      },
+      {
+        "name": "Hondata FlashPro ECU Tune",
+        "category": "performance",
+        "description": "The Hondata FlashPro is the gold-standard ECU tuner for the 9th-gen Civic Si. It unlocks a base OTS (off-the-shelf) map that optimizes fuel trims, VTEC crossover point, and ignition timing to work with your intake. Even on a stock map, this device enables full data logging and is essential before any further power mods.",
+        "price_min": 695.0,
+        "price_max": 750.0,
+        "difficulty": "medium",
+        "stage": 1,
+        "priority": 2,
+        "warnings": [],
+        "brand_tips": [
+          "Hondata FlashPro (P/N 01-10-0101)"
+        ]
+      },
+      {
+        "name": "Throttle Body Spacer",
+        "category": "performance",
+        "description": "A simple bolt-on aluminum spacer installed between the throttle body and intake manifold on the K24Z7. Creates a slight plenum effect that can improve low-end torque by 3\u20135 lb-ft with minimal effort. Pairs well with the cold air intake.",
+        "price_min": 40.0,
+        "price_max": 60.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 3,
+        "warnings": [],
+        "brand_tips": [
+          "Skunk2 Racing Throttle Body Spacer for 9th Gen Civic Si"
+        ]
+      },
+      {
+        "name": "Sway Bar End Links (Hardened Polyurethane)",
+        "category": "handling",
+        "description": "Replacing the worn OEM rubber end links with upgraded hardened polyurethane or solid-steel end links dramatically reduces body roll and improves steering feedback on the 9th Gen Civic Si. These are easy to install and provide an immediate, noticeable improvement in cornering feel.",
+        "price_min": 60.0,
+        "price_max": 90.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 4,
+        "warnings": [],
+        "brand_tips": [
+          "Moog K750339",
+          "Whiteline KLC136"
+        ]
+      },
+      {
+        "name": "Front & Rear Sway Bar Upgrade",
+        "category": "handling",
+        "description": "A front 27mm solid front sway bar and a rear 19mm rear sway bar set for the 9th Gen Civic Si. These are a direct bolt-on upgrade that significantly reduce understeer \u2014 the Civic Si's biggest handling weakness from the factory. A must-do mod before suspension springs.",
+        "price_min": 180.0,
+        "price_max": 250.0,
+        "difficulty": "medium",
+        "stage": 1,
+        "priority": 5,
+        "warnings": [],
+        "brand_tips": [
+          "Whiteline BHF37Z (front)",
+          "Whiteline BHR75Z (rear)",
+          "Eibach Anti-Roll Kit"
+        ]
+      },
+      {
+        "name": "Lowering Springs",
+        "category": "handling",
+        "description": "A set of progressive-rate lowering springs drops the 9th Gen Civic Si by approximately 1.2\u20131.5 inches front and rear. This lowers the center of gravity, reduces body roll, and sharpens cornering response while retaining a compliant daily-driver ride with the stock dampers. Always pair with an alignment after install.",
+        "price_min": 160.0,
+        "price_max": 250.0,
+        "difficulty": "medium",
+        "stage": 2,
+        "priority": 6,
+        "warnings": [],
+        "brand_tips": [
+          "Eibach Pro-Kit E10-40-009-02-22",
+          "H&R Sport Springs 51672",
+          "Tein S.Tech"
+        ]
+      },
+      {
+        "name": "Strut Tower Brace (Front)",
+        "category": "handling",
+        "description": "A bolt-on aluminum front strut tower brace for the 9th Gen Civic Si chassis ties the two front strut towers together, reducing chassis flex during hard cornering and improving steering precision. Highly recommended pairing with new sway bars.",
+        "price_min": 80.0,
+        "price_max": 130.0,
+        "difficulty": "easy",
+        "stage": 2,
+        "priority": 7,
+        "warnings": [],
+        "brand_tips": [
+          "Skunk2 Racing 341-05-0560",
+          "Ultra Racing FHB-H-1780"
+        ]
+      },
+      {
+        "name": "Stainless Steel Braided Brake Lines",
+        "category": "handling",
+        "description": "OEM rubber brake lines expand slightly under hard braking, causing a mushy pedal feel. Stainless braided lines deliver a firmer, more consistent pedal and improved modulation \u2014 critical for a daily driver used in spirited driving. A foundational safety upgrade for any beginner build.",
+        "price_min": 60.0,
+        "price_max": 85.0,
+        "difficulty": "easy",
+        "stage": 2,
+        "priority": 8,
+        "warnings": [],
+        "brand_tips": [
+          "Goodridge G-Stop Kit for 9th Gen Civic Si",
+          "StopTech 950.40031"
+        ]
+      }
+    ]
+  },
+  "input_tokens": 1274,
+  "output_tokens": 1192,
+  "latency_ms": 25918.3
+}

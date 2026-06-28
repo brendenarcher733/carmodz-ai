@@ -1,15 +1,22 @@
 # services/build_service.py
 # Business logic for build CRUD operations
 
+import logging
+
 from sqlalchemy.orm import Session
 from models.build import Build, BuildCreate
 from models.recommendation import Recommendation, ModRecommendation
-from services.mock_ai import generate_recommendations as mock_recommendations, build_mod_plan
-from services.ai_service import generate_build_recommendations
+from services.mock_ai import build_mod_plan
 from fastapi import HTTPException
+
+logger = logging.getLogger(__name__)
 
 
 def create_build(db: Session, data: BuildCreate, user_id: int) -> Build:
+    """Creates the build row only. Recommendation generation is no longer
+    inline here — it used to block this call for 25-45s on a Claude
+    round-trip. The router enqueues the async job (workers/recommendation_worker.py)
+    right after this returns and stores the resulting job_id on the build."""
     build = Build(
         user_id=user_id,
         title=data.title,
@@ -22,34 +29,27 @@ def create_build(db: Session, data: BuildCreate, user_id: int) -> Build:
         categories=data.categories,
         is_daily=int(data.is_daily),
         notes=data.notes,
+        status="pending",
     )
     db.add(build)
     db.commit()
     db.refresh(build)
+    return build
 
-    # Auto-generate recommendations — Claude if key set, mock fallback
-    ai_mods = generate_build_recommendations(data)
-    if ai_mods is not None:
-        mods = [ModRecommendation(**m) for m in ai_mods]
-    else:
-        mods = mock_recommendations(data)
 
-    for mod in mods:
-        rec = Recommendation(
-            build_id=build.id,
-            name=mod.name,
-            category=mod.category,
-            description=mod.description,
-            price_min=mod.price_min,
-            price_max=mod.price_max,
-            difficulty=mod.difficulty,
-            stage=mod.stage,
-            priority=mod.priority,
-            warnings=mod.warnings,
-            brand_tips=mod.brand_tips,
+def retry_build_generation(db: Session, build_id: int, user_id: int) -> Build:
+    """Resets a failed build back to pending so the router can enqueue a
+    fresh job. Only meaningful from status='failed' — retrying a build
+    that's already 'ready' (even via mock fallback) would silently throw
+    away its existing, valid recommendations for no reason."""
+    build = get_build(db, build_id, user_id)
+    if build.status not in ("failed",):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Build {build_id} is '{build.status}', not 'failed' — nothing to retry",
         )
-        db.add(rec)
-
+    build.status = "pending"
+    build.error_message = None
     db.commit()
     db.refresh(build)
     return build
@@ -126,9 +126,22 @@ def delete_build(db: Session, build_id: int, user_id: int) -> None:
 
 def get_build_plan(db: Session, build_id: int, user_id: int):
     build = get_build(db, build_id, user_id)
-    recs = db.query(Recommendation).filter(Recommendation.build_id == build_id).all()
 
-    from models.recommendation import ModRecommendation
+    if build.status in ("pending", "generating"):
+        # 425 Too Early — the right status code for "this isn't a 404, it's
+        # not a 500, the resource is real and just isn't ready yet; the
+        # client should retry." That's exactly what the frontend's poller does.
+        raise HTTPException(
+            status_code=425,
+            detail=f"Build {build_id} recommendations are still {build.status} — poll /status and retry",
+        )
+    if build.status == "failed":
+        raise HTTPException(
+            status_code=500,
+            detail=build.error_message or f"Build {build_id} generation failed",
+        )
+
+    recs = db.query(Recommendation).filter(Recommendation.build_id == build_id).all()
     mods = [
         ModRecommendation(
             name=r.name, category=r.category, description=r.description,
@@ -139,11 +152,12 @@ def get_build_plan(db: Session, build_id: int, user_id: int):
         for r in recs
     ]
 
-    from models.build import BuildCreate
     build_data = BuildCreate(
         title=build.title, year=build.year, make=build.make, model=build.model,
         budget=build.budget, goal=build.goal, experience=build.experience,
         categories=build.categories or [], is_daily=bool(build.is_daily), notes=build.notes or "",
     )
 
-    return build_mod_plan(build_id, build_data, mods)
+    plan = build_mod_plan(build_id, build_data, mods)
+    plan.used_mock_fallback = build.used_mock_fallback
+    return plan

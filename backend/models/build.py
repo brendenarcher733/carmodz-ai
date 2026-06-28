@@ -30,6 +30,17 @@ class Build(Base):
     created_at    = Column(DateTime, default=datetime.utcnow)
     updated_at    = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Async recommendation-generation job tracking. status_updated_at is set
+    # explicitly by application code every time `status` changes — it
+    # deliberately does NOT use SQLAlchemy's onupdate=, which would bump it
+    # on *any* row update (e.g. toggling is_favourite) and corrupt the cron
+    # reaper's "how long has this actually been stuck in generating" check.
+    status            = Column(String(20), default="pending")  # pending|generating|ready|failed
+    job_id            = Column(String(64), nullable=True)
+    used_mock_fallback = Column(Boolean, default=False)
+    error_message     = Column(Text, nullable=True)
+    status_updated_at = Column(DateTime, default=datetime.utcnow)
+
     # One build → many recommendations
     recommendations = relationship("Recommendation", back_populates="build",
                                    cascade="all, delete-orphan")
@@ -84,6 +95,28 @@ class BuildResponse(BaseModel):
     notes:        str
     created_at:   datetime
     updated_at:   datetime
+
+    # Job tracking — lets the frontend know whether recommendations are ready
+    # to fetch yet, and whether they came from the real AI or the mock
+    # fallback (used_mock_fallback exists so a degraded result is disclosed,
+    # never silently passed off as a normal AI-generated plan).
+    status:             str = "ready"
+    job_id:             Optional[str] = None
+    used_mock_fallback: bool = False
+    error_message:      Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class BuildStatusResponse(BaseModel):
+    """Lightweight payload for polling — avoids shipping the full build
+    (categories, notes, etc.) on every 1.5s poll tick."""
+    id:                 int
+    status:             str
+    job_id:             Optional[str] = None
+    used_mock_fallback: bool = False
+    error_message:      Optional[str] = None
 
     class Config:
         from_attributes = True

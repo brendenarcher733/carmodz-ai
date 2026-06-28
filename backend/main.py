@@ -5,18 +5,22 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from core.database import init_db
+from core.redis_pool import get_redis_pool
 from routers import builds, advisor, auth
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize DB tables on startup."""
+    """Initialize DB tables + the shared arq Redis pool on startup."""
     init_db()
+    app.state.redis_pool = await get_redis_pool()
     print(f"✅ CarMods AI backend started [{settings.environment}]")
     print(f"   AI Provider: {settings.ai_provider}")
+    print(f"   Redis: {settings.redis_url}")
     if not settings.is_production:
         print(f"   Docs: http://localhost:8000/docs")
     yield
+    await app.state.redis_pool.aclose()
 
 
 app = FastAPI(

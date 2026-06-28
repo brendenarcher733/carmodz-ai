@@ -1,0 +1,117 @@
+{
+  "case_id": "duplicate_pressure_narrow_scope",
+  "model": "claude-sonnet-4-6",
+  "recorded_at": "2026-06-28T22:46:59Z",
+  "tool_input": {
+    "recommendations": [
+      {
+        "name": "MX-5 ND Axle-Back Exhaust (Borla S-Type)",
+        "category": "sound",
+        "description": "Borla's S-Type axle-back exhaust for the ND MX-5 delivers a throaty, sporty exhaust note without drone at highway speeds. Replaces only the rear muffler section, making it one of the easiest bolt-on sound upgrades available. Ideal for a daily driver who wants noticeable but not obnoxious sound.",
+        "price_min": 350.0,
+        "price_max": 450.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 1,
+        "warnings": [],
+        "brand_tips": [
+          "Borla S-Type Axle-Back (#11916)",
+          "Racing Beat Exhaust for ND Miata"
+        ]
+      },
+      {
+        "name": "Cold Air / Short Ram Intake (K&N 69-Series)",
+        "category": "sound",
+        "description": "K&N's 69-Series Typhoon short ram intake replaces the stock airbox on the 2017 MX-5. Beyond a small performance boost, it adds a satisfying induction growl and whoosh sound under acceleration that complements an exhaust upgrade nicely. Easy drop-in installation with no tuning required.",
+        "price_min": 100.0,
+        "price_max": 160.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 2,
+        "warnings": [],
+        "brand_tips": [
+          "K&N 69-2536TTK for ND Miata",
+          "Mishimoto Performance Intake for ND MX-5"
+        ]
+      },
+      {
+        "name": "Resonator Delete (OEM Resonator Bypass Pipe)",
+        "category": "sound",
+        "description": "Replacing the mid-pipe resonator with a straight-through or high-flow bypass pipe frees up exhaust tone in the mid-range frequencies, giving the car a more characterful sound throughout the RPM range. Best paired with an axle-back for a fuller, richer note. Clamps directly onto stock mid-pipe.",
+        "price_min": 60.0,
+        "price_max": 100.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 3,
+        "warnings": [],
+        "brand_tips": [
+          "MazdaSpeed / OEM-size resonator delete pipes",
+          "DIY custom pipe from exhaust shop ($40\u201360)"
+        ]
+      },
+      {
+        "name": "Plasti-Dip Engine Bay Sound Dampening (Firewall)",
+        "category": "sound",
+        "description": "Applying Dynamat or Noico self-adhesive sound-deadening mat to the firewall and transmission tunnel reduces road and mechanical noise intrusion into the cabin, making the exhaust and intake sounds you've added the dominant audio experience \u2014 a great complement to the other mods.",
+        "price_min": 40.0,
+        "price_max": 70.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 4,
+        "warnings": [],
+        "brand_tips": [
+          "Noico 80 mil Sound Deadener (50 sq ft roll)",
+          "Dynamat Xtreme Door Kit"
+        ]
+      },
+      {
+        "name": "Chassis Brace / Strut Tower Brace (for better acoustic feedback)",
+        "category": "sound",
+        "description": "A front strut tower brace on the ND MX-5 tightens up chassis flex, which subtly improves the mechanical 'feel and sound' feedback through the car \u2014 steering inputs and engine sounds translate more crisply. Brands like Mazdaspeed and Mishimoto make direct bolt-on fitments.",
+        "price_min": 80.0,
+        "price_max": 130.0,
+        "difficulty": "easy",
+        "stage": 2,
+        "priority": 5,
+        "warnings": [],
+        "brand_tips": [
+          "Mishimoto Strut Tower Brace MMSTB-MX5ND",
+          "Flyin' Miata ND Strut Bar"
+        ]
+      },
+      {
+        "name": "Sport Horn Upgrade",
+        "category": "sound",
+        "description": "Swap the weak stock Miata horn for a louder, higher-quality dual-tone Hella or Fiamm sport horn. A fun, easy upgrade that takes under 30 minutes and makes the car feel more complete. Plug-and-play with the stock wiring harness.",
+        "price_min": 20.0,
+        "price_max": 35.0,
+        "difficulty": "easy",
+        "stage": 1,
+        "priority": 6,
+        "warnings": [],
+        "brand_tips": [
+          "Hella Supertone Horn Kit (003399801)",
+          "FIAMM Sport Horn"
+        ]
+      },
+      {
+        "name": "Intake Snorkel / Velocity Stack Sound Enhancer",
+        "category": "sound",
+        "description": "An aftermarket velocity stack or intake snorkel extension fitted to the airbox or K&N intake amplifies the induction roar inside the cabin on the 2017 MX-5. Some ND owners pair these with an opened-up airbox lid for a louder engine note with zero risk.",
+        "price_min": 25.0,
+        "price_max": 55.0,
+        "difficulty": "easy",
+        "stage": 2,
+        "priority": 7,
+        "warnings": [],
+        "brand_tips": [
+          "Beatrush Airbox Sound Enhancer for ND",
+          "DIY snorkel mod via Miata.net forum guides"
+        ]
+      }
+    ]
+  },
+  "input_tokens": 1282,
+  "output_tokens": 1128,
+  "latency_ms": 24542.8
+}

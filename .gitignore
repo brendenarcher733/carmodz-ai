@@ -15,3 +15,6 @@ venv/
 node_modules/
 dist/
 .DS_Store
+
+# Eval run output — cassettes/ ARE committed (they're fixtures), reports/ is not
+backend/evals/reports/*.json
