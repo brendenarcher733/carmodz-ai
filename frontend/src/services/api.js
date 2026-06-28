@@ -18,6 +18,15 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   res => res.data,
   err => {
+    // Expired/invalid token — clear local session so the UI falls back to
+    // the logged-out state instead of repeatedly hitting 401s.
+    if (err.response?.status === 401 && localStorage.getItem('cm_token')) {
+      localStorage.removeItem('cm_token')
+      localStorage.removeItem('cm_user')
+      if (!location.pathname.startsWith('/login')) {
+        location.assign('/login')
+      }
+    }
     const msg = err.response?.data?.detail || err.message || 'Network error'
     return Promise.reject(new Error(msg))
   }
