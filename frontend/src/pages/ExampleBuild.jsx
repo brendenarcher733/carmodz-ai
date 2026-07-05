@@ -96,12 +96,8 @@ function ModCard({ mod, index, vehicle, onView3D }) {
   const stage = STAGE_META[mod.stage]
   return (
     <div
-      className="animate-fade-up bg-surface rounded-2xl overflow-hidden transition-all duration-200 hover:bg-elevated"
-      style={{
-        animationDelay: `${index * 50}ms`,
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderLeft: `3px solid ${stage.color}`,
-      }}
+      className="animate-fade-up bg-surface border border-white/[0.07] rounded-2xl overflow-hidden transition-all duration-200 hover:bg-elevated"
+      style={{ animationDelay: `${index * 50}ms` }}
     >
       <div className="p-6">
         {/* Header */}
@@ -260,7 +256,6 @@ export default function ExampleBuild() {
           className="relative overflow-hidden rounded-3xl mb-8"
           style={{ background: 'linear-gradient(135deg, rgba(255,140,0,0.07) 0%, rgba(19,21,25,1) 50%)' }}
         >
-          <div className="absolute inset-0 grid-texture opacity-25 pointer-events-none" />
           <div
             className="absolute top-0 right-0 bottom-0 w-1/2 pointer-events-none"
             style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,140,0,0.05) 0%, transparent 70%)' }}
@@ -406,7 +401,6 @@ export default function ExampleBuild() {
           className="relative overflow-hidden rounded-3xl text-center px-8 py-16"
           style={{ background: 'linear-gradient(135deg, rgba(255,140,0,0.08) 0%, rgba(19,21,25,1) 60%)' }}
         >
-          <div className="absolute inset-0 grid-texture opacity-20 pointer-events-none" />
           <div className="relative z-10">
             <p className="eyebrow mb-4">Ready to build?</p>
             <h2

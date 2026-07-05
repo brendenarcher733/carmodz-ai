@@ -318,29 +318,18 @@ function BuildingOverlay({ vehicle }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-obsidian/95 backdrop-blur-xl">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,140,0,0.07) 0%, transparent 65%)' }}
-      />
       <div className="relative text-center max-w-sm px-8">
-        <div className="relative w-20 h-20 mx-auto mb-10">
-          <div className="absolute inset-0 rounded-full border border-accent/30 animate-ping" style={{ animationDuration: '2s' }} />
-          <div className="absolute inset-2 rounded-full border border-accent/20 animate-spin-slow" />
+        <div className="relative w-16 h-16 mx-auto mb-10">
+          <div className="absolute inset-0 rounded-full border-2 border-white/10 border-t-accent animate-spin" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="text-accent">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-accent">
               <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
             </svg>
           </div>
         </div>
         <h2 className="font-display font-black text-white text-2xl mb-2 tracking-tight">Building Your Garage</h2>
-        {vehicle && <p className="font-mono text-xs text-muted uppercase tracking-widest mb-5">{vehicle}</p>}
+        {vehicle && <p className="text-xs text-muted uppercase tracking-widest mb-5">{vehicle}</p>}
         <p key={idx} className="text-body text-sm leading-relaxed animate-fade-in">{LOADING_MSGS[idx]}</p>
-        <div className="flex justify-center gap-2 mt-8">
-          {[0, 1, 2].map(i => (
-            <div key={i} className="w-1.5 h-1.5 rounded-full bg-accent/40"
-              style={{ animation: `pulseDot 1.4s ease-in-out ${i * 0.2}s infinite` }} />
-          ))}
-        </div>
       </div>
     </div>
   )
@@ -359,7 +348,7 @@ function StepBar({ current }) {
               <div className={clsx(
                 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all duration-300',
                 done   && 'bg-accent text-obsidian',
-                active && 'bg-accent text-obsidian shadow-glow-sm',
+                active && 'bg-accent text-obsidian',
                 !done && !active && 'bg-surface border border-white/[0.1] text-muted',
               )}>
                 {done
@@ -577,8 +566,8 @@ function VehicleSelector({ form, set }) {
       {/* ── Confirmation chip ── */}
       {form.year && form.make && form.model && (
         <div className="mt-6 animate-fade-in">
-          <div className="inline-flex items-center gap-3 bg-accent/[0.08] border border-accent/25 rounded-2xl px-5 py-3">
-            <div className="w-2 h-2 rounded-full bg-accent animate-pulse-dot" />
+          <div className="inline-flex items-center gap-3 bg-white/[0.05] border border-white/[0.12] rounded-2xl px-5 py-3">
+            <div className="w-2 h-2 rounded-full bg-accent" />
             <span className="font-display font-bold text-white">
               {form.year} {form.make} {form.model}
             </span>
@@ -661,16 +650,7 @@ export default function Planner() {
       <div
         className="absolute top-0 inset-x-0 h-72 pointer-events-none"
         style={{
-          backgroundImage: `
-            linear-gradient(to bottom,
-              rgba(8,9,11,0.65) 0%,
-              rgba(8,9,11,0.88) 55%,
-              rgba(8,9,11,1)    100%
-            ),
-            url('https://images.unsplash.com/photo-1625047509248-ec889cbff17f?auto=format&fit=crop&w=1920&q=80')
-          `,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center 40%',
+          background: 'radial-gradient(ellipse 60% 60% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 65%)',
         }}
       />
 

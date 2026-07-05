@@ -119,12 +119,12 @@ export default function Configurator() {
             position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
             display: 'flex', alignItems: 'center', gap: 8,
             background: 'rgba(8,9,15,0.72)', backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255,140,0,0.22)',
+            border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: 20, padding: '5px 14px',
             whiteSpace: 'nowrap',
           }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ff8c00', flexShrink: 0, boxShadow: '0 0 6px #ff8c00' }} />
-            <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#ff8c00', letterSpacing: '0.10em', textTransform: 'uppercase' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ff8c00', flexShrink: 0 }} />
+            <span style={{ fontSize: 11, color: '#9ca3af', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               {vehicleClass.label}
             </span>
           </div>

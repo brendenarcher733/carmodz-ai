@@ -51,9 +51,11 @@ export default {
         '3xl': '24px',
       },
       boxShadow: {
-        'glow-sm': '0 0 12px rgba(255,140,0,0.15)',
-        'glow':    '0 0 24px rgba(255,140,0,0.2)',
-        'glow-lg': '0 0 60px rgba(255,140,0,0.12)',
+        // Soft, restrained lift with a whisper of warmth — never a glowing ring.
+        // Reserved for primary CTAs only.
+        'glow-sm': '0 6px 20px rgba(255,140,0,0.10)',
+        'glow':    '0 10px 32px rgba(255,140,0,0.14)',
+        'glow-lg': '0 16px 56px rgba(255,140,0,0.10)',
         'card':    '0 4px 24px rgba(0,0,0,0.5)',
         'card-lg': '0 8px 56px rgba(0,0,0,0.7)',
       },

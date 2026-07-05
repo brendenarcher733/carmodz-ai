@@ -160,7 +160,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   to="/signup"
-                  className="inline-flex items-center gap-2 bg-accent text-obsidian text-base font-display font-bold px-6 py-2.5 rounded-xl hover:bg-accent-bright transition-colors duration-150 shadow-glow-sm"
+                  className="inline-flex items-center gap-2 bg-accent text-obsidian text-base font-display font-bold px-6 py-2.5 rounded-xl hover:bg-accent-bright transition-colors duration-150"
                 >
                   Get Started
                 </Link>

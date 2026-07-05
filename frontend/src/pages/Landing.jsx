@@ -1,109 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
-/* ─────────────────────────────────────────────
-   YouTube clip background — loops a specific
-   start→end window using the IFrame API so the
-   flame moment repeats continuously.
-   Adjust START_S / END_S to the exact seconds
-   in the video where the flames appear.
-───────────────────────────────────────────── */
-const VIDEO_ID = 'FOD2I-YuQ0c'
-const START_S  = 95   // 1:35 — McLaren driving
-const END_S    = 109  // 1:49
-
-function YouTubeClipBg() {
-  const divRef = useRef(null)
-  const player = useRef(null)
-
-  useEffect(() => {
-    let interval
-
-    function createPlayer() {
-      player.current = new window.YT.Player(divRef.current, {
-        videoId: VIDEO_ID,
-        playerVars: {
-          autoplay:       1,
-          mute:           1,
-          controls:       0,
-          disablekb:      1,
-          rel:            0,
-          showinfo:       0,
-          modestbranding: 1,
-          iv_load_policy: 3,
-          fs:             0,
-          playsinline:    1,
-          start:          START_S,
-          end:            END_S,
-        },
-        events: {
-          onReady(e) { e.target.playVideo() },
-          onStateChange(e) {
-            // YT.PlayerState.ENDED === 0
-            if (e.data === 0) {
-              player.current.seekTo(START_S, true)
-              player.current.playVideo()
-            }
-          },
-        },
-      })
-
-      // Poll at 100 ms — tighter than the default 500 ms so the
-      // clip cuts back before overshooting END_S noticeably
-      interval = setInterval(() => {
-        try {
-          const t = player.current?.getCurrentTime?.()
-          if (t != null && t >= END_S) {
-            player.current.seekTo(START_S, true)
-            player.current.playVideo()
-          }
-        } catch (_) { /* player not ready yet */ }
-      }, 100)
-    }
-
-    if (window.YT?.Player) {
-      createPlayer()
-    } else {
-      const prev = window.onYouTubeIframeAPIReady
-      window.onYouTubeIframeAPIReady = () => { prev?.(); createPlayer() }
-
-      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-        const s = document.createElement('script')
-        s.src = 'https://www.youtube.com/iframe_api'
-        document.head.appendChild(s)
-      }
-    }
-
-    return () => {
-      clearInterval(interval)
-      player.current?.destroy()
-      player.current = null
-    }
-  }, [])
-
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* div replaced by the YT iframe in-place */}
-      <div
-        ref={divRef}
-        style={{
-          position:   'absolute',
-          top:        '50%',
-          left:       '50%',
-          /* 16:9 cover formula */
-          width:      '177.78vh',
-          height:     '100vh',
-          minWidth:   '100%',
-          minHeight:  '56.25vw',
-          transform:  'translate(-50%, -50%)',
-          pointerEvents: 'none',
-          border:     'none',
-        }}
-      />
-    </div>
-  )
-}
-
 /* ─── Scroll-reveal hook ─── */
 function useReveal(threshold = 0.12) {
   const ref = useRef(null)
@@ -180,7 +77,7 @@ function ExampleCard() {
         </div>
         <div className="flex items-center gap-4 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
           <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot flex-shrink-0" />
+            <div className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
             <span className="font-mono text-xs text-accent font-semibold">{EXAMPLE.hpGain} est.</span>
           </div>
           <div className="w-px h-3 bg-white/10" />
@@ -232,38 +129,17 @@ export default function Landing() {
     <div className="bg-obsidian">
 
       {/* ═══════════════════════════════════════════
-          HERO — full-screen video background
+          HERO — calm gradient backdrop, no video/imagery
       ═══════════════════════════════════════════ */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
 
-        {/* ── YouTube clip background ── */}
-        <YouTubeClipBg />
-
-        {/* ── Dark gradient overlay (dims video, keeps text readable) ── */}
-        <div className="absolute inset-0" style={{
-          background: `
-            linear-gradient(105deg,
-              rgba(8,9,11,1)    0%,
-              rgba(8,9,11,0.97) 30%,
-              rgba(8,9,11,0.82) 52%,
-              rgba(8,9,11,0.50) 72%,
-              rgba(8,9,11,0.20) 100%
-            ),
-            linear-gradient(to bottom,
-              rgba(8,9,11,0.55) 0%,
-              transparent        18%,
-              transparent        62%,
-              rgba(8,9,11,1)     100%
-            )
-          `,
-        }} />
-
-        {/* ── Grid texture ── */}
-        <div className="absolute inset-0 grid-texture opacity-20 pointer-events-none" />
-
-        {/* ── Accent glow behind the car side ── */}
+        {/* ── Neutral atmospheric gradient ── */}
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: 'radial-gradient(ellipse 40% 45% at 86% 32%, rgba(255,140,0,0.06) 0%, transparent 65%)',
+          background: `
+            radial-gradient(ellipse 60% 50% at 80% 15%, rgba(255,255,255,0.05) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 40% at 10% 85%, rgba(255,140,0,0.03) 0%, transparent 60%),
+            linear-gradient(180deg, #0a0b0d 0%, #08090b 100%)
+          `,
         }} />
 
         {/* ── Content ── */}
@@ -272,8 +148,8 @@ export default function Landing() {
 
             {/* LEFT — Copy */}
             <div>
-              <div className="animate-fade-up anim-delay-1 inline-flex items-center gap-2.5 bg-accent/[0.08] border border-accent/25 text-accent-bright text-xs font-mono font-semibold tracking-[0.16em] uppercase px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot" />
+              <div className="animate-fade-up anim-delay-1 inline-flex items-center gap-2.5 bg-white/[0.05] border border-white/[0.1] text-body text-xs font-semibold tracking-[0.14em] uppercase px-4 py-2 rounded-full mb-8">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent" />
                 AI Car Modification Planner
               </div>
 
@@ -320,15 +196,13 @@ export default function Landing() {
                 </Link>
               </div>
 
-              <p className="animate-fade-up anim-delay-5 text-muted text-sm font-mono">
+              <p className="animate-fade-up anim-delay-5 text-muted text-sm">
                 Built for real car enthusiasts — from daily drivers to full performance builds.
               </p>
             </div>
 
             {/* RIGHT — Example build card */}
             <div className="relative">
-              <div className="absolute -inset-4 rounded-3xl pointer-events-none"
-                style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255,140,0,0.07) 0%, transparent 70%)' }} />
               <ExampleCard />
             </div>
 
@@ -359,10 +233,10 @@ export default function Landing() {
       {/* ═══════════════════════════════════════════
           FEATURES GRID — scroll reveal
       ═══════════════════════════════════════════ */}
-      <section className="py-28">
+      <section className="py-32">
         <div className="container-content">
 
-          <div ref={featuresRef} className="reveal mb-16">
+          <div ref={featuresRef} className="reveal mb-20">
             <p className="eyebrow mb-4">The platform</p>
             <h2 className="font-display font-black text-white leading-[1.05] tracking-tight max-w-lg"
               style={{ fontSize: 'clamp(2.4rem, 4vw, 3.2rem)' }}>
@@ -400,7 +274,7 @@ export default function Landing() {
       ═══════════════════════════════════════════ */}
       <section
         ref={ctaRef}
-        className="reveal py-24"
+        className="reveal py-28"
         style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
       >
         <div className="container-content">

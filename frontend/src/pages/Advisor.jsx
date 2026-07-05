@@ -24,8 +24,8 @@ function Message({ msg }) {
     <div className={clsx('flex gap-3', isUser ? 'justify-end' : 'justify-start')}>
       {/* Avatar — advisor only */}
       {!isUser && (
-        <div className="w-7 h-7 rounded-lg bg-accent/[0.12] border border-accent/25 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="text-accent">
+        <div className="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/[0.1] flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="text-body">
             <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" strokeWidth="1.25"/>
             <path d="M4 6.5c0-1.38 1.12-2.5 2.5-2.5S9 5.12 9 6.5 7.88 9 6.5 9" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
             <circle cx="6.5" cy="6.5" r="1" fill="currentColor"/>
@@ -36,7 +36,7 @@ function Message({ msg }) {
       <div className={clsx(
         'max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-relaxed',
         isUser
-          ? 'bg-accent/[0.12] border border-accent/25 text-white rounded-tr-sm'
+          ? 'bg-elevated border border-white/[0.1] text-white rounded-tr-sm'
           : 'bg-surface border border-white/[0.07] text-body rounded-tl-sm',
       )}>
         {msg.content}
@@ -48,7 +48,7 @@ function Message({ msg }) {
               <button
                 key={sug}
                 data-sug={sug}
-                className="text-xs font-mono text-accent border border-accent/25 bg-accent/[0.06] px-3 py-1.5 rounded-lg hover:bg-accent/[0.12] transition-colors"
+                className="text-xs text-body border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 rounded-lg hover:bg-white/[0.08] hover:text-white transition-colors"
               >
                 {sug}
               </button>
@@ -75,8 +75,8 @@ function Message({ msg }) {
 function TypingIndicator() {
   return (
     <div className="flex gap-3 justify-start">
-      <div className="w-7 h-7 rounded-lg bg-accent/[0.12] border border-accent/25 flex items-center justify-center flex-shrink-0">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="text-accent">
+      <div className="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/[0.1] flex items-center justify-center flex-shrink-0">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="text-body">
           <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" strokeWidth="1.25"/>
           <circle cx="6.5" cy="6.5" r="1" fill="currentColor"/>
         </svg>
@@ -133,20 +133,11 @@ export default function Advisor() {
 
   return (
     <div className="page-shell relative">
-      {/* Atmospheric background — cockpit/interior */}
+      {/* Atmospheric background */}
       <div
         className="absolute top-0 inset-x-0 h-56 pointer-events-none"
         style={{
-          backgroundImage: `
-            linear-gradient(to bottom,
-              rgba(8,9,11,0.6)  0%,
-              rgba(8,9,11,0.88) 55%,
-              rgba(8,9,11,1)    100%
-            ),
-            url('https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1920&q=80')
-          `,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center 35%',
+          background: 'radial-gradient(ellipse 60% 60% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 65%)',
         }}
       />
       <div className="container-content py-10 h-[calc(100vh-80px)] flex flex-col lg:flex-row gap-5 relative z-10">
@@ -157,8 +148,8 @@ export default function Advisor() {
           {/* Advisor identity */}
           <div className="bg-surface border border-white/[0.07] rounded-2xl p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-accent/[0.12] border border-accent/25 flex items-center justify-center">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="text-accent">
+              <div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.1] flex items-center justify-center">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="text-body">
                   <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.4"/>
                   <path d="M6 9c0-1.65 1.35-3 3-3s3 1.35 3 3-1.35 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
                   <circle cx="9" cy="9" r="1.25" fill="currentColor"/>
@@ -168,7 +159,7 @@ export default function Advisor() {
                 <div className="font-display font-bold text-white text-sm">Performance Advisor</div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-stage-1 animate-pulse-dot" />
-                  <span className="font-mono text-xs text-muted">Ready</span>
+                  <span className="text-xs text-muted">Ready</span>
                 </div>
               </div>
             </div>
@@ -180,14 +171,14 @@ export default function Advisor() {
 
           {/* Vehicle context */}
           <div className="bg-surface border border-white/[0.07] rounded-2xl p-5">
-            <p className="font-mono text-xs text-muted uppercase tracking-wider mb-3">Your Vehicle</p>
+            <p className="eyebrow mb-3">Your Vehicle</p>
             {hasVehicle ? (
               <div className="flex items-center justify-between">
                 <span className="text-white text-sm font-medium">
                   {[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}
                 </span>
                 <button
-                  className="text-accent text-xs font-mono hover:underline"
+                  className="text-accent text-xs hover:underline"
                   onClick={() => { updateVehicle(null); setCarYear(''); setCarMake(''); setCarModel('') }}
                 >
                   Change
@@ -211,7 +202,7 @@ export default function Advisor() {
                 <button
                   type="submit"
                   disabled={!carYear && !carMake && !carModel}
-                  className="w-full bg-accent/[0.1] border border-accent/25 text-accent text-xs font-display font-semibold py-2 rounded-xl hover:bg-accent/[0.18] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full bg-white/[0.06] border border-white/[0.12] text-white text-xs font-display font-semibold py-2 rounded-xl hover:bg-white/[0.1] hover:border-white/[0.2] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Set My Car
                 </button>
@@ -221,7 +212,7 @@ export default function Advisor() {
 
           {/* Quick starters */}
           <div className="bg-surface border border-white/[0.07] rounded-2xl p-5">
-            <p className="font-mono text-xs text-muted uppercase tracking-wider mb-3">Quick Questions</p>
+            <p className="eyebrow mb-3">Quick Questions</p>
             <div className="space-y-1.5">
               {QUICK_STARTERS.map(q => (
                 <button
@@ -238,10 +229,10 @@ export default function Advisor() {
 
           {/* Topics */}
           <div className="bg-surface border border-white/[0.07] rounded-2xl p-5">
-            <p className="font-mono text-xs text-muted uppercase tracking-wider mb-3">Topics I Cover</p>
+            <p className="eyebrow mb-3">Topics I Cover</p>
             <div className="flex flex-wrap gap-1.5">
               {TOPICS.map(t => (
-                <span key={t} className="bg-white/[0.05] text-muted text-xs font-mono px-2.5 py-1 rounded-lg">
+                <span key={t} className="bg-white/[0.05] text-muted text-xs px-2.5 py-1 rounded-lg">
                   {t}
                 </span>
               ))}
@@ -260,7 +251,7 @@ export default function Advisor() {
             <div className="w-2 h-2 rounded-full bg-stage-1 animate-pulse-dot" />
             <div>
               <div className="font-display font-semibold text-white text-sm">Performance Advisor</div>
-              <div className="text-muted text-xs font-mono">
+              <div className="text-muted text-xs">
                 {hasVehicle
                   ? `Advising: ${[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}`
                   : 'Powered by CarMods AI'}

@@ -14,7 +14,7 @@ export function Card({ children, className, padding = 'md', hover = false, glow 
       'bg-surface border border-white/[0.07] rounded-2xl',
       PADDING[padding],
       hover && 'transition-all duration-200 cursor-pointer hover:border-white/[0.14] hover:bg-elevated hover:shadow-card',
-      glow && 'shadow-glow-sm border-accent/20',
+      glow && 'shadow-card border-white/[0.12]',
       className,
     )}>
       {children}

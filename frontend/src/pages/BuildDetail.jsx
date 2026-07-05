@@ -39,12 +39,8 @@ function ModCard({ mod, index, vehicle, onView3D }) {
   const stage = STAGE_META[mod.stage] || STAGE_META[1]
   return (
     <div
-      className="animate-fade-up bg-surface rounded-2xl overflow-hidden transition-all duration-200 hover:bg-elevated"
-      style={{
-        animationDelay: `${index * 40}ms`,
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderLeft: `3px solid ${stage.color}`,
-      }}
+      className="animate-fade-up bg-surface border border-white/[0.07] rounded-2xl overflow-hidden transition-all duration-200 hover:bg-elevated"
+      style={{ animationDelay: `${index * 40}ms` }}
     >
       <div className="p-5">
         {/* Header */}
@@ -170,17 +166,16 @@ function GeneratingState({ vehicleLabel }) {
   return (
     <div className="page-shell flex items-center justify-center" style={{ minHeight: '60vh' }}>
       <div className="text-center max-w-sm px-8">
-        <div className="relative w-20 h-20 mx-auto mb-8">
-          <div className="absolute inset-0 rounded-full border border-accent/30 animate-ping" style={{ animationDuration: '2s' }} />
-          <div className="absolute inset-2 rounded-full border border-accent/20 animate-spin-slow" />
+        <div className="relative w-16 h-16 mx-auto mb-8">
+          <div className="absolute inset-0 rounded-full border-2 border-white/10 border-t-accent animate-spin" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="text-accent">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-accent">
               <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
             </svg>
           </div>
         </div>
         <h2 className="font-display font-black text-white text-xl mb-2 tracking-tight">Building your plan</h2>
-        {vehicleLabel && <p className="font-mono text-xs text-muted uppercase tracking-widest mb-5">{vehicleLabel}</p>}
+        {vehicleLabel && <p className="text-xs text-muted uppercase tracking-widest mb-5">{vehicleLabel}</p>}
         <p key={idx} className="text-body text-sm leading-relaxed animate-fade-in">{GENERATING_MSGS[idx]}</p>
         <p className="font-mono text-xs text-muted mt-6">This usually takes 20-45 seconds.</p>
       </div>
@@ -295,8 +290,6 @@ export default function BuildDetail() {
         <div className="relative overflow-hidden rounded-3xl mb-8"
           style={{ background: 'linear-gradient(135deg, rgba(255,140,0,0.06) 0%, rgba(19,21,25,1) 50%)' }}>
 
-          {/* Background pattern */}
-          <div className="absolute inset-0 grid-texture opacity-30 pointer-events-none" />
           <div className="absolute top-0 right-0 bottom-0 w-1/2 pointer-events-none"
             style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,140,0,0.05) 0%, transparent 70%)' }} />
 
@@ -372,7 +365,6 @@ export default function BuildDetail() {
               border: '1px solid rgba(255,140,0,0.2)',
             }}
           >
-            <div className="absolute inset-0 grid-texture opacity-20 pointer-events-none" />
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-accent/[0.12] border border-accent/25 flex items-center justify-center group-hover:bg-accent/[0.2] transition-all duration-200">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="text-accent">

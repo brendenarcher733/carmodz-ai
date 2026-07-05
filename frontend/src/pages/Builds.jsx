@@ -76,14 +76,8 @@ function GarageBay({ build, onDelete, onToggleFavourite }) {
   const since = new Date(build.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 
   return (
-    <div
-      className="relative overflow-hidden rounded-2xl border border-white/[0.07] group transition-all duration-300 hover:border-white/[0.14]"
-      style={{ background: `linear-gradient(140deg, ${meta.dim} 0%, #131519 45%)` }}
-    >
-      {/* Left accent stripe */}
-      <div className="absolute top-0 left-0 bottom-0 w-[3px]" style={{ background: meta.color }} />
-
-      <div className="pl-8 pr-6 py-7">
+    <div className="relative overflow-hidden rounded-2xl bg-surface border border-white/[0.07] group transition-all duration-300 hover:border-white/[0.14]">
+      <div className="px-7 py-7">
         <div className="flex items-start justify-between gap-6">
 
           {/* ── Left: Vehicle Identity ── */}
@@ -133,7 +127,7 @@ function GarageBay({ build, onDelete, onToggleFavourite }) {
           <div className="flex flex-col items-end gap-3 flex-shrink-0">
             <Link
               to={`/builds/${build.id}`}
-              className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-sm px-6 py-3 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow-sm whitespace-nowrap"
+              className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-sm px-6 py-3 rounded-xl hover:bg-accent-bright transition-all duration-150 whitespace-nowrap"
             >
               Continue Build
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -177,16 +171,7 @@ export default function Garage() {
       <div
         className="absolute top-0 inset-x-0 h-64 pointer-events-none"
         style={{
-          backgroundImage: `
-            linear-gradient(to bottom,
-              rgba(8,9,11,0.55) 0%,
-              rgba(8,9,11,0.85) 50%,
-              rgba(8,9,11,1)    100%
-            ),
-            url('https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1920&q=80')
-          `,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center 30%',
+          background: 'radial-gradient(ellipse 60% 60% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 65%)',
         }}
       />
 
@@ -213,7 +198,7 @@ export default function Garage() {
 
           <Link
             to="/planner"
-            className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-bold text-sm px-6 py-3 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow-sm"
+            className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-bold text-sm px-6 py-3 rounded-xl hover:bg-accent-bright transition-all duration-150"
           >
             + New Build
           </Link>
@@ -244,8 +229,6 @@ export default function Garage() {
               className="max-w-xl mx-auto text-center rounded-3xl border border-white/[0.06] py-20 px-10 relative overflow-hidden"
               style={{ background: 'rgba(19,21,25,0.5)' }}
             >
-              <div className="absolute inset-0 grid-texture opacity-50 pointer-events-none" />
-
               <div className="relative z-10">
                 <div className="w-20 h-20 rounded-2xl bg-accent/[0.08] border border-accent/20 flex items-center justify-center mx-auto mb-8">
                   <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="text-accent">

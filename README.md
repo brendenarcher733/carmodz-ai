@@ -10,7 +10,7 @@ A full-stack web application that helps car enthusiasts plan realistic modificat
 
 | Layer     | Tech                                   |
 |-----------|----------------------------------------|
-| Frontend  | React 18 + Vite, CSS Modules           |
+| Frontend  | React 18 + Vite, Tailwind CSS           |
 | Backend   | Python 3.11 + FastAPI                  |
 | Database  | SQLite (dev) / PostgreSQL (prod-ready) |
 | AI        | Mock service → OpenAI / Anthropic      |
@@ -167,9 +167,10 @@ npm run build
 
 ## Design System
 
-- Dark automotive theme with orange (#FF8C00) accent
-- Space Grotesk display font, Inter UI font, JetBrains Mono for code/data
-- CSS Modules — no class name collisions, no runtime overhead
+- Premium automotive theme — refined dark UI (obsidian/charcoal/surface scale) inspired by Apple, Rivian, Porsche, Tesla, and Linear
+- Orange (`#FF8C00`) is a restrained signature accent — reserved for primary actions, selected/active states, progress indicators, AI-status signals, and key highlight numbers, not decoration
+- Space Grotesk display font, Inter UI font, JetBrains Mono for numeric/technical data
+- Tailwind CSS utility classes + a small set of shared component classes in `globals.css` (`.eyebrow`, `.field-input`, `.glass`, etc.)
 - Fully responsive — mobile and desktop layouts
 
 ---

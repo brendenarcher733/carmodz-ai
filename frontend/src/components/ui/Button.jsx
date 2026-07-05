@@ -8,7 +8,7 @@ const BASE = [
 ].join(' ')
 
 const VARIANTS = {
-  primary:   'bg-accent text-obsidian hover:bg-accent-bright hover:shadow-glow active:scale-[0.98]',
+  primary:   'bg-accent text-obsidian hover:bg-accent-bright hover:shadow-glow-sm active:scale-[0.98]',
   secondary: 'bg-white/[0.06] border border-white/[0.12] text-white hover:bg-white/[0.1] hover:border-white/[0.2]',
   ghost:     'text-body hover:text-white hover:bg-white/[0.05]',
   danger:    'border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50',

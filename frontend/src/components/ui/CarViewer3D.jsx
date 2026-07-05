@@ -275,8 +275,6 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
           {status === 'ready' && (
             <div className="absolute z-10 pointer-events-none" style={areaPos}>
               <div className="relative">
-                {/* Pulsing dot */}
-                <div className="w-4 h-4 rounded-full bg-accent/30 flex items-center justify-center animate-ping absolute -inset-1" />
                 <div className="w-4 h-4 rounded-full bg-accent flex items-center justify-center relative">
                   <div className="w-2 h-2 rounded-full bg-obsidian" />
                 </div>

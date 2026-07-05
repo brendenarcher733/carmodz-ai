@@ -30,20 +30,16 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
 
-      {/* Background — night city car */}
+      {/* Background — neutral atmospheric gradient */}
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: `
-            radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,140,0,0.06) 0%, transparent 55%),
-            linear-gradient(to bottom, rgba(8,9,11,0.7) 0%, rgba(8,9,11,0.92) 100%),
-            url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1920&q=80')
+          background: `
+            radial-gradient(ellipse 70% 50% at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 55%),
+            linear-gradient(180deg, #0a0b0d 0%, #08090b 100%)
           `,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center 40%',
         }}
       />
-      <div className="absolute inset-0 grid-texture opacity-30 pointer-events-none" />
 
       {/* Card */}
       <div
@@ -109,7 +105,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={busy || !form.email || !form.password}
-            className="w-full flex items-center justify-center gap-2 bg-accent text-obsidian font-display font-black text-base py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none mt-2"
+            className="w-full flex items-center justify-center gap-2 bg-accent text-obsidian font-display font-black text-base py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed mt-2"
           >
             {busy && <span className="w-4 h-4 rounded-full border-2 border-obsidian/30 border-t-obsidian animate-spin" />}
             Sign In
