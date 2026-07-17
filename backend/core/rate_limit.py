@@ -1,25 +1,24 @@
 # core/rate_limit.py
-# Lightweight in-memory fixed-window rate limiter — no Redis dependency.
+# Redis-backed fixed-window rate limiter.
 #
-# Single-process only: state lives in this module's memory, so it does not
-# share counts across multiple uvicorn workers/instances. Fine for a single
-# MVP deployment; swap for a Redis-backed limiter before scaling horizontally.
-
-import time
-from collections import defaultdict
-from threading import Lock
+# Backed by the same arq Redis pool created once at FastAPI startup and
+# stored on app.state.redis_pool (see main.py's lifespan + core/redis_pool.py)
+# — ArqRedis is a subclass of redis.asyncio.Redis, so it can be used directly
+# for plain INCR/EXPIRE without a second connection pool. This replaces a
+# prior in-memory implementation that only worked correctly for a single
+# process: counts didn't survive a restart and weren't shared across
+# instances, so horizontal scaling (or even a zero-downtime redeploy) would
+# silently let each new process reset everyone's rate limit.
 
 from fastapi import HTTPException, Request, status
 
-_buckets: dict[str, list[float]] = defaultdict(list)
-_lock = Lock()
-
 
 def _client_key(request: Request, scope: str) -> str:
-    # Trust X-Forwarded-For only if you control the proxy in front of this app.
+    # Trust X-Forwarded-For only if you control the proxy in front of this app
+    # (true on Railway/Render/Fly's edge, which set/overwrite this header).
     forwarded = request.headers.get("x-forwarded-for")
     ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
-    return f"{scope}:{ip}"
+    return f"ratelimit:{scope}:{ip}"
 
 
 class RateLimiter:
@@ -30,23 +29,23 @@ class RateLimiter:
         self.seconds = seconds
         self.scope = scope
 
-    def __call__(self, request: Request) -> None:
+    async def __call__(self, request: Request) -> None:
+        redis = request.app.state.redis_pool
         key = _client_key(request, self.scope)
-        now = time.monotonic()
-        window_start = now - self.seconds
 
-        with _lock:
-            hits = _buckets[key]
-            # Drop timestamps outside the current window
-            while hits and hits[0] < window_start:
-                hits.pop(0)
+        # INCR + EXPIRE in a pipeline: one round trip. EXPIRE is only armed
+        # on the first hit of a window (count == 1) so a later request in the
+        # same window can't push the window back out by re-arming the TTL.
+        pipe = redis.pipeline(transaction=True)
+        pipe.incr(key)
+        count = (await pipe.execute())[0]
+        if count == 1:
+            await redis.expire(key, self.seconds)
 
-            if len(hits) >= self.times:
-                retry_after = max(1, int(self.seconds - (now - hits[0])))
-                raise HTTPException(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="Too many requests — please slow down.",
-                    headers={"Retry-After": str(retry_after)},
-                )
-
-            hits.append(now)
+        if count > self.times:
+            retry_after = await redis.ttl(key)
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many requests — please slow down.",
+                headers={"Retry-After": str(max(1, retry_after))},
+            )

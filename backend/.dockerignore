@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.env
+.env.*
+*.db
+evals/reports/
+evals/cassettes/__pycache__/
+.pytest_cache/

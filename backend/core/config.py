@@ -3,7 +3,7 @@
 # Swap mock AI for real by setting OPENAI_API_KEY in .env
 
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, field_validator
 from functools import lru_cache
 
 
@@ -13,6 +13,15 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = Field(default="sqlite:///./carmods.db", alias="DATABASE_URL")
+
+    @field_validator("database_url")
+    @classmethod
+    def _normalize_postgres_scheme(cls, v: str) -> str:
+        # Railway/Heroku-style managed Postgres hand out "postgres://" URLs,
+        # but SQLAlchemy 2.x's psycopg2 dialect only recognizes "postgresql://".
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
 
     # Job queue — backs the async recommendation-generation worker
     redis_url: str = Field(default="redis://localhost:6379", alias="REDIS_URL")

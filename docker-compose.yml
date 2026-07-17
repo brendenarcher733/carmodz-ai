@@ -1,0 +1,75 @@
+# Local dev parity with production: Postgres + Redis + the backend web
+# process + the arq worker, all from the same image. Run with:
+#   docker compose up --build
+#
+# Frontend is intentionally NOT containerized here — `npm run dev` inside
+# frontend/ gives much faster HMR than a container would, and it only needs
+# VITE_API_URL pointed at this backend (defaults to http://localhost:8000,
+# which is what this compose file exposes).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: carmods
+      POSTGRES_PASSWORD: carmods
+      POSTGRES_DB: carmods
+    # Not published to the host — only backend/worker need to reach it, over
+    # the compose network by service name. Avoids clashing with any Postgres
+    # already running locally on the default port.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carmods"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    # Not published to the host, same reasoning as postgres above.
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    ports:
+      # Host-side 8001 avoids colliding with anything else you may have
+      # bound to 8000 locally; the container itself still listens on 8000.
+      - "8001:8000"
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql://carmods:carmods@postgres:5432/carmods
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-change-in-production-set-SECRET_KEY-env-var}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: ./backend
+    command: arq workers.recommendation_worker.WorkerSettings
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql://carmods:carmods@postgres:5432/carmods
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-change-in-production-set-SECRET_KEY-env-var}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

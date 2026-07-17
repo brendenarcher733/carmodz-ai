@@ -1,0 +1,64 @@
+name: CI
+
+# Boot/migration smoke gate — NOT correctness testing (there's no test suite
+# yet). Catches the class of failure where the app doesn't even start:
+# broken imports, a migration that doesn't apply cleanly, a frontend build
+# that doesn't compile.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backend-boot-smoke:
+    name: Backend boots + migrations apply
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: carmods
+          POSTGRES_PASSWORD: carmods
+          POSTGRES_DB: carmods
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U carmods"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgresql://carmods:carmods@localhost:5432/carmods
+      REDIS_URL: redis://localhost:6379
+      SECRET_KEY: ci-only-secret-not-used-anywhere-real
+      AI_PROVIDER: mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Apply Alembic migrations against a fresh Postgres
+        run: alembic upgrade head
+      - name: Import the app (catches startup-time errors)
+        run: python -c "import main"
+
+  frontend-build:
+    name: Frontend builds
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm install
+      - run: npm run build
