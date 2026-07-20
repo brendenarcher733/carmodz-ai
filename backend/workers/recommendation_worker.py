@@ -26,6 +26,8 @@
 # that catches that.
 
 import asyncio
+import hashlib
+import json
 import logging
 from datetime import datetime, timedelta
 
@@ -49,11 +51,47 @@ from services.mock_ai import generate_recommendations as mock_recommendations
 
 logger = logging.getLogger(__name__)
 
-MAX_TRIES = 3
-RETRY_BACKOFF_SECONDS = 5      # linear backoff: 5s, 10s before attempts 2, 3
-JOB_TIMEOUT_SECONDS = 90       # observed live latency is 25-45s; this is ~2x headroom,
-                                # not the 300s arq default, so a hung call doesn't camp a worker slot
+MAX_TRIES = 2                  # was 3 — the Anthropic/OpenAI clients now enforce their own
+                                # timeout (services/ai_service.py), so a stuck 3rd attempt was
+                                # pure worst-case tail latency for little added reliability;
+                                # one retry already covers the common transient-failure case,
+                                # and the immediate mock fallback after that is instant anyway
+RETRY_BACKOFF_SECONDS = 5      # linear backoff: 5s before attempt 2
+JOB_TIMEOUT_SECONDS = 75       # ai_service.RECOMMENDATIONS_REQUEST_TIMEOUT_SECONDS=60 is this
+                                # task's own per-call ceiling; this needs real headroom above
+                                # that (not right up against it, and not the old 90s, which had
+                                # no relationship to the client timeout at all — it was just a
+                                # guess). Worst case end-to-end is now 75 + 5 + 75 ≈ 155s instead
+                                # of the original 90*3 + 15 ≈ 285s — smaller than first attempted
+                                # (95s), but that number was wrong: live testing showed a 30s
+                                # client timeout was killing a large fraction of legitimate
+                                # in-progress calls, since this call's own documented normal
+                                # latency (25-45s) sat inside that ceiling instead of under it.
 REAP_THRESHOLD_MINUTES = 3     # how long "generating" can persist before the cron reaper assumes the worker died
+
+RECOMMENDATION_CACHE_TTL_SECONDS = 60 * 60 * 24   # 24h — long enough to catch repeat traffic on
+                                                    # popular platform/budget/goal combos, short
+                                                    # enough that pricing/brand info naturally
+                                                    # ages out without any manual invalidation
+
+
+def _recommendation_cache_key(build: Build) -> str:
+    """Stable cache key over exactly the fields that affect the AI prompt.
+    Exact-match only, deliberately — no fuzzy/nearby-budget matching, so a
+    cache hit only ever serves a plan for the precise inputs the user gave."""
+    payload = {
+        "year": build.year,
+        "make": (build.make or "").strip().lower(),
+        "model": (build.model or "").strip().lower(),
+        "budget": round(build.budget, 2),
+        "goal": (build.goal or "").strip().lower(),
+        "experience": (build.experience or "").strip().lower(),
+        "categories": sorted(c.strip().lower() for c in (build.categories or [])),
+        "is_daily": bool(build.is_daily),
+        "notes": (build.notes or "").strip().lower(),
+    }
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+    return f"recgen:cache:{digest}"
 
 
 def _persist_recommendations(db, build: Build, mods: list[ModRecommendation]) -> None:
@@ -86,12 +124,26 @@ async def generate_recommendations_task(ctx: dict, build_id: int) -> dict:
         build.status_updated_at = datetime.utcnow()
         db.commit()
 
-        # generate_build_recommendations (and everything it calls) is a sync,
-        # blocking call (the Anthropic SDK isn't used in async mode here —
-        # see the writeup for why that tradeoff was fine for this refactor).
-        # asyncio.to_thread offloads it so this worker's event loop can keep
-        # servicing other concurrent jobs while this one waits on the network.
-        ai_mods = await asyncio.to_thread(generate_build_recommendations, build)
+        # Exact-match cache on the fields that actually shape the prompt —
+        # a repeat of a popular platform/budget/goal combo (very plausible:
+        # different users building the same common car on a similar budget)
+        # returns in a Redis round-trip instead of a 25-45s Claude call.
+        cache_key = _recommendation_cache_key(build)
+        cached = await ctx["redis"].get(cache_key)
+        if cached is not None:
+            logger.info("Build %s: recommendation cache hit (%s)", build_id, cache_key)
+            ai_mods = json.loads(cached)
+        else:
+            # generate_build_recommendations (and everything it calls) is a sync,
+            # blocking call (the Anthropic SDK isn't used in async mode here —
+            # see the writeup for why that tradeoff was fine for this refactor).
+            # asyncio.to_thread offloads it so this worker's event loop can keep
+            # servicing other concurrent jobs while this one waits on the network.
+            ai_mods = await asyncio.to_thread(generate_build_recommendations, build)
+            if ai_mods is not None:
+                await ctx["redis"].set(
+                    cache_key, json.dumps(ai_mods), ex=RECOMMENDATION_CACHE_TTL_SECONDS
+                )
 
         mods: list[ModRecommendation] | None = None
         if ai_mods is not None:

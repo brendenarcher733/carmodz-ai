@@ -57,6 +57,49 @@ export const advisorApi = {
       build_id: buildId,
     }),
   quickRecs: (payload) => api.post('/api/mod-advisor/quick-recs', payload),
+
+  // Streaming variant of chat — uses raw fetch + ReadableStream rather than
+  // axios (which buffers the whole response body) or EventSource (which
+  // can't send a POST body or an Authorization header, both required here).
+  // Calls onToken per text chunk as it arrives, onDone once with the final
+  // suggestion chips, onError if the request itself fails.
+  streamChat: async (message, sessionId, vehicle, buildId, { onToken, onDone, onError }) => {
+    const token = localStorage.getItem('cm_token')
+    const baseURL = import.meta.env.VITE_API_URL || ''
+    try {
+      const res = await fetch(`${baseURL}/api/mod-advisor/chat/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ message, session_id: sessionId, vehicle, build_id: buildId }),
+      })
+      if (!res.ok || !res.body) throw new Error(`Request failed with status ${res.status}`)
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+
+        let idx
+        while ((idx = buffer.indexOf('\n\n')) !== -1) {
+          const frame = buffer.slice(0, idx).trim()
+          buffer = buffer.slice(idx + 2)
+          if (!frame.startsWith('data:')) continue
+          const payload = JSON.parse(frame.slice(5).trim())
+          if (payload.type === 'token') onToken(payload.text)
+          else if (payload.type === 'done') onDone(payload.suggestions)
+        }
+      }
+    } catch (err) {
+      onError(err)
+    }
+  },
 }
 
 export const authApi = {

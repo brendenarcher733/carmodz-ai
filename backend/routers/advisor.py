@@ -1,12 +1,15 @@
 # routers/advisor.py
+import json
+
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from typing import Optional
 from sqlalchemy.orm import Session
-from core.database import get_db
+from core.database import get_db, SessionLocal
 from core.rate_limit import RateLimiter
 from models.schemas import ChatMessageIn
-from services.chat_service import handle_chat
+from services.chat_service import handle_chat, handle_chat_stream
 
 router = APIRouter(prefix="/api/mod-advisor", tags=["Mod Advisor"])
 
@@ -54,4 +57,40 @@ def chat_with_advisor(payload: ChatRequest, db: Session = Depends(get_db)):
     return ChatResponse(
         response=reply,
         suggestions=_suggestions_for(payload.message, reply),
+    )
+
+
+@router.post("/chat/stream", dependencies=[Depends(chat_rate_limit)])
+async def chat_with_advisor_stream(payload: ChatRequest):
+    """SSE variant of /chat — same rate limit, same persistence, same
+    suggestion-chip logic, but yields text as it's generated instead of
+    waiting for the full response. Manages its own DB session (rather than
+    Depends(get_db)) so its lifetime is unambiguous across the whole
+    streamed response regardless of how the ASGI server times dependency
+    teardown relative to StreamingResponse body consumption — same pattern
+    the arq worker already uses for its own DB session."""
+    data = ChatMessageIn(
+        session_id=payload.session_id,
+        message=payload.message,
+        build_id=payload.build_id,
+        vehicle=payload.vehicle,
+    )
+
+    async def event_stream():
+        db = SessionLocal()
+        full_text = ""
+        try:
+            async for chunk in handle_chat_stream(db, data):
+                full_text += chunk
+                yield f"data: {json.dumps({'type': 'token', 'text': chunk})}\n\n"
+        finally:
+            db.close()
+
+        suggestions = _suggestions_for(payload.message, full_text)
+        yield f"data: {json.dumps({'type': 'done', 'suggestions': suggestions})}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )

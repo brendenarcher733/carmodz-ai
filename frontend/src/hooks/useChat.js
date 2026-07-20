@@ -27,18 +27,45 @@ export function useChat(initialVehicle = null) {
     const userMsg = { id: Date.now(), role: 'user', content: text }
     setMessages(prev => [...prev, userMsg])
     setLoading(true)
-    try {
-      const res = await advisorApi.chat(text, sessionId.current, vehicle)
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1, role: 'assistant',
-        content: res.response, suggestions: res.suggestions
-      }])
-    } catch {
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1, role: 'assistant',
-        content: "Sorry, I hit a snag. Try again?", suggestions: null
-      }])
-    } finally { setLoading(false) }
+
+    // The assistant bubble is only added to the message list once the first
+    // token actually arrives — until then the existing TypingIndicator shows,
+    // completely unchanged. This keeps streaming a pure data-flow change:
+    // no new components, no layout change, just when/how message.content
+    // gets populated.
+    const assistantId = Date.now() + 1
+    let started = false
+
+    await advisorApi.streamChat(text, sessionId.current, vehicle, null, {
+      onToken: (chunk) => {
+        if (!started) {
+          started = true
+          setLoading(false)
+          setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: chunk, suggestions: null }])
+        } else {
+          setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: m.content + chunk } : m))
+        }
+      },
+      onDone: (suggestions) => {
+        setLoading(false)
+        if (started) {
+          setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, suggestions } : m))
+        }
+      },
+      onError: () => {
+        setLoading(false)
+        if (started) {
+          setMessages(prev => prev.map(m => m.id === assistantId
+            ? { ...m, content: m.content || "Sorry, I hit a snag. Try again?" }
+            : m))
+        } else {
+          setMessages(prev => [...prev, {
+            id: assistantId, role: 'assistant',
+            content: "Sorry, I hit a snag. Try again?", suggestions: null,
+          }])
+        }
+      },
+    })
   }, [vehicle])
 
   const updateVehicle = useCallback((v) => setVehicle(v), [])

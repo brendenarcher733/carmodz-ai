@@ -23,6 +23,35 @@ from models.recommendation import ModRecommendationsResponse
 
 logger = logging.getLogger(__name__)
 
+# Neither Anthropic nor OpenAI clients below previously set an explicit
+# timeout/retry count, so both ran on SDK defaults — confirmed directly
+# against the installed anthropic SDK: a 600s read timeout and 2 automatic
+# internal retries. That means a single call could silently take up to
+# ~3x this long before our own retry logic even sees a failure.
+#
+# max_retries=0 (not 1) is deliberate, and was corrected after live testing
+# caught the bug: with max_retries=1, a single "attempt" from the worker's
+# point of view could internally retry once more inside the SDK — up to 2x
+# the per-call timeout below for what looks like one attempt. That silently
+# exceeded the worker's own JOB_TIMEOUT_SECONDS ceiling
+# (workers/recommendation_worker.py), so arq's blunt timeout killed the job
+# before our own graceful Retry()-with-backoff logic ever got to run.
+# Retries should live in exactly one place. The worker already retries with
+# proper backoff and an instant mock fallback — the client's job is just to
+# fail fast and predictably, not to add its own hidden retry layer on top.
+AI_REQUEST_MAX_RETRIES = 0
+
+# Two different timeouts, not one shared value — corrected after live testing
+# against the real API caught the original single 30s constant timing out a
+# large fraction of genuinely-successful build-recommendation calls. Chat
+# (max_tokens=600, plain text) is fast; recommendations (max_tokens=4000,
+# forced strict tool-call, 6-10 structured items) is a fundamentally
+# different workload whose OWN pre-existing code comment already documented
+# 25-45s as its *normal*, not worst-case, latency — a 30s ceiling sat inside
+# that normal range instead of above it.
+CHAT_REQUEST_TIMEOUT_SECONDS = 25
+RECOMMENDATIONS_REQUEST_TIMEOUT_SECONDS = 60
+
 
 # ── Build Recommendations — structured output ────────────────────────────────
 #
@@ -173,7 +202,11 @@ def _claude_build_recommendations(
     try:
         if client is None:
             import anthropic
-            client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+            client = anthropic.Anthropic(
+                api_key=settings.anthropic_api_key,
+                timeout=RECOMMENDATIONS_REQUEST_TIMEOUT_SECONDS,
+                max_retries=AI_REQUEST_MAX_RETRIES,
+            )
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
@@ -221,7 +254,11 @@ def _openai_build_recommendations(build) -> Optional[list[dict]]:
     try:
         import json
         from openai import OpenAI
-        client = OpenAI(api_key=settings.openai_api_key)
+        client = OpenAI(
+            api_key=settings.openai_api_key,
+            timeout=RECOMMENDATIONS_REQUEST_TIMEOUT_SECONDS,
+            max_retries=AI_REQUEST_MAX_RETRIES,
+        )
 
         prompt = _build_recommendations_prompt(build) + (
             '\n\nReturn ONLY a JSON object of the exact shape '
@@ -343,6 +380,34 @@ def _mock_chat(message: str, vehicle: Optional[dict] = None) -> str:
     return random.choice(MOCK_CHAT_RESPONSES["default"])
 
 
+def _chat_system_blocks(vehicle: Optional[dict] = None) -> list[dict]:
+    """Build the `system` param as separate content blocks so the (large,
+    byte-identical-across-every-user-and-every-call) persona text can be
+    marked cacheable independently of the small per-call vehicle context
+    that would otherwise invalidate the cache on every single request.
+    Anthropic's prompt caching skips reprocessing the cached block after its
+    first hit — pure latency/cost win on the shared portion of the prompt."""
+    blocks = [{
+        "type": "text",
+        "text": ADVISOR_PERSONA,
+        "cache_control": {"type": "ephemeral"},
+    }]
+    if vehicle:
+        yr, mk, mo = vehicle.get("year", ""), vehicle.get("make", ""), vehicle.get("model", "")
+        if yr or mk or mo:
+            blocks.append({
+                "type": "text",
+                "text": f"The user is working on a {yr} {mk} {mo}. Tailor all advice to this specific platform.",
+            })
+    return blocks
+
+
+def _chat_messages(message: str, session_history: list[dict]) -> list[dict]:
+    messages = [{"role": m["role"], "content": m["content"]} for m in session_history[-10:]]
+    messages.append({"role": "user", "content": message})
+    return messages
+
+
 def _claude_chat(
     message: str,
     session_history: list[dict],
@@ -351,28 +416,56 @@ def _claude_chat(
     """Real AI chat via Anthropic Claude."""
     try:
         import anthropic
-        client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
-
-        system_content = ADVISOR_PERSONA
-        if vehicle:
-            yr, mk, mo = vehicle.get("year", ""), vehicle.get("make", ""), vehicle.get("model", "")
-            if yr or mk or mo:
-                system_content += f"\n\nThe user is working on a {yr} {mk} {mo}. Tailor all advice to this specific platform."
-
-        messages = [{"role": m["role"], "content": m["content"]} for m in session_history[-10:]]
-        messages.append({"role": "user", "content": message})
+        client = anthropic.Anthropic(
+            api_key=settings.anthropic_api_key,
+            timeout=CHAT_REQUEST_TIMEOUT_SECONDS,
+            max_retries=AI_REQUEST_MAX_RETRIES,
+        )
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=600,
-            system=system_content,
-            messages=messages,
+            system=_chat_system_blocks(vehicle),
+            messages=_chat_messages(message, session_history),
         )
         return response.content[0].text
 
     except Exception:
         logger.exception("Claude chat call failed, falling back to mock")
         return _mock_chat(message, vehicle)
+
+
+async def stream_claude_chat(
+    message: str,
+    session_history: list[dict],
+    vehicle: Optional[dict] = None,
+):
+    """Async-generator streaming counterpart to _claude_chat.
+
+    Uses AsyncAnthropic (not the sync client + asyncio.to_thread pattern the
+    worker uses) because this runs inside the main API process, which serves
+    every concurrent user — blocking its event loop for the duration of a
+    chat generation would stall every other in-flight request, not just this
+    one caller. Yields text deltas as they arrive; the caller is responsible
+    for assembling/persisting the full text and for falling back to the mock
+    engine if this raises (mirrors _claude_chat's own except/fallback, which
+    can't be reused directly since a generator can't "return" a value after
+    partial yields the way a plain function can)."""
+    import anthropic
+    client = anthropic.AsyncAnthropic(
+        api_key=settings.anthropic_api_key,
+        timeout=CHAT_REQUEST_TIMEOUT_SECONDS,
+        max_retries=AI_REQUEST_MAX_RETRIES,
+    )
+
+    async with client.messages.stream(
+        model="claude-sonnet-4-6",
+        max_tokens=600,
+        system=_chat_system_blocks(vehicle),
+        messages=_chat_messages(message, session_history),
+    ) as stream:
+        async for text in stream.text_stream:
+            yield text
 
 
 def _ai_chat(
@@ -383,7 +476,11 @@ def _ai_chat(
     """Real AI chat via OpenAI."""
     try:
         from openai import OpenAI
-        client = OpenAI(api_key=settings.openai_api_key)
+        client = OpenAI(
+            api_key=settings.openai_api_key,
+            timeout=CHAT_REQUEST_TIMEOUT_SECONDS,
+            max_retries=AI_REQUEST_MAX_RETRIES,
+        )
 
         system_content = ADVISOR_PERSONA
         if vehicle:
