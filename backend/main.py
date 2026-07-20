@@ -35,13 +35,16 @@ app = FastAPI(
     openapi_url=None if settings.is_production else "/openapi.json",
 )
 
-# CORS — only the configured frontend origin(s) may call this API with credentials
+# CORS — only the configured frontend origin(s) may call this API with credentials.
+# allow_credentials=True is required for the refresh-token cookie
+# (routers/auth.py) to be sent/received cross-origin at all; X-CSRF-Token is
+# that flow's CSRF header, not sent by default without being explicitly allowed.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Authorization", "Content-Type", "X-CSRF-Token"],
 )
 
 

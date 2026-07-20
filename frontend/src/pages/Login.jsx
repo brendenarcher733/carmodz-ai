@@ -66,6 +66,12 @@ export default function Login() {
         </h1>
         <p className="text-body text-sm mb-8">Sign in to your account to continue.</p>
 
+        {location.state?.resetSuccess && (
+          <div className="bg-stage-1/10 border border-stage-1/25 rounded-xl px-4 py-3 text-stage-1 text-sm mb-4">
+            Password reset — sign in with your new password.
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="field-label">Email</label>
@@ -83,7 +89,7 @@ export default function Login() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="field-label mb-0">Password</label>
-              <span className="font-mono text-xs text-muted cursor-not-allowed">Forgot password?</span>
+              <Link to="/forgot-password" className="font-mono text-xs text-muted hover:text-accent transition-colors">Forgot password?</Link>
             </div>
             <input
               className="field-input"

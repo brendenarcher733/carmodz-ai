@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { authApi } from '../services/api'
+import { authApi, persistSession, clearSession } from '../services/api'
 
 const AuthContext = createContext(null)
 
@@ -13,39 +13,50 @@ export function AuthProvider({ children }) {
       const saved = localStorage.getItem('cm_user')
       if (saved) setUser(JSON.parse(saved))
     } catch {
-      localStorage.removeItem('cm_user')
-      localStorage.removeItem('cm_token')
+      clearSession()
     } finally {
       setReady(true)
     }
   }, [])
 
-  const persist = (token, userData) => {
-    localStorage.setItem('cm_token',  token)
-    localStorage.setItem('cm_user',   JSON.stringify(userData))
-    setUser(userData)
-  }
-
   const login = async (email, password) => {
     const data = await authApi.login(email, password)
-    persist(data.access_token, data.user)
+    persistSession(data)
+    setUser(data.user)
     return data
   }
 
   const signup = async (name, email, password) => {
     const data = await authApi.signup(name, email, password)
-    persist(data.access_token, data.user)
+    persistSession(data)
+    setUser(data.user)
     return data
   }
 
-  const logout = () => {
-    localStorage.removeItem('cm_token')
-    localStorage.removeItem('cm_user')
+  const logout = async () => {
+    // Best-effort — the session should look logged-out locally even if the
+    // network call fails, rather than leaving the user stuck.
+    try { await authApi.logout() } catch { /* ignore */ }
+    clearSession()
     setUser(null)
   }
 
+  const resendVerification = async () => {
+    return authApi.resendVerification()
+  }
+
   return (
-    <AuthContext.Provider value={{ user, ready, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        ready,
+        login,
+        signup,
+        logout,
+        resendVerification,
+        emailVerified: !!user?.email_verified,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

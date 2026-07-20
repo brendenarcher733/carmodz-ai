@@ -62,7 +62,11 @@
 @layer components {
   /* ── Layout ── */
   .page-shell {
-    @apply min-h-screen pt-20;
+    /* --page-shell-offset defaults to the fixed Navbar's own height (5rem)
+       and is bumped up by EmailVerificationBanner while that's showing —
+       see that component for why. */
+    @apply min-h-screen;
+    padding-top: var(--page-shell-offset, 5rem);
   }
 
   .container-content {
