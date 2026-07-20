@@ -29,17 +29,28 @@ logger = logging.getLogger(__name__)
 # internal retries. That means a single call could silently take up to
 # ~3x this long before our own retry logic even sees a failure.
 #
-# max_retries=0 (not 1) is deliberate, and was corrected after live testing
-# caught the bug: with max_retries=1, a single "attempt" from the worker's
-# point of view could internally retry once more inside the SDK — up to 2x
-# the per-call timeout below for what looks like one attempt. That silently
-# exceeded the worker's own JOB_TIMEOUT_SECONDS ceiling
-# (workers/recommendation_worker.py), so arq's blunt timeout killed the job
-# before our own graceful Retry()-with-backoff logic ever got to run.
-# Retries should live in exactly one place. The worker already retries with
-# proper backoff and an instant mock fallback — the client's job is just to
-# fail fast and predictably, not to add its own hidden retry layer on top.
-AI_REQUEST_MAX_RETRIES = 0
+# Retry count is deliberately different per workload — found by hitting a
+# real production regression, not designed up front:
+#
+# Recommendations: max_retries=0. The worker (workers/recommendation_worker.py)
+# already retries with its own backoff and an instant mock fallback. With
+# max_retries=1 here, a single worker-level "attempt" could internally retry
+# once more inside the SDK — up to 2x the per-call timeout for what looks
+# like one attempt — which silently exceeded the worker's own
+# JOB_TIMEOUT_SECONDS and let arq's blunt timeout kill the job before the
+# worker's graceful Retry()-with-backoff ever ran. Retries belong in exactly
+# one place for this path, and the worker is it.
+#
+# Chat: max_retries=1, not 0. Chat has no other retry layer at all — no
+# worker, nothing upstream — it previously relied entirely on the SDK's own
+# default (2) to silently absorb transient blips. Setting it to 0 (deployed
+# briefly, then reverted after live verification against production caught
+# it) removed chat's only safety net: a single transient Anthropic hiccup
+# started surfacing immediately as a mock-fallback response instead of
+# quietly succeeding on retry. 1 retry keeps a real safety margin without
+# reintroducing the multi-minute-tail problem this whole pass exists to fix.
+RECOMMENDATIONS_MAX_RETRIES = 0
+CHAT_MAX_RETRIES = 1
 
 # Two different timeouts, not one shared value — corrected after live testing
 # against the real API caught the original single 30s constant timing out a
@@ -205,7 +216,7 @@ def _claude_build_recommendations(
             client = anthropic.Anthropic(
                 api_key=settings.anthropic_api_key,
                 timeout=RECOMMENDATIONS_REQUEST_TIMEOUT_SECONDS,
-                max_retries=AI_REQUEST_MAX_RETRIES,
+                max_retries=RECOMMENDATIONS_MAX_RETRIES,
             )
 
         response = client.messages.create(
@@ -257,7 +268,7 @@ def _openai_build_recommendations(build) -> Optional[list[dict]]:
         client = OpenAI(
             api_key=settings.openai_api_key,
             timeout=RECOMMENDATIONS_REQUEST_TIMEOUT_SECONDS,
-            max_retries=AI_REQUEST_MAX_RETRIES,
+            max_retries=RECOMMENDATIONS_MAX_RETRIES,
         )
 
         prompt = _build_recommendations_prompt(build) + (
@@ -419,7 +430,7 @@ def _claude_chat(
         client = anthropic.Anthropic(
             api_key=settings.anthropic_api_key,
             timeout=CHAT_REQUEST_TIMEOUT_SECONDS,
-            max_retries=AI_REQUEST_MAX_RETRIES,
+            max_retries=CHAT_MAX_RETRIES,
         )
 
         response = client.messages.create(
@@ -455,7 +466,7 @@ async def stream_claude_chat(
     client = anthropic.AsyncAnthropic(
         api_key=settings.anthropic_api_key,
         timeout=CHAT_REQUEST_TIMEOUT_SECONDS,
-        max_retries=AI_REQUEST_MAX_RETRIES,
+        max_retries=CHAT_MAX_RETRIES,
     )
 
     async with client.messages.stream(
@@ -479,7 +490,7 @@ def _ai_chat(
         client = OpenAI(
             api_key=settings.openai_api_key,
             timeout=CHAT_REQUEST_TIMEOUT_SECONDS,
-            max_retries=AI_REQUEST_MAX_RETRIES,
+            max_retries=CHAT_MAX_RETRIES,
         )
 
         system_content = ADVISOR_PERSONA
