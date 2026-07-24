@@ -1,7 +1,9 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useBuilds } from '../hooks/useBuilds'
 import { useAuth } from '../contexts/AuthContext'
 import { Spinner } from '../components/ui/Spinner'
+import * as analytics from '../services/analytics'
 
 /* ─── Goal metadata ─── */
 const GOAL_META = {
@@ -160,6 +162,8 @@ function GarageBay({ build, onDelete, onToggleFavourite }) {
 
 /* ─── Main Garage ─── */
 export default function Garage() {
+  useEffect(() => { analytics.capture('garage_viewed') }, [])
+
   const { builds, stats, loading, error, deleteBuild, toggleFavourite } = useBuilds()
   const { user } = useAuth()
 

@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import * as analytics from './services/analytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute }  from './components/AdminRoute'
 import { Navbar }      from './components/layout/Navbar'
@@ -21,10 +22,25 @@ import Configurator    from './pages/Configurator'
 import Admin           from './pages/Admin'
 import './styles/globals.css'
 
+analytics.init()
+
+// SPA route changes don't trigger a real page load, so PostHog's own
+// autocapture pageview (which only fires once) can't see them — this
+// fires a $pageview on every client-side navigation instead, which is what
+// makes page-level drop-off/funnel analysis possible at all.
+function RouteTracker() {
+  const location = useLocation()
+  useEffect(() => {
+    analytics.capture('$pageview', { path: location.pathname })
+  }, [location.pathname])
+  return null
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
+        <RouteTracker />
         {/* Login / Signup render without the Navbar */}
         <Routes>
           <Route path="/login"           element={<Login />}          />

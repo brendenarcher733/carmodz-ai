@@ -29,12 +29,14 @@ import asyncio
 import hashlib
 import json
 import logging
+import time
 from datetime import datetime, timedelta
 
 from arq import cron
 from arq.worker import Retry
 from pydantic import ValidationError
 
+from core import analytics
 from core.config import settings
 from core.database import SessionLocal
 from core.redis_pool import redis_settings_from_url
@@ -132,6 +134,7 @@ async def generate_recommendations_task(ctx: dict, build_id: int) -> dict:
         cache_key = _recommendation_cache_key(build)
         cached = await ctx["redis"].get(cache_key)
         was_cache_hit = cached is not None
+        duration_ms: int | None = None
         if was_cache_hit:
             logger.info("Build %s: recommendation cache hit (%s)", build_id, cache_key)
             ai_mods = json.loads(cached)
@@ -141,7 +144,9 @@ async def generate_recommendations_task(ctx: dict, build_id: int) -> dict:
             # see the writeup for why that tradeoff was fine for this refactor).
             # asyncio.to_thread offloads it so this worker's event loop can keep
             # servicing other concurrent jobs while this one waits on the network.
+            start = time.perf_counter()
             ai_mods = await asyncio.to_thread(generate_build_recommendations, build)
+            duration_ms = int((time.perf_counter() - start) * 1000)
             if ai_mods is not None:
                 await ctx["redis"].set(
                     cache_key, json.dumps(ai_mods), ex=RECOMMENDATION_CACHE_TTL_SECONDS
@@ -163,8 +168,16 @@ async def generate_recommendations_task(ctx: dict, build_id: int) -> dict:
                 request_type="recommendation",
                 provider=settings.configured_ai_provider,
                 success=mods is not None,
+                duration_ms=duration_ms,
             ))
             db.commit()
+            analytics.capture(build.user_id, "ai_request_completed", {
+                "request_type": "recommendation",
+                "provider": settings.configured_ai_provider,
+                "success": mods is not None,
+                "duration_ms": duration_ms,
+                "cached": False,
+            })
 
         if mods is None:
             if job_try < MAX_TRIES:

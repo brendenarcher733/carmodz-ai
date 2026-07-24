@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import * as analytics from '../services/analytics'
 
 export default function Signup() {
   const { signup }  = useAuth()
@@ -9,6 +10,8 @@ export default function Signup() {
   const [form,  setForm]  = useState({ name: '', email: '', password: '', confirm: '' })
   const [error, setError] = useState(null)
   const [busy,  setBusy]  = useState(false)
+
+  useEffect(() => { analytics.capture('signup_form_viewed') }, [])
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }))
 
@@ -20,6 +23,7 @@ export default function Signup() {
     if (!canSubmit) return
     setBusy(true)
     setError(null)
+    analytics.capture('signup_submitted')
     try {
       await signup(form.name, form.email, form.password)
       const dest = location.state?.from?.pathname || '/builds'

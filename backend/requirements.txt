@@ -11,3 +11,4 @@ arq==0.28.0
 redis==5.3.1
 psycopg2-binary==2.9.9
 alembic==1.13.2
+posthog==7.29.0

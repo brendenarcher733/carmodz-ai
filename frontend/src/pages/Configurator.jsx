@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CarScene }    from '../components/configurator/CarScene'
 import { ConfigPanel } from '../components/configurator/ConfigPanel'
 import { BuildSummary } from '../components/configurator/BuildSummary'
 import { useCarConfig } from '../hooks/useCarConfig'
 import { classifyVehicle } from '../lib/vehicleUtils'
+import * as analytics from '../services/analytics'
 
 export default function Configurator() {
+  useEffect(() => { analytics.capture('configurator_used') }, [])
+
   const [searchParams] = useSearchParams()
   const make  = searchParams.get('make')  ?? ''
   const model = searchParams.get('model') ?? ''

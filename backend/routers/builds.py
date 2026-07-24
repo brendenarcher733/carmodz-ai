@@ -4,6 +4,7 @@ import logging
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
+from core import analytics
 from core.database import get_db
 from models.build import BuildCreate, BuildResponse, BuildStatusResponse
 from models.recommendation import ModPlan
@@ -57,6 +58,11 @@ async def create_new_build(
     Returns immediately (status='pending') — this used to block for 25-45s
     on a Claude round-trip. Poll GET /{id}/status until status='ready'."""
     build = create_build(db, data, current_user.id)
+    analytics.capture(current_user.id, "build_created", {
+        "year": data.year, "make": data.make, "model": data.model,
+        "budget": data.budget, "goal": data.goal, "experience": data.experience,
+        "categories": data.categories, "is_daily": data.is_daily,
+    })
     await _enqueue_generation_job(request, db, build)
     return build
 

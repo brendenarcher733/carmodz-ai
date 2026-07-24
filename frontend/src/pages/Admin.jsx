@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { adminApi } from '../services/api'
+import * as analytics from '../services/analytics'
 import { Spinner } from '../components/ui/Spinner'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
@@ -13,21 +14,46 @@ const STAT_META = [
   { key: 'total_builds',        label: 'Total Builds'        },
   { key: 'total_ai_requests',   label: 'Total AI Requests'   },
   { key: 'new_users_this_week', label: 'New This Week'       },
+  {
+    key: 'avg_ai_response_time_ms',
+    label: 'Avg AI Response',
+    format: (v) => (v == null ? '—' : `${(v / 1000).toFixed(1)}s`),
+  },
 ]
 
 function StatsRow({ stats }) {
   if (!stats) return null
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
-      {STAT_META.map(({ key, label }) => (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+      {STAT_META.map(({ key, label, format }) => (
         <Card key={key} padding="md" className="text-center">
           <div className="font-display font-black text-white text-2xl leading-none mb-1.5">
-            {stats[key]?.toLocaleString?.() ?? stats[key]}
+            {format ? format(stats[key]) : (stats[key]?.toLocaleString?.() ?? stats[key])}
           </div>
           <div className="text-muted text-xs font-mono uppercase tracking-widest">{label}</div>
         </Card>
       ))}
     </div>
+  )
+}
+
+function PopularVehicles({ vehicles }) {
+  if (!vehicles || vehicles.length === 0) return null
+  return (
+    <Card padding="lg" className="mb-8">
+      <h2 className="font-display font-bold text-white text-sm uppercase tracking-widest mb-4">
+        Top Vehicles
+      </h2>
+      <div className="space-y-2.5">
+        {vehicles.map((v, i) => (
+          <div key={`${v.make}-${v.model}`} className="flex items-center gap-3">
+            <span className="font-mono text-xs text-muted w-4">{i + 1}</span>
+            <span className="text-body text-sm flex-1">{v.make} {v.model}</span>
+            <span className="font-mono text-xs text-muted">{v.count} build{v.count === 1 ? '' : 's'}</span>
+          </div>
+        ))}
+      </div>
+    </Card>
   )
 }
 
@@ -52,25 +78,30 @@ function formatDate(value) {
 
 /* ─── Main page ─── */
 export default function Admin() {
-  const [stats, setStats]     = useState(null)
-  const [users, setUsers]     = useState([])
-  const [total, setTotal]     = useState(0)
-  const [page, setPage]       = useState(0)
-  const [search, setSearch]   = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState(null)
+  const [stats, setStats]       = useState(null)
+  const [vehicles, setVehicles] = useState([])
+  const [users, setUsers]       = useState([])
+  const [total, setTotal]       = useState(0)
+  const [page, setPage]         = useState(0)
+  const [search, setSearch]     = useState('')
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState(null)
+
+  useEffect(() => { analytics.capture('admin_dashboard_viewed') }, [])
 
   const load = useCallback(async (pageArg, searchArg) => {
     setLoading(true)
     setError(null)
     try {
-      const [statsData, usersData] = await Promise.all([
+      const [statsData, usersData, vehiclesData] = await Promise.all([
         adminApi.stats(),
         adminApi.users({ skip: pageArg * PAGE_SIZE, limit: PAGE_SIZE, search: searchArg }),
+        adminApi.popularVehicles(),
       ])
       setStats(statsData)
       setUsers(usersData.users)
       setTotal(usersData.total)
+      setVehicles(vehiclesData)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -126,6 +157,7 @@ export default function Admin() {
         {!error && stats && (
           <>
             <StatsRow stats={stats} />
+            <PopularVehicles vehicles={vehicles} />
 
             <form onSubmit={handleSearchSubmit} className="mb-5 flex gap-2">
               <input

@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
+from core import analytics
 from core.config import settings
 from core.database import get_db
 from core.email import send_email
@@ -275,6 +276,9 @@ def signup(data: UserCreate, request: Request, response: Response, db: Session =
     verify_token = _create_action_token(db, user, "verify_email", EMAIL_VERIFICATION_TTL_HOURS)
     _send_verification_email(user, verify_token)
 
+    analytics.identify(user.id, {"email": user.email, "name": user.name})
+    analytics.capture(user.id, "user_signed_up")
+
     return _issue_session(db, user, request, response)
 
 
@@ -296,8 +300,13 @@ def login(data: UserLogin, request: Request, response: Response, db: Session = D
             detail="Please verify your email before logging in. Check your inbox, or request a new link.",
         )
 
+    # Read before overwriting — this is what distinguishes a first-ever login
+    # (never set) from a returning user (already set once before).
+    is_returning = user.last_login_at is not None
     user.last_login_at = datetime.utcnow()
     db.commit()
+
+    analytics.capture(user.id, "user_logged_in", {"is_returning": is_returning})
 
     return _issue_session(db, user, request, response)
 

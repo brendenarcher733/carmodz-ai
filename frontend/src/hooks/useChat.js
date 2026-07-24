@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { advisorApi } from '../services/api'
+import * as analytics from '../services/analytics'
 
 function generateSessionId() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -27,6 +28,7 @@ export function useChat(initialVehicle = null) {
     const userMsg = { id: Date.now(), role: 'user', content: text }
     setMessages(prev => [...prev, userMsg])
     setLoading(true)
+    analytics.capture('chat_message_sent')
 
     // The assistant bubble is only added to the message list once the first
     // token actually arrives — until then the existing TypingIndicator shows,

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { buildsApi } from '../services/api'
+import * as analytics from '../services/analytics'
 import clsx from 'clsx'
 
 /* ─── Vehicle data ─── */
@@ -606,6 +607,13 @@ export default function Planner() {
       : [...p.categories, cat],
   }))
 
+  // Fires whenever the wizard step changes — a user who fires step 1 but
+  // never step 2 is a drop-off, visible directly as a funnel step gap once
+  // this data is in PostHog. No separate "abandoned" event needed.
+  useEffect(() => {
+    analytics.capture('planner_step_viewed', { step_index: step, step_name: STEPS[step] })
+  }, [step])
+
   const canAdvance = () => {
     if (step === 0) return form.year && form.make && form.model
     if (step === 1) return form.budget > 0 && form.goal
@@ -860,7 +868,12 @@ export default function Planner() {
           {step < 3 ? (
             <button
               type="button"
-              onClick={() => setStep(p => p + 1)}
+              onClick={() => {
+                if (step === 0) {
+                  analytics.capture('vehicle_selected', { year: form.year, make: form.make, model: form.model })
+                }
+                setStep(p => p + 1)
+              }}
               disabled={!canAdvance()}
               className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-bold text-sm px-7 py-3 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
             >

@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from core.database import get_db
 from models.user import User
 from routers.auth import require_admin
-from services.admin_service import get_platform_stats, get_users_with_stats
+from services.admin_service import get_platform_stats, get_popular_vehicles, get_users_with_stats
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"], dependencies=[Depends(require_admin)])
 
@@ -40,11 +40,23 @@ class AdminStatsResponse(BaseModel):
     total_builds: int
     total_ai_requests: int
     new_users_this_week: int
+    avg_ai_response_time_ms: int | None = None
+
+
+class PopularVehicle(BaseModel):
+    make: str
+    model: str
+    count: int
 
 
 @router.get("/stats", response_model=AdminStatsResponse)
 def admin_stats(db: Session = Depends(get_db)):
     return get_platform_stats(db)
+
+
+@router.get("/popular-vehicles", response_model=list[PopularVehicle])
+def admin_popular_vehicles(db: Session = Depends(get_db)):
+    return get_popular_vehicles(db)
 
 
 @router.get("/users", response_model=AdminUsersResponse)

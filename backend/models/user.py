@@ -86,6 +86,9 @@ class AiRequestLog(Base):
     request_type = Column(String(30), nullable=False)   # "chat" | "recommendation"
     provider     = Column(String(20), nullable=False)   # "anthropic" | "openai" | "mock"
     success      = Column(Boolean, nullable=False, default=True)
+    # Null on a cache hit (workers/recommendation_worker.py) — no AI call was
+    # actually timed. Populated on every real attempt otherwise.
+    duration_ms  = Column(Integer, nullable=True)
     created_at   = Column(DateTime, default=datetime.utcnow, index=True)
 
 

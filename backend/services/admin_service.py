@@ -69,6 +69,11 @@ def get_platform_stats(db: Session) -> dict:
         db.query(func.count(User.id)).filter(User.created_at >= week_ago).scalar() or 0
     )
     active_users = db.query(func.count(User.id)).filter(User.is_active == True).scalar() or 0
+    avg_ai_response_time_ms = (
+        db.query(func.avg(AiRequestLog.duration_ms))
+        .filter(AiRequestLog.success == True, AiRequestLog.duration_ms.isnot(None))
+        .scalar()
+    )
 
     return {
         "total_users": total_users,
@@ -76,4 +81,19 @@ def get_platform_stats(db: Session) -> dict:
         "total_builds": total_builds,
         "total_ai_requests": total_ai_requests,
         "new_users_this_week": new_users_this_week,
+        "avg_ai_response_time_ms": round(avg_ai_response_time_ms) if avg_ai_response_time_ms is not None else None,
     }
+
+
+def get_popular_vehicles(db: Session, limit: int = 5) -> list[dict]:
+    """Top make/model combos by build count — the "popular vehicle searches"
+    signal we already own in our own database, no external analytics tool
+    needed for this specific metric."""
+    rows = (
+        db.query(Build.make, Build.model, func.count(Build.id).label("count"))
+        .group_by(Build.make, Build.model)
+        .order_by(func.count(Build.id).desc())
+        .limit(limit)
+        .all()
+    )
+    return [{"make": make, "model": model, "count": count} for make, model, count in rows]

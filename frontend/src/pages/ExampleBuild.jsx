@@ -1,7 +1,8 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { Badge } from '../components/ui/Badge'
 import { ShopLinks } from '../components/ui/ShopLinks'
+import * as analytics from '../services/analytics'
 
 const CarViewer3D = lazy(() =>
   import('../components/ui/CarViewer3D').then(m => ({ default: m.CarViewer3D }))
@@ -209,6 +210,8 @@ function StageTimeline({ mods }) {
 
 /* ─── Main page ─── */
 export default function ExampleBuild() {
+  useEffect(() => { analytics.capture('example_build_viewed') }, [])
+
   const [viewing3D, setViewing3D] = useState(null)
 
   const stageMods = { 1: [], 2: [] }

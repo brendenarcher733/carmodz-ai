@@ -76,6 +76,14 @@ class Settings(BaseSettings):
         default="", alias="EMAIL_VERIFICATION_REQUIRED_FEATURES"
     )
 
+    # Product analytics — same pluggable, off-by-default pattern as AI_PROVIDER
+    # and EMAIL_PROVIDER above. Unset means core/analytics.py no-ops everywhere
+    # it's called; the app behaves identically to before this existed. The
+    # same key value is meant to be reused as the frontend's VITE_POSTHOG_KEY —
+    # PostHog project API keys are designed to be public/client-safe.
+    posthog_api_key: str = Field(default="", alias="POSTHOG_API_KEY")
+    posthog_host:    str = Field(default="https://us.i.posthog.com", alias="POSTHOG_HOST")
+
     @property
     def email_verification_required_features(self) -> set[str]:
         return {

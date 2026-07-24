@@ -189,8 +189,9 @@ export const authApi = {
 }
 
 export const adminApi = {
-  stats: () => api.get('/api/admin/stats'),
-  users: (params = {}) => api.get('/api/admin/users', { params }),
+  stats:           ()     => api.get('/api/admin/stats'),
+  users:           (params = {}) => api.get('/api/admin/users', { params }),
+  popularVehicles: ()     => api.get('/api/admin/popular-vehicles'),
 }
 
 export const healthApi = {

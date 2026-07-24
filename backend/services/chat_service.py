@@ -5,8 +5,10 @@ Manages chat session history and delegates to the AI service.
 
 import asyncio
 import logging
+import time
 
 from sqlalchemy.orm import Session
+from core import analytics
 from core.config import settings
 from models.chat import ChatMessage
 from models.schemas import ChatMessageIn
@@ -16,7 +18,7 @@ from services.ai_service import generate_chat_response, stream_claude_chat
 logger = logging.getLogger(__name__)
 
 
-def _log_ai_request(db: Session, user_id: int | None, request_type: str) -> None:
+def _log_ai_request(db: Session, user_id: int | None, request_type: str, duration_ms: int) -> None:
     """Logged once per real chat turn, always success=True — chat always
     returns *some* response (falling back to mock on a provider failure is
     silent inside generate_chat_response/stream_claude_chat and doesn't
@@ -29,8 +31,15 @@ def _log_ai_request(db: Session, user_id: int | None, request_type: str) -> None
         request_type=request_type,
         provider=settings.configured_ai_provider,
         success=True,
+        duration_ms=duration_ms,
     ))
     db.commit()
+    analytics.capture(user_id or "anonymous", "ai_request_completed", {
+        "request_type": request_type,
+        "provider": settings.configured_ai_provider,
+        "success": True,
+        "duration_ms": duration_ms,
+    })
 
 
 def get_session_history(db: Session, session_id: str) -> list[dict]:
@@ -91,11 +100,13 @@ def handle_chat(db: Session, data: ChatMessageIn, user_id: int | None = None) ->
     )
 
     # Generate response
+    start = time.perf_counter()
     reply = generate_chat_response(
         message=data.message,
         session_history=history,
         vehicle=data.vehicle,
     )
+    duration_ms = int((time.perf_counter() - start) * 1000)
 
     # Save assistant response
     save_message(
@@ -105,7 +116,7 @@ def handle_chat(db: Session, data: ChatMessageIn, user_id: int | None = None) ->
         content=reply,
         build_id=data.build_id,
     )
-    _log_ai_request(db, user_id, "chat")
+    _log_ai_request(db, user_id, "chat", duration_ms)
 
     return reply
 
@@ -141,6 +152,7 @@ async def handle_chat_stream(db: Session, data: ChatMessageIn, user_id: int | No
     )
 
     full_text = ""
+    start = time.perf_counter()
     if settings.anthropic_api_key:
         try:
             async for chunk in stream_claude_chat(data.message, history, data.vehicle):
@@ -160,6 +172,11 @@ async def handle_chat_stream(db: Session, data: ChatMessageIn, user_id: int | No
     else:
         full_text = await asyncio.to_thread(generate_chat_response, data.message, history, data.vehicle)
         yield full_text
+    # Total time to last token, not time-to-first-token — streaming improves
+    # *perceived* latency (see the docstring above) but this metric tracks
+    # total generation time, consistent with how the non-streaming path
+    # measures the same "ai_request_completed" event.
+    duration_ms = int((time.perf_counter() - start) * 1000)
 
     await asyncio.to_thread(
         save_message,
@@ -169,4 +186,4 @@ async def handle_chat_stream(db: Session, data: ChatMessageIn, user_id: int | No
         content=full_text,
         build_id=data.build_id,
     )
-    await asyncio.to_thread(_log_ai_request, db, user_id, "chat")
+    await asyncio.to_thread(_log_ai_request, db, user_id, "chat", duration_ms)
