@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useChat } from '../hooks/useChat'
 import { Spinner } from '../components/ui/Spinner'
 import clsx from 'clsx'
+import * as analytics from '../services/analytics'
 
 const QUICK_STARTERS = [
   "Where do I start with a $3k budget?",
@@ -125,6 +126,7 @@ export default function Advisor() {
     e.preventDefault()
     if (!carYear && !carMake && !carModel) return
     const v = { year: carYear, make: carMake, model: carModel }
+    analytics.capture('advisor_vehicle_set', { year: carYear, make: carMake, model: carModel })
     updateVehicle(v)
     sendMessage(`I'm working on a ${[carYear, carMake, carModel].filter(Boolean).join(' ')}.`)
   }

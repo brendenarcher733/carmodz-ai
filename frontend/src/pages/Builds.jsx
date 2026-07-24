@@ -270,8 +270,8 @@ export default function Garage() {
               <GarageBay
                 key={b.id}
                 build={b}
-                onDelete={deleteBuild}
-                onToggleFavourite={toggleFavourite}
+                onDelete={id => { analytics.capture('build_deleted', { build_id: id }); deleteBuild(id) }}
+                onToggleFavourite={id => { const build = builds.find(x => x.id === id); analytics.capture('build_favourited', { build_id: id, is_favourite: !build?.is_favourite }); toggleFavourite(id) }}
               />
             ))}
 

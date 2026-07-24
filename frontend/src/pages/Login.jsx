@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import * as analytics from '../services/analytics'
 
 export default function Login() {
   const { login }   = useAuth()
@@ -16,12 +17,14 @@ export default function Login() {
     e.preventDefault()
     setBusy(true)
     setError(null)
+    analytics.capture('login_submitted')
     try {
       await login(form.email, form.password)
       const dest = location.state?.from?.pathname || '/builds'
       navigate(dest, { replace: true })
     } catch (err) {
       setError(err.message)
+      analytics.captureException(err)
     } finally {
       setBusy(false)
     }
