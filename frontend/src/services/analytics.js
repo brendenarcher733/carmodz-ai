@@ -10,7 +10,13 @@ const HOST = import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com'
 let initialized = false
 
 export function init() {
-  if (!KEY || initialized) return
+  if (initialized) return
+  if (!KEY) {
+    if (import.meta.env.DEV) {
+      console.error('VITE_POSTHOG_KEY variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once VITE_POSTHOG_KEY is configured')
+    }
+    return
+  }
   posthog.init(KEY, {
     api_host: HOST,
     // Route changes are captured explicitly (see RouteTracker in main.jsx) —
@@ -48,4 +54,9 @@ export function reset() {
 export function startSessionRecording() {
   if (!initialized) return
   posthog.startSessionRecording()
+}
+
+export function captureException(error, properties = {}) {
+  if (!initialized) return
+  posthog.captureException(error, { ...properties })
 }

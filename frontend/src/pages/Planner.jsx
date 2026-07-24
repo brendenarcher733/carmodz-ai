@@ -623,6 +623,16 @@ export default function Planner() {
 
   const submit = async () => {
     setLoading(true); setError(null)
+    analytics.capture('build_submitted', {
+      year: form.year,
+      make: form.make,
+      model: form.model,
+      budget: parseFloat(form.budget),
+      goal: form.goal,
+      experience: form.experience,
+      is_daily: form.is_daily,
+      categories: form.categories,
+    })
     try {
       const payload = {
         ...form,
@@ -634,6 +644,7 @@ export default function Planner() {
       navigate(`/builds/${build.id}`)
     } catch (e) {
       setError(e.message)
+      analytics.captureException(e)
       setLoading(false)
     }
   }

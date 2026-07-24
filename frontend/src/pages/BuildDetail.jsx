@@ -5,6 +5,7 @@ import { buildsApi } from '../services/api'
 import { Badge } from '../components/ui/Badge'
 import { Spinner } from '../components/ui/Spinner'
 import { ShopLinks } from '../components/ui/ShopLinks'
+import * as analytics from '../services/analytics'
 
 const CarViewer3D = lazy(() =>
   import('../components/ui/CarViewer3D').then(m => ({ default: m.CarViewer3D }))
@@ -232,7 +233,27 @@ export default function BuildDetail() {
   const isReady = status?.status === 'ready'
   const { plan, loading, error } = useBuildPlan(id, { enabled: isReady })
 
+  useEffect(() => {
+    if (status?.status === 'failed') {
+      analytics.capture('build_plan_failed', { build_id: id, error_message: status.error_message })
+    }
+  }, [status?.status, id])
+
+  useEffect(() => {
+    if (!plan) return
+    analytics.capture('build_plan_viewed', {
+      build_id: id,
+      make: plan.make,
+      model: plan.model,
+      year: plan.year,
+      goal: plan.goal,
+      mod_count: plan.mods.length,
+      used_mock_fallback: plan.used_mock_fallback,
+    })
+  }, [plan, id])
+
   const handleRetry = async () => {
+    analytics.capture('build_plan_retried', { build_id: id })
     setRetrying(true)
     await retry()
     setRetrying(false)
@@ -494,7 +515,7 @@ export default function BuildDetail() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {mods.map((mod, i) => (
-                  <ModCard key={mod.name} mod={mod} index={i} vehicle={vehicle} onView3D={setViewing3D} />
+                  <ModCard key={mod.name} mod={mod} index={i} vehicle={vehicle} onView3D={mod => { analytics.capture('mod_3d_viewed', { mod_name: mod.name, mod_category: mod.category, mod_stage: mod.stage }); setViewing3D(mod) }} />
                 ))}
               </div>
             </section>

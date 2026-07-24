@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import clsx from 'clsx'
 import { MODIFICATIONS } from '../../data/modifications'
+import * as analytics from '../../services/analytics'
 
 const CATEGORY_ORDER = ['paint', 'tint', 'wheels', 'performance', 'suspension', 'brakes', 'exterior', 'interior']
 
@@ -30,6 +31,7 @@ export function ConfigPanel({ config, setSingle, toggleMulti, setCustomColor }) 
   const cat = MODIFICATIONS[activeTab]
 
   function handleOption(id) {
+    analytics.capture('configurator_option_changed', { category: activeTab, option_id: id })
     if (cat.single) setSingle(activeTab, id)
     else toggleMulti(activeTab, id)
   }

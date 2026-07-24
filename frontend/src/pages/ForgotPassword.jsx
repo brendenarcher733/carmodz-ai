@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { authApi } from '../services/api'
+import * as analytics from '../services/analytics'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -12,6 +13,7 @@ export default function ForgotPassword() {
     e.preventDefault()
     setBusy(true)
     setError(null)
+    analytics.capture('forgot_password_submitted')
     try {
       // Backend always returns the same generic response regardless of
       // whether the email exists — deliberate, prevents an attacker from
