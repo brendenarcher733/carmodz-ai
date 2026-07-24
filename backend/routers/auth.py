@@ -56,6 +56,32 @@ def get_current_user(
     return user
 
 
+def get_current_user_optional(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer),
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Same decode logic as get_current_user, but never raises — for
+    endpoints that work fine unauthenticated (the Mod Advisor chat) but
+    should still attribute the request to a user when one is logged in.
+    Any problem with the token (missing, expired, unknown user) just means
+    "anonymous," not a 401."""
+    if not credentials:
+        return None
+    user_id = decode_access_token(credentials.credentials)
+    if not user_id:
+        return None
+    return db.query(User).filter(User.id == user_id, User.is_active == True).first()
+
+
+def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    """Gate for /api/admin/*. Same shape as require_verified_email, but a
+    hard requirement rather than a config-driven one — there's no soft-gate
+    story for admin data the way there is for a feature like billing."""
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
+
+
 def require_verified_email(feature_key: str):
     """Dependency factory for gating a *specific* endpoint behind email
     verification, without hard-coding that requirement into the auth system
@@ -269,6 +295,9 @@ def login(data: UserLogin, request: Request, response: Response, db: Session = D
             status_code=403,
             detail="Please verify your email before logging in. Check your inbox, or request a new link.",
         )
+
+    user.last_login_at = datetime.utcnow()
+    db.commit()
 
     return _issue_session(db, user, request, response)
 

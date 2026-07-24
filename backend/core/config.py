@@ -92,6 +92,19 @@ class Settings(BaseSettings):
         return self.openai_model
 
     @property
+    def configured_ai_provider(self) -> str:
+        """Which provider generate_chat_response/generate_build_recommendations
+        (services/ai_service.py) will actually try first — used by both of
+        those call sites' request logging (models.user.AiRequestLog) so the
+        "which provider" label can't drift out of sync with the real
+        provider-selection logic."""
+        if self.anthropic_api_key:
+            return "anthropic"
+        if self.openai_api_key:
+            return "openai"
+        return "mock"
+
+    @property
     def is_production(self) -> bool:
         return self.environment.lower() == "production"
 

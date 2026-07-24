@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { AdminRoute }  from './components/AdminRoute'
 import { Navbar }      from './components/layout/Navbar'
 import { EmailVerificationBanner } from './components/EmailVerificationBanner'
 import Landing         from './pages/Landing'
@@ -17,6 +18,7 @@ import ResetPassword   from './pages/ResetPassword'
 import VerifyEmail     from './pages/VerifyEmail'
 import ExampleBuild    from './pages/ExampleBuild'
 import Configurator    from './pages/Configurator'
+import Admin           from './pages/Admin'
 import './styles/globals.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -44,6 +46,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path="/advisor"       element={<Advisor />}      />
                   <Route path="/example-build"  element={<ExampleBuild />}  />
                   <Route path="/configurator"   element={<ProtectedRoute><Configurator /></ProtectedRoute>}  />
+                  <Route path="/admin"          element={<AdminRoute><Admin /></AdminRoute>}  />
                 </Routes>
               </>
             }

@@ -188,6 +188,11 @@ export const authApi = {
   resendVerification: ()                   => api.post('/api/auth/resend-verification'),
 }
 
+export const adminApi = {
+  stats: () => api.get('/api/admin/stats'),
+  users: (params = {}) => api.get('/api/admin/users', { params }),
+}
+
 export const healthApi = {
   check: () => api.get('/health'),
 }

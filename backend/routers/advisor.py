@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 from core.database import get_db, SessionLocal
 from core.rate_limit import RateLimiter
 from models.schemas import ChatMessageIn
+from models.user import User
+from routers.auth import get_current_user_optional
 from services.chat_service import handle_chat, handle_chat_stream
 
 router = APIRouter(prefix="/api/mod-advisor", tags=["Mod Advisor"])
@@ -46,14 +48,18 @@ def _suggestions_for(message: str, response: str) -> Optional[list[str]]:
 
 
 @router.post("/chat", response_model=ChatResponse, dependencies=[Depends(chat_rate_limit)])
-def chat_with_advisor(payload: ChatRequest, db: Session = Depends(get_db)):
+def chat_with_advisor(
+    payload: ChatRequest,
+    db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_current_user_optional),
+):
     data = ChatMessageIn(
         session_id=payload.session_id,
         message=payload.message,
         build_id=payload.build_id,
         vehicle=payload.vehicle,
     )
-    reply = handle_chat(db, data)
+    reply = handle_chat(db, data, user_id=current_user.id if current_user else None)
     return ChatResponse(
         response=reply,
         suggestions=_suggestions_for(payload.message, reply),
@@ -61,7 +67,10 @@ def chat_with_advisor(payload: ChatRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/chat/stream", dependencies=[Depends(chat_rate_limit)])
-async def chat_with_advisor_stream(payload: ChatRequest):
+async def chat_with_advisor_stream(
+    payload: ChatRequest,
+    current_user: User | None = Depends(get_current_user_optional),
+):
     """SSE variant of /chat — same rate limit, same persistence, same
     suggestion-chip logic, but yields text as it's generated instead of
     waiting for the full response. Manages its own DB session (rather than
@@ -76,11 +85,13 @@ async def chat_with_advisor_stream(payload: ChatRequest):
         vehicle=payload.vehicle,
     )
 
+    user_id = current_user.id if current_user else None
+
     async def event_stream():
         db = SessionLocal()
         full_text = ""
         try:
-            async for chunk in handle_chat_stream(db, data):
+            async for chunk in handle_chat_stream(db, data, user_id=user_id):
                 full_text += chunk
                 yield f"data: {json.dumps({'type': 'token', 'text': chunk})}\n\n"
         finally:

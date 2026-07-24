@@ -20,7 +20,12 @@ class User(Base):
     password_hash  = Column(String(255), nullable=False)
     is_active      = Column(Boolean, default=True)
     email_verified = Column(Boolean, nullable=False, default=False)
+    is_admin       = Column(Boolean, nullable=False, default=False)
     created_at     = Column(DateTime, default=datetime.utcnow)
+    # Set only on a real login (routers/auth.py) — deliberately not touched by
+    # silent /refresh calls, since "last login" and "last active" are
+    # different metrics and the admin dashboard wants the former.
+    last_login_at  = Column(DateTime, nullable=True)
 
     def __repr__(self):
         return f"<User id={self.id} {self.email}>"
@@ -63,6 +68,25 @@ class ActionToken(Base):
     created_at  = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User")
+
+
+class AiRequestLog(Base):
+    """One row per real AI call (never per cache hit — no AI call was
+    actually made then). Deliberately generic — a request-type-discriminated
+    event log, not a chat-specific or recommendation-specific table — so
+    admin metrics beyond a simple count (cost, tokens, latency, new request
+    types) can be added later without a schema redesign.
+
+    user_id is nullable: the Mod Advisor chat endpoint is usable without
+    logging in (routers/advisor.py), so not every request has an owner."""
+    __tablename__ = "ai_request_logs"
+
+    id           = Column(Integer, primary_key=True, index=True)
+    user_id      = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    request_type = Column(String(30), nullable=False)   # "chat" | "recommendation"
+    provider     = Column(String(20), nullable=False)   # "anthropic" | "openai" | "mock"
+    success      = Column(Boolean, nullable=False, default=True)
+    created_at   = Column(DateTime, default=datetime.utcnow, index=True)
 
 
 # ── Pydantic Schemas ───────────────────────────────────────────────────────────
@@ -115,6 +139,7 @@ class UserResponse(BaseModel):
     name:           str
     email:          str
     email_verified: bool
+    is_admin:       bool
     created_at:     datetime
 
     model_config = {"from_attributes": True}

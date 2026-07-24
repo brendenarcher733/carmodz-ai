@@ -43,6 +43,7 @@ from core.redis_pool import redis_settings_from_url
 # registered in this process unless its module is imported somewhere.
 # The main app gets this for free via init_db(); the worker has no
 # equivalent startup hook, so it's done explicitly here instead.
+from models.user import AiRequestLog
 from models import user, chat  # noqa: F401
 from models.build import Build
 from models.recommendation import ModRecommendation, Recommendation
@@ -130,7 +131,8 @@ async def generate_recommendations_task(ctx: dict, build_id: int) -> dict:
         # returns in a Redis round-trip instead of a 25-45s Claude call.
         cache_key = _recommendation_cache_key(build)
         cached = await ctx["redis"].get(cache_key)
-        if cached is not None:
+        was_cache_hit = cached is not None
+        if was_cache_hit:
             logger.info("Build %s: recommendation cache hit (%s)", build_id, cache_key)
             ai_mods = json.loads(cached)
         else:
@@ -152,6 +154,17 @@ async def generate_recommendations_task(ctx: dict, build_id: int) -> dict:
             except ValidationError:
                 logger.warning("Build %s: AI output failed final validation", build_id, exc_info=True)
                 mods = None
+
+        # Logged only for a real attempt — a cache hit never made an AI call,
+        # so it isn't an AI "request" for the admin dashboard's usage metrics.
+        if not was_cache_hit:
+            db.add(AiRequestLog(
+                user_id=build.user_id,
+                request_type="recommendation",
+                provider=settings.configured_ai_provider,
+                success=mods is not None,
+            ))
+            db.commit()
 
         if mods is None:
             if job_try < MAX_TRIES:

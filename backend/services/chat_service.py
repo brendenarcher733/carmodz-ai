@@ -10,9 +10,27 @@ from sqlalchemy.orm import Session
 from core.config import settings
 from models.chat import ChatMessage
 from models.schemas import ChatMessageIn
+from models.user import AiRequestLog
 from services.ai_service import generate_chat_response, stream_claude_chat
 
 logger = logging.getLogger(__name__)
+
+
+def _log_ai_request(db: Session, user_id: int | None, request_type: str) -> None:
+    """Logged once per real chat turn, always success=True — chat always
+    returns *some* response (falling back to mock on a provider failure is
+    silent inside generate_chat_response/stream_claude_chat and doesn't
+    propagate a failure signal to this layer today, unlike the build
+    recommendation worker, which does track that explicitly — see
+    workers/recommendation_worker.py's own logging for the more precise
+    success/failure case)."""
+    db.add(AiRequestLog(
+        user_id=user_id,
+        request_type=request_type,
+        provider=settings.configured_ai_provider,
+        success=True,
+    ))
+    db.commit()
 
 
 def get_session_history(db: Session, session_id: str) -> list[dict]:
@@ -47,7 +65,7 @@ def save_message(
     return msg
 
 
-def handle_chat(db: Session, data: ChatMessageIn) -> str:
+def handle_chat(db: Session, data: ChatMessageIn, user_id: int | None = None) -> str:
     """
     Full chat cycle:
       1. Load session history
@@ -55,6 +73,11 @@ def handle_chat(db: Session, data: ChatMessageIn) -> str:
       3. Generate AI response
       4. Save the AI response
       5. Return the reply text
+
+    user_id is optional — the Mod Advisor chat endpoint works without being
+    logged in (routers/advisor.py); when a session *is* authenticated, the
+    request gets attributed to that user for the admin dashboard's usage
+    metrics (routers/admin.py).
     """
     history = get_session_history(db, data.session_id)
 
@@ -82,11 +105,12 @@ def handle_chat(db: Session, data: ChatMessageIn) -> str:
         content=reply,
         build_id=data.build_id,
     )
+    _log_ai_request(db, user_id, "chat")
 
     return reply
 
 
-async def handle_chat_stream(db: Session, data: ChatMessageIn):
+async def handle_chat_stream(db: Session, data: ChatMessageIn, user_id: int | None = None):
     """Streaming counterpart to handle_chat. Yields text deltas as they
     arrive instead of returning one complete string — doesn't reduce total
     generation time, but collapses *perceived* latency to time-to-first-token
@@ -145,3 +169,4 @@ async def handle_chat_stream(db: Session, data: ChatMessageIn):
         content=full_text,
         build_id=data.build_id,
     )
+    await asyncio.to_thread(_log_ai_request, db, user_id, "chat")

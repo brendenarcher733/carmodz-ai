@@ -94,6 +94,10 @@ export function Navbar() {
   const { user, logout }   = useAuth()
   const [open, setOpen]    = useState(false)
 
+  const navLinks = user?.is_admin
+    ? [...NAV_LINKS, { to: '/admin', label: 'Admin' }]
+    : NAV_LINKS
+
   const handleLogout = () => {
     logout()
     navigate('/')
@@ -125,7 +129,7 @@ export function Navbar() {
 
           {/* Desktop nav links */}
           <ul className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map(({ to, label }) => (
+            {navLinks.map(({ to, label }) => (
               <li key={to}>
                 <Link
                   to={to}
@@ -198,7 +202,7 @@ export function Navbar() {
           }}
         >
           <div className="container-content py-4 flex flex-col gap-1">
-            {NAV_LINKS.map(({ to, label }) => (
+            {navLinks.map(({ to, label }) => (
               <Link
                 key={to}
                 to={to}
