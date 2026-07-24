@@ -92,7 +92,6 @@ export function Navbar() {
   const { pathname }       = useLocation()
   const navigate           = useNavigate()
   const { user, logout }   = useAuth()
-  const [open, setOpen]    = useState(false)
 
   const navLinks = user?.is_admin
     ? [...NAV_LINKS, { to: '/admin', label: 'Admin' }]
@@ -170,74 +169,9 @@ export function Navbar() {
                 </Link>
               </div>
             )}
-
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setOpen(o => !o)}
-              className="md:hidden p-2 text-body hover:text-white transition-colors"
-              aria-label="Toggle menu"
-            >
-              {open ? (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              )}
-            </button>
           </div>
         </div>
       </nav>
-
-      {/* Mobile menu */}
-      {open && (
-        <div
-          className="md:hidden"
-          style={{
-            background: 'rgba(8,9,11,0.97)',
-            backdropFilter: 'blur(24px)',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-          }}
-        >
-          <div className="container-content py-4 flex flex-col gap-1">
-            {navLinks.map(({ to, label }) => (
-              <Link
-                key={to}
-                to={to}
-                onClick={() => setOpen(false)}
-                className={clsx(
-                  'px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150',
-                  pathname === to
-                    ? 'text-white bg-white/[0.08]'
-                    : 'text-body hover:text-white hover:bg-white/[0.05]',
-                )}
-              >
-                {label}
-              </Link>
-            ))}
-            <div className="mt-2 flex flex-col gap-2">
-              {user ? (
-                <>
-                  <div className="px-4 py-2 text-sm text-body">{user.name}</div>
-                  <button
-                    onClick={() => { handleLogout(); setOpen(false) }}
-                    className="text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/[0.06] rounded-xl transition-colors"
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link to="/login"  onClick={() => setOpen(false)} className="px-4 py-3 text-sm text-body hover:text-white rounded-xl hover:bg-white/[0.05] transition-colors">Sign In</Link>
-                  <Link to="/signup" onClick={() => setOpen(false)} className="flex items-center justify-center bg-accent text-obsidian text-sm font-display font-bold px-5 py-3 rounded-xl">Get Started</Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   )
 }

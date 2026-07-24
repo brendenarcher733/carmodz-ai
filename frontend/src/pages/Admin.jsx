@@ -76,6 +76,39 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+/* Mobile-only stacked equivalent of the desktop table below — same data,
+   same StatusBadges/formatDate helpers, just a card instead of a row so
+   nothing needs horizontal scrolling on a phone. */
+function UserCard({ user }) {
+  return (
+    <Card padding="md">
+      <div className="mb-3">
+        <div className="font-medium text-white">{user.name}</div>
+        <div className="font-mono text-xs text-muted truncate">{user.email}</div>
+      </div>
+      <div className="grid grid-cols-2 gap-y-2 gap-x-3 mb-3 text-sm">
+        <div>
+          <div className="text-muted text-[10px] font-mono uppercase tracking-widest mb-0.5">Signed Up</div>
+          <div className="text-body">{formatDate(user.created_at)}</div>
+        </div>
+        <div>
+          <div className="text-muted text-[10px] font-mono uppercase tracking-widest mb-0.5">Last Login</div>
+          <div className="text-body">{formatDate(user.last_login_at)}</div>
+        </div>
+        <div>
+          <div className="text-muted text-[10px] font-mono uppercase tracking-widest mb-0.5">Builds</div>
+          <div className="text-body font-mono">{user.build_count}</div>
+        </div>
+        <div>
+          <div className="text-muted text-[10px] font-mono uppercase tracking-widest mb-0.5">AI Requests</div>
+          <div className="text-body font-mono">{user.ai_request_count}</div>
+        </div>
+      </div>
+      <StatusBadges user={user} />
+    </Card>
+  )
+}
+
 /* ─── Main page ─── */
 export default function Admin() {
   const [stats, setStats]       = useState(null)
@@ -128,7 +161,7 @@ export default function Admin() {
         }}
       />
 
-      <div className="container-content py-12 relative z-10">
+      <div className="container-content py-6 md:py-12 relative z-10">
 
         <div className="mb-8">
           <p className="eyebrow mb-2">Internal</p>
@@ -165,17 +198,20 @@ export default function Admin() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name or email…"
-                className="flex-1 max-w-sm bg-surface border border-white/[0.07] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-muted focus:outline-none focus:border-white/[0.2] transition-colors"
+                className="flex-1 max-w-sm bg-surface border border-white/[0.07] rounded-xl px-4 py-2.5 text-base md:text-sm text-white placeholder:text-muted focus:outline-none focus:border-white/[0.2] transition-colors"
               />
               <button
                 type="submit"
-                className="px-5 py-2.5 text-sm font-medium text-body hover:text-white bg-white/[0.05] hover:bg-white/[0.08] rounded-xl transition-colors"
+                className="tap-target md:min-h-0 px-5 text-sm font-medium text-body hover:text-white bg-white/[0.05] hover:bg-white/[0.08] rounded-xl transition-colors"
               >
                 Search
               </button>
             </form>
 
-            <Card padding="none" className="overflow-hidden">
+            {/* Desktop: dense table. Mobile: stacked cards (same data) — a
+                6-column table only works via horizontal scroll on a phone,
+                which isn't how a native app presents this kind of list. */}
+            <Card padding="none" className="hidden md:block overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -214,6 +250,15 @@ export default function Admin() {
               </div>
             </Card>
 
+            <div className="md:hidden space-y-3">
+              {users.map((user) => <UserCard key={user.id} user={user} />)}
+              {users.length === 0 && (
+                <Card padding="lg" className="text-center">
+                  <p className="text-muted text-sm">No users match this search.</p>
+                </Card>
+              )}
+            </div>
+
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-5 text-sm">
                 <span className="text-muted">
@@ -223,14 +268,14 @@ export default function Admin() {
                   <button
                     onClick={() => setPage((p) => Math.max(0, p - 1))}
                     disabled={page === 0}
-                    className="px-4 py-2 text-body hover:text-white bg-white/[0.05] hover:bg-white/[0.08] rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    className="tap-target md:min-h-0 px-4 text-body hover:text-white bg-white/[0.05] hover:bg-white/[0.08] rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                     disabled={page >= totalPages - 1}
-                    className="px-4 py-2 text-body hover:text-white bg-white/[0.05] hover:bg-white/[0.08] rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    className="tap-target md:min-h-0 px-4 text-body hover:text-white bg-white/[0.05] hover:bg-white/[0.08] rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   >
                     Next
                   </button>

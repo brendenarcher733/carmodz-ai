@@ -224,19 +224,19 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian/90 backdrop-blur-2xl">
       <div
-        className="relative w-full bg-surface rounded-3xl overflow-hidden shadow-card-lg"
-        style={{ maxWidth: '960px', border: '1px solid rgba(255,255,255,0.09)' }}
+        className="relative w-full bg-surface rounded-3xl shadow-card-lg overflow-y-auto md:overflow-hidden"
+        style={{ maxWidth: '960px', maxHeight: 'calc(100dvh - 2rem)', border: '1px solid rgba(255,255,255,0.09)' }}
       >
         {/* ── Header ── */}
         <div
-          className="flex items-center justify-between px-6 py-4"
+          className="flex items-center justify-between gap-3 px-4 md:px-6 py-3 md:py-4"
           style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
         >
-          <div>
-            <h2 className="font-display font-black text-white text-xl tracking-tight">
+          <div className="min-w-0">
+            <h2 className="font-display font-black text-white text-lg md:text-xl tracking-tight truncate">
               {vehicle.year} {vehicle.make} {vehicle.model}
             </h2>
-            <p className="text-body text-sm mt-0.5">
+            <p className="text-body text-xs md:text-sm mt-0.5 truncate">
               <span className="text-accent font-medium">{mod.name}</span>
               <span className="text-muted mx-2">·</span>
               affects <span className="text-white">{area}</span>
@@ -244,7 +244,7 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center text-muted hover:text-white hover:bg-white/[0.1] transition-all"
+            className="tap-target md:w-9 md:h-9 md:min-h-0 md:min-w-0 rounded-xl bg-white/[0.06] flex items-center justify-center text-muted hover:text-white hover:bg-white/[0.1] transition-all flex-shrink-0"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -253,7 +253,7 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
         </div>
 
         {/* ── 3D Canvas ── */}
-        <div ref={mountRef} className="relative w-full" style={{ height: '460px' }}>
+        <div ref={mountRef} className="relative w-full h-[300px] md:h-[460px]">
 
           {/* Loading overlay */}
           {status === 'loading' && (
@@ -310,13 +310,13 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
 
         {/* ── Footer — mod detail ── */}
         <div
-          className="px-6 py-4 flex items-start gap-4"
+          className="px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-start gap-3 md:gap-4"
           style={{ borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
         >
           <div className="flex-1">
             <p className="text-body text-sm leading-relaxed">{mod.description}</p>
           </div>
-          <div className="flex-shrink-0 text-right">
+          <div className="flex-shrink-0 md:text-right">
             <div className="font-display font-black text-white text-lg leading-none">
               ${mod.price_min?.toLocaleString()} – ${mod.price_max?.toLocaleString()}
             </div>
@@ -325,7 +325,7 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
         </div>
 
         {/* Note about model */}
-        <div className="px-6 pb-4">
+        <div className="px-4 md:px-6 pb-4">
           <p className="font-mono text-xs text-muted">
             3D model shown is representative — vehicle-specific models coming in v2.
           </p>

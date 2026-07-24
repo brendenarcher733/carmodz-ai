@@ -79,8 +79,8 @@ function GarageBay({ build, onDelete, onToggleFavourite }) {
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-surface border border-white/[0.07] group transition-all duration-300 hover:border-white/[0.14]">
-      <div className="px-7 py-7">
-        <div className="flex items-start justify-between gap-6">
+      <div className="px-5 py-5 md:px-7 md:py-7">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6">
 
           {/* ── Left: Vehicle Identity ── */}
           <div className="flex-1 min-w-0">
@@ -126,10 +126,10 @@ function GarageBay({ build, onDelete, onToggleFavourite }) {
           </div>
 
           {/* ── Right: Actions ── */}
-          <div className="flex flex-col items-end gap-3 flex-shrink-0">
+          <div className="flex flex-col items-stretch sm:items-end gap-3 flex-shrink-0">
             <Link
               to={`/builds/${build.id}`}
-              className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-sm px-6 py-3 rounded-xl hover:bg-accent-bright transition-all duration-150 whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-2 bg-accent text-obsidian font-display font-black text-sm px-6 py-3 rounded-xl hover:bg-accent-bright transition-all duration-150 whitespace-nowrap"
             >
               Continue Build
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -138,7 +138,7 @@ function GarageBay({ build, onDelete, onToggleFavourite }) {
             </Link>
             <button
               onClick={() => onDelete(build.id)}
-              className="text-muted text-xs font-mono hover:text-red-400 transition-colors px-2 py-1"
+              className="tap-target sm:min-h-0 text-muted text-xs font-mono hover:text-red-400 transition-colors px-2"
             >
               Remove from garage
             </button>

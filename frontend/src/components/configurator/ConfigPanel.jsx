@@ -144,7 +144,7 @@ export function ConfigPanel({ config, setSingle, toggleMulti, setCustomColor }) 
                 onChange={e => {
                   if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) setCustomColor(e.target.value)
                 }}
-                className="flex-1 font-mono text-sm bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-accent/50"
+                className="flex-1 font-mono text-base md:text-sm bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-accent/50"
               />
             </div>
           </div>

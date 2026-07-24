@@ -32,14 +32,13 @@ export default function VerifyEmail() {
 
       {/* Card */}
       <div
-        className="relative z-10 w-full max-w-sm mx-4 animate-fade-up text-center"
+        className="relative z-10 w-full max-w-sm mx-4 p-6 sm:p-10 animate-fade-up text-center"
         style={{
           background: 'rgba(13,14,19,0.88)',
           backdropFilter: 'blur(32px) saturate(180%)',
           WebkitBackdropFilter: 'blur(32px) saturate(180%)',
           border: '1px solid rgba(255,255,255,0.09)',
           borderRadius: '20px',
-          padding: '2.5rem',
         }}
       >
         <Link to="/" className="inline-flex items-center gap-2 mb-8">

@@ -20,6 +20,28 @@
   --hard:        #EF4444;
   --border:      rgba(255,255,255,0.07);
   --border-hover:rgba(255,255,255,0.14);
+
+  /* Reserved space for the mobile bottom tab bar (components/layout/BottomNav.jsx).
+     Zero on desktop, where that component doesn't render at all. */
+  --bottom-nav-height: 0px;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --bottom-nav-height: calc(4rem + env(safe-area-inset-bottom));
+  }
+
+  /* Configurator (pages/Configurator.jsx) is a bespoke full-viewport layout
+     that doesn't use .page-shell, and its own top-clearance math (a flat
+     56px, pre-existing and left untouched here) never accounted for the
+     email-verification banner at all on any screen size — this corrects
+     it for mobile specifically, where the banner showing is far more
+     visually disruptive on an already-tight viewport. Desktop keeps the
+     original inline-style formula exactly as it was. */
+  .configurator-shell {
+    margin-top: var(--page-shell-offset, 5rem) !important;
+    height: calc(100dvh - var(--page-shell-offset, 5rem) - var(--bottom-nav-height, 0px)) !important;
+  }
 }
 
 @layer base {
@@ -64,13 +86,16 @@
   .page-shell {
     /* --page-shell-offset defaults to the fixed Navbar's own height (5rem)
        and is bumped up by EmailVerificationBanner while that's showing —
-       see that component for why. */
+       see that component for why. --bottom-nav-height reserves space above
+       the mobile bottom tab bar (BottomNav.jsx) so content never sits
+       underneath it; it's 0 on desktop where that bar doesn't render. */
     @apply min-h-screen;
     padding-top: var(--page-shell-offset, 5rem);
+    padding-bottom: var(--bottom-nav-height, 0px);
   }
 
   .container-content {
-    @apply max-w-[1200px] mx-auto px-8;
+    @apply max-w-[1200px] mx-auto px-4 md:px-8;
   }
 
   /* ── Typography ── */
@@ -123,6 +148,16 @@
 }
 
 @layer utilities {
+  /* Apple HIG minimum tappable area (44x44pt) — applied explicitly to
+     specific under-sized interactive elements (icon buttons, close buttons,
+     pagination controls), never blanket-applied to `button`, since that
+     would also inflate intentionally-small chips/badges that aren't meant
+     to be primary tap targets. */
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
   /* Animation delays */
   .anim-delay-1 { animation-delay: 60ms; }
   .anim-delay-2 { animation-delay: 130ms; }
@@ -184,4 +219,20 @@
 @keyframes pulseDot {
   0%, 100% { opacity: 1;   transform: scale(1);   }
   50%       { opacity: 0.4; transform: scale(0.85);}
+}
+
+/* Respect the OS-level "reduce motion" setting — none of the animation/
+   transition/scroll-reveal rules above check for it today. This has zero
+   effect on anyone without the setting enabled. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal, .reveal-left, .reveal-right, .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

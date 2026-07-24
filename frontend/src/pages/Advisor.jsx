@@ -140,15 +140,22 @@ export default function Advisor() {
           background: 'radial-gradient(ellipse 60% 60% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 65%)',
         }}
       />
-      <div className="container-content py-10 h-[calc(100vh-80px)] flex flex-col lg:flex-row gap-5 relative z-10">
+      <div className="container-content py-4 md:py-10 h-[calc(100dvh-var(--page-shell-offset,5rem)-var(--bottom-nav-height,0px))] flex flex-col lg:flex-row gap-3 md:gap-5 relative z-10">
 
-        {/* ── Sidebar ── */}
-        <aside className="lg:w-72 flex-shrink-0 flex flex-col gap-4 overflow-y-auto">
+        {/* ── Sidebar ──
+             Below `lg` this stacks above the chat panel (unchanged from
+             before). Below `md` specifically, each card also compacts —
+             identity drops its description line, Quick Questions becomes a
+             horizontally-scrollable chip row instead of a stacked list —
+             so a phone doesn't have to scroll past ~4 full-height cards
+             before the chat panel is even visible. `lg:` and up (the real
+             desktop layout) is completely unchanged. */}
+        <aside className="max-h-[38vh] lg:max-h-none lg:w-72 flex-shrink-0 flex flex-col gap-3 md:gap-4 overflow-y-auto">
 
           {/* Advisor identity */}
-          <div className="bg-surface border border-white/[0.07] rounded-2xl p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.1] flex items-center justify-center">
+          <div className="bg-surface border border-white/[0.07] rounded-2xl p-3 md:p-5 flex-shrink-0">
+            <div className="flex items-center gap-3 md:mb-3">
+              <div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.1] flex items-center justify-center flex-shrink-0">
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="text-body">
                   <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.4"/>
                   <path d="M6 9c0-1.65 1.35-3 3-3s3 1.35 3 3-1.35 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
@@ -163,15 +170,15 @@ export default function Advisor() {
                 </div>
               </div>
             </div>
-            <p className="text-body text-xs leading-relaxed">
+            <p className="hidden md:block text-body text-xs leading-relaxed">
               Expert build guidance — mod order, budget allocation, platform-specific
               picks, and what to skip spending money on.
             </p>
           </div>
 
           {/* Vehicle context */}
-          <div className="bg-surface border border-white/[0.07] rounded-2xl p-5">
-            <p className="eyebrow mb-3">Your Vehicle</p>
+          <div className="bg-surface border border-white/[0.07] rounded-2xl p-3 md:p-5 flex-shrink-0">
+            <p className="eyebrow mb-2 md:mb-3">Your Vehicle</p>
             {hasVehicle ? (
               <div className="flex items-center justify-between">
                 <span className="text-white text-sm font-medium">
@@ -193,7 +200,7 @@ export default function Advisor() {
                 ].map(({ val, set: setter, ph }) => (
                   <input
                     key={ph}
-                    className="w-full bg-elevated border border-white/[0.07] rounded-xl px-3 py-2 text-white text-xs placeholder:text-muted focus:outline-none focus:border-accent/40 transition-colors"
+                    className="w-full bg-elevated border border-white/[0.07] rounded-xl px-3 py-2 text-white text-base md:text-xs placeholder:text-muted focus:outline-none focus:border-accent/40 transition-colors"
                     placeholder={ph}
                     value={val}
                     onChange={e => setter(e.target.value)}
@@ -211,15 +218,15 @@ export default function Advisor() {
           </div>
 
           {/* Quick starters */}
-          <div className="bg-surface border border-white/[0.07] rounded-2xl p-5">
-            <p className="eyebrow mb-3">Quick Questions</p>
-            <div className="space-y-1.5">
+          <div className="bg-surface border border-white/[0.07] rounded-2xl p-3 md:p-5 flex-shrink-0">
+            <p className="eyebrow mb-2 md:mb-3">Quick Questions</p>
+            <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0 md:flex-col md:gap-0 md:space-y-1.5 md:overflow-visible">
               {QUICK_STARTERS.map(q => (
                 <button
                   key={q}
                   onClick={() => sendMessage(q)}
                   disabled={loading}
-                  className="w-full text-left text-body text-xs px-3 py-2.5 rounded-lg hover:bg-elevated hover:text-white transition-all duration-150 disabled:opacity-40"
+                  className="flex-shrink-0 whitespace-nowrap md:whitespace-normal md:w-full text-left text-body text-xs px-3 py-2.5 rounded-lg bg-elevated md:bg-transparent hover:bg-elevated hover:text-white transition-all duration-150 disabled:opacity-40"
                 >
                   {q}
                 </button>
@@ -228,7 +235,7 @@ export default function Advisor() {
           </div>
 
           {/* Topics */}
-          <div className="bg-surface border border-white/[0.07] rounded-2xl p-5">
+          <div className="hidden md:block bg-surface border border-white/[0.07] rounded-2xl p-5">
             <p className="eyebrow mb-3">Topics I Cover</p>
             <div className="flex flex-wrap gap-1.5">
               {TOPICS.map(t => (
@@ -245,7 +252,7 @@ export default function Advisor() {
 
           {/* Chat header */}
           <div
-            className="flex items-center gap-3 px-5 py-4 flex-shrink-0"
+            className="flex items-center gap-3 px-4 md:px-5 py-3 md:py-4 flex-shrink-0"
             style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
           >
             <div className="w-2 h-2 rounded-full bg-stage-1 animate-pulse-dot" />
@@ -261,7 +268,7 @@ export default function Advisor() {
 
           {/* Messages */}
           <div
-            className="flex-1 overflow-y-auto p-5 space-y-4 min-h-0"
+            className="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 min-h-0"
             onClick={handleClick}
           >
             {messages.map(msg => <Message key={msg.id} msg={msg} />)}
@@ -281,7 +288,7 @@ export default function Advisor() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKey}
-              className="flex-1 bg-elevated border border-white/[0.08] rounded-xl px-4 py-3 text-white text-sm placeholder:text-muted resize-none focus:outline-none focus:border-accent/40 transition-colors leading-relaxed"
+              className="flex-1 bg-elevated border border-white/[0.08] rounded-xl px-4 py-3 text-white text-base md:text-sm placeholder:text-muted resize-none focus:outline-none focus:border-accent/40 transition-colors leading-relaxed"
               style={{ minHeight: '46px', maxHeight: '140px' }}
             />
             <button

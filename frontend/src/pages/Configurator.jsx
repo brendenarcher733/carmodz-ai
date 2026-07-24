@@ -7,6 +7,62 @@ import { useCarConfig } from '../hooks/useCarConfig'
 import { classifyVehicle } from '../lib/vehicleUtils'
 import * as analytics from '../services/analytics'
 
+/* Mobile-only bottom sheet for the Customize / Summary panels. Same visual
+   language as components/layout/ProfileSheet.jsx (drag handle, backdrop,
+   rounded-top glass panel). */
+function MobileSheet({ open, onClose, title, children }) {
+  if (!open) return null
+  return (
+    <div className="md:hidden fixed inset-0 z-[60]">
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div
+        className="absolute bottom-0 inset-x-0 rounded-t-3xl overflow-hidden flex flex-col animate-fade-up"
+        style={{
+          maxHeight: '75dvh',
+          background: '#0f1014',
+          border: '1px solid rgba(255,255,255,0.09)',
+          borderBottom: 'none',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
+      >
+        <div className="flex items-center justify-between px-4 pt-3 pb-2 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="w-9 h-1 rounded-full bg-white/[0.15] absolute left-1/2 -translate-x-1/2 top-2" />
+          <span className="font-display font-bold text-white text-sm mt-2">{title}</span>
+          <button
+            onClick={onClose}
+            className="tap-target -mr-2 flex items-center justify-center text-muted hover:text-white transition-colors mt-2"
+            aria-label="Close"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FloatingPill({ onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className="tap-target flex items-center gap-2 px-5 rounded-full font-display font-bold text-sm text-white"
+      style={{
+        background: 'rgba(19,21,25,0.92)',
+        backdropFilter: 'blur(16px)',
+        border: '1px solid rgba(255,255,255,0.14)',
+        boxShadow: '0 8px 28px rgba(0,0,0,0.5)',
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
 export default function Configurator() {
   useEffect(() => { analytics.capture('configurator_used') }, [])
 
@@ -24,14 +80,22 @@ export default function Configurator() {
 
   const { config, setSingle, toggleMulti, setCustomColor, summary } = useCarConfig()
 
-  const [panelOpen, setPanelOpen] = useState(null) // null | 'config' | 'summary' (mobile)
+  const [panelOpen, setPanelOpen] = useState(null) // null | 'config' | 'summary' (mobile sheet)
 
   return (
     <div
+      className="configurator-shell"
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: 'calc(100vh - 56px)',  /* offset for Navbar */
+        // dvh (not vh) so this tracks the real visual viewport on mobile —
+        // the 56px offset is unchanged from before, so this renders
+        // pixel-identical to the previous 100vh-based calc on desktop.
+        // Mobile gets a corrected formula (see .configurator-shell in
+        // globals.css) that actually clears the navbar + email-verification
+        // banner instead of relying on this page's pre-existing (and, on
+        // desktop, unchanged) 56px assumption.
+        height: 'calc(100dvh - 56px - var(--bottom-nav-height, 0px))',
         background: '#0c0d10',
         overflow: 'hidden',
       }}
@@ -48,23 +112,25 @@ export default function Configurator() {
           flexShrink: 0,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
           <Link
             to="/builds"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#6b7280', fontSize: 13, textDecoration: 'none' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#6b7280', fontSize: 13, textDecoration: 'none', flexShrink: 0 }}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Garage
+            <span className="hidden sm:inline">Garage</span>
           </Link>
-          <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: 13 }}>/</span>
-          <span style={{ color: 'white', fontWeight: 700, fontSize: 14, fontFamily: 'var(--font-display, sans-serif)' }}>
+          <span className="hidden sm:inline" style={{ color: 'rgba(255,255,255,0.15)', fontSize: 13 }}>/</span>
+          <span
+            style={{ color: 'white', fontWeight: 700, fontSize: 14, fontFamily: 'var(--font-display, sans-serif)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          >
             {vehicleName}
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#ff8c00' }}>
             {summary.items.length} mod{summary.items.length !== 1 ? 's' : ''}
           </span>
@@ -72,27 +138,14 @@ export default function Configurator() {
           <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'white', fontWeight: 700 }}>
             ${summary.total.toLocaleString()}
           </span>
-
-          {/* Mobile panel toggles */}
-          <button
-            onClick={() => setPanelOpen(p => p === 'config' ? null : 'config')}
-            style={{
-              display: 'none', // shown via media query not possible inline — handled with class below
-              padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)',
-              background: 'transparent', color: '#9ca3af', fontSize: 12, cursor: 'pointer',
-            }}
-            className="md:hidden"
-          >
-            Options
-          </button>
         </div>
       </div>
 
-      {/* ── Three-panel layout ── */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      {/* ── Layout ── */}
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden', position: 'relative' }}>
 
-        {/* Left — Config panel */}
-        <div style={{ width: 272, flexShrink: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {/* Left — Config panel (desktop only) */}
+        <div className="hidden md:flex" style={{ width: 272, flexShrink: 0, overflow: 'hidden', flexDirection: 'column' }}>
           <ConfigPanel
             config={config}
             setSingle={setSingle}
@@ -101,7 +154,7 @@ export default function Configurator() {
           />
         </div>
 
-        {/* Center — 3D viewer */}
+        {/* Center — 3D viewer (single mount, shared by both layouts) */}
         <div style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex', flexDirection: 'column' }}>
           <CarScene config={config} make={make || legacyName} model={model} year={year} />
 
@@ -111,7 +164,9 @@ export default function Configurator() {
             background: 'rgba(8,9,11,0.75)', backdropFilter: 'blur(8px)',
             border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8,
             padding: '5px 12px', pointerEvents: 'none',
-          }}>
+          }}
+          className="hidden md:block"
+          >
             <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#6b7280' }}>
               drag to orbit · scroll to zoom
             </span>
@@ -131,13 +186,45 @@ export default function Configurator() {
               {vehicleClass.label}
             </span>
           </div>
+
+          {/* Mobile-only floating action buttons — native-style pill controls
+              that open the Customize / Summary sheets below. */}
+          <div
+            className="md:hidden flex items-center justify-center gap-3 absolute inset-x-0"
+            style={{ bottom: 'calc(16px + env(safe-area-inset-bottom))' }}
+          >
+            <FloatingPill onClick={() => setPanelOpen('config')}>
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                <path d="M2 11L5 5l3 4 2-3 3 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Customize
+            </FloatingPill>
+            <FloatingPill onClick={() => setPanelOpen('summary')}>
+              <span className="text-accent font-mono">{summary.items.length}</span>
+              Summary
+              <span className="text-muted font-mono">${summary.total.toLocaleString()}</span>
+            </FloatingPill>
+          </div>
         </div>
 
-        {/* Right — Build summary */}
-        <div style={{ width: 280, flexShrink: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {/* Right — Build summary (desktop only) */}
+        <div className="hidden md:flex" style={{ width: 280, flexShrink: 0, overflow: 'hidden', flexDirection: 'column' }}>
           <BuildSummary summary={summary} vehicleName={vehicleName} />
         </div>
       </div>
+
+      {/* ── Mobile sheets ── */}
+      <MobileSheet open={panelOpen === 'config'} onClose={() => setPanelOpen(null)} title="Customize">
+        <ConfigPanel
+          config={config}
+          setSingle={setSingle}
+          toggleMulti={toggleMulti}
+          setCustomColor={setCustomColor}
+        />
+      </MobileSheet>
+      <MobileSheet open={panelOpen === 'summary'} onClose={() => setPanelOpen(null)} title="Build Summary">
+        <BuildSummary summary={summary} vehicleName={vehicleName} />
+      </MobileSheet>
     </div>
   )
 }

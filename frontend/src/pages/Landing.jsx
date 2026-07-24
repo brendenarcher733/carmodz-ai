@@ -87,22 +87,29 @@ function ExampleCard() {
         </div>
       </div>
 
-      <div className="grid px-5 py-2" style={{ gridTemplateColumns: '24px 1fr auto auto auto', gap: '0 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.015)' }}>
+      <div
+        className="grid grid-cols-[20px_1fr_auto] md:grid-cols-[24px_1fr_auto_auto_auto] gap-x-2 md:gap-x-3 px-4 md:px-5 py-2"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.015)' }}
+      >
         <span className="font-mono text-xs text-muted">#</span>
         <span className="font-mono text-xs text-muted">Modification</span>
         <span className="font-mono text-xs text-muted text-right">Cost</span>
-        <span className="font-mono text-xs text-muted text-right">Difficulty</span>
-        <span className="font-mono text-xs text-muted text-right">Stage</span>
+        <span className="hidden md:inline font-mono text-xs text-muted text-right">Difficulty</span>
+        <span className="hidden md:inline font-mono text-xs text-muted text-right">Stage</span>
       </div>
 
       {EXAMPLE.mods.map((mod, i) => (
-        <div key={mod.name} className="grid px-5 py-3 hover:bg-white/[0.03] transition-colors items-center"
-          style={{ gridTemplateColumns: '24px 1fr auto auto auto', gap: '0 12px', borderBottom: i < EXAMPLE.mods.length - 1 ? '1px solid rgba(255,255,255,0.04)' : undefined }}>
+        <div key={mod.name}
+          className="grid grid-cols-[20px_1fr_auto] md:grid-cols-[24px_1fr_auto_auto_auto] gap-x-2 md:gap-x-3 px-4 md:px-5 py-3 hover:bg-white/[0.03] transition-colors items-center"
+          style={{ borderBottom: i < EXAMPLE.mods.length - 1 ? '1px solid rgba(255,255,255,0.04)' : undefined }}>
           <span className="font-mono text-xs font-bold text-accent">#{mod.rank}</span>
-          <span className="text-sm text-white font-medium">{mod.name}</span>
+          <div className="min-w-0">
+            <span className="text-sm text-white font-medium block truncate">{mod.name}</span>
+            <span className={`md:hidden font-mono text-[10px] font-semibold ${mod.diffCls}`}>{mod.diff} · S{mod.stage}</span>
+          </div>
           <span className="font-mono text-xs text-muted text-right whitespace-nowrap">{mod.cost}</span>
-          <span className={`font-mono text-xs font-semibold text-right ${mod.diffCls}`}>{mod.diff}</span>
-          <span className="font-mono text-xs text-muted bg-white/[0.05] px-2 py-0.5 rounded text-right">S{mod.stage}</span>
+          <span className={`hidden md:inline font-mono text-xs font-semibold text-right ${mod.diffCls}`}>{mod.diff}</span>
+          <span className="hidden md:inline font-mono text-xs text-muted bg-white/[0.05] px-2 py-0.5 rounded text-right">S{mod.stage}</span>
         </div>
       ))}
 

@@ -45,14 +45,13 @@ export default function ResetPassword() {
 
       {/* Card */}
       <div
-        className="relative z-10 w-full max-w-sm mx-4 animate-fade-up"
+        className="relative z-10 w-full max-w-sm mx-4 p-6 sm:p-10 animate-fade-up"
         style={{
           background: 'rgba(13,14,19,0.88)',
           backdropFilter: 'blur(32px) saturate(180%)',
           WebkitBackdropFilter: 'blur(32px) saturate(180%)',
           border: '1px solid rgba(255,255,255,0.09)',
           borderRadius: '20px',
-          padding: '2.5rem',
         }}
       >
         {/* Logo */}

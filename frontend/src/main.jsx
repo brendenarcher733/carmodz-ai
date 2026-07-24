@@ -6,6 +6,7 @@ import * as analytics from './services/analytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute }  from './components/AdminRoute'
 import { Navbar }      from './components/layout/Navbar'
+import { BottomNav }   from './components/layout/BottomNav'
 import { EmailVerificationBanner } from './components/EmailVerificationBanner'
 import Landing         from './pages/Landing'
 import Planner         from './pages/Planner'
@@ -36,6 +37,16 @@ function RouteTracker() {
   return null
 }
 
+// Configurator gets its own immersive full-screen mobile layout with its
+// own floating action buttons (see Configurator.jsx) — a persistent tab
+// bar would sit on top of that, so it's the one route the bottom nav
+// doesn't render on.
+function ConditionalBottomNav() {
+  const location = useLocation()
+  if (location.pathname.startsWith('/configurator')) return null
+  return <BottomNav />
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -54,6 +65,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               <>
                 <Navbar />
                 <EmailVerificationBanner />
+                <ConditionalBottomNav />
                 <Routes>
                   <Route path="/"           element={<Landing />}     />
                   <Route path="/planner"    element={<ProtectedRoute><Planner /></ProtectedRoute>}     />

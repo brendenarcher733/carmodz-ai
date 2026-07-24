@@ -340,36 +340,43 @@ function BuildingOverlay({ vehicle }) {
 
 function StepBar({ current }) {
   return (
-    <div className="flex items-center mb-12">
-      {STEPS.map((label, i) => {
-        const done = i < current, active = i === current
-        return (
-          <div key={label} className="flex items-center flex-1 last:flex-none">
-            <div className="flex flex-col items-center gap-2">
-              <div className={clsx(
-                'w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all duration-300',
-                done   && 'bg-accent text-obsidian',
-                active && 'bg-accent text-obsidian',
-                !done && !active && 'bg-surface border border-white/[0.1] text-muted',
-              )}>
-                {done
-                  ? <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  : i + 1}
+    <div className="mb-8 md:mb-12">
+      <div className="flex items-center">
+        {STEPS.map((label, i) => {
+          const done = i < current, active = i === current
+          return (
+            <div key={label} className="flex items-center flex-1 last:flex-none">
+              <div className="flex flex-col items-center gap-2">
+                <div className={clsx(
+                  'w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all duration-300',
+                  done   && 'bg-accent text-obsidian',
+                  active && 'bg-accent text-obsidian',
+                  !done && !active && 'bg-surface border border-white/[0.1] text-muted',
+                )}>
+                  {done
+                    ? <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    : i + 1}
+                </div>
+                <span className={clsx(
+                  'text-xs font-mono uppercase tracking-wider hidden sm:block',
+                  active ? 'text-accent' : done ? 'text-body' : 'text-muted',
+                )}>
+                  {label}
+                </span>
               </div>
-              <span className={clsx(
-                'text-xs font-mono uppercase tracking-wider hidden sm:block',
-                active ? 'text-accent' : done ? 'text-body' : 'text-muted',
-              )}>
-                {label}
-              </span>
+              {i < STEPS.length - 1 && (
+                <div className="flex-1 h-px mx-2 transition-all duration-300"
+                  style={{ background: done ? '#FF8C00' : 'rgba(255,255,255,0.07)' }} />
+              )}
             </div>
-            {i < STEPS.length - 1 && (
-              <div className="flex-1 h-px mx-2 transition-all duration-300"
-                style={{ background: done ? '#FF8C00' : 'rgba(255,255,255,0.07)' }} />
-            )}
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
+      {/* Step labels are hidden on the circles themselves below `sm` (no
+          room) — this compact line keeps textual context on phones. */}
+      <p className="sm:hidden text-center text-accent text-xs font-mono uppercase tracking-wider mt-3">
+        Step {current + 1} of {STEPS.length} — {STEPS[current]}
+      </p>
     </div>
   )
 }
@@ -411,7 +418,7 @@ function VehicleSelector({ form, set }) {
           <path d="M10 10l3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
         </svg>
         <input
-          className="field-input pl-9 text-sm"
+          className="field-input pl-9 text-base md:text-sm"
           placeholder="Search makes — Ferrari, Lamborghini, Supra…"
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -436,7 +443,7 @@ function VehicleSelector({ form, set }) {
             <p className="font-mono text-[10px] text-muted uppercase tracking-[0.14em] mb-2 px-0.5">
               {group.label}
             </p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
               {group.makes.map(make => (
                 <button
                   key={make}
@@ -461,7 +468,7 @@ function VehicleSelector({ form, set }) {
           <div>
             <p className="text-muted text-sm mb-3">No match — enter manually:</p>
             <input
-              className="field-input text-sm"
+              className="field-input text-base md:text-sm"
               placeholder="Type make name…"
               value={search}
               onChange={e => { setSearch(e.target.value); selectMake(e.target.value) }}
@@ -474,7 +481,7 @@ function VehicleSelector({ form, set }) {
       {form.make && selectedModels.length > 0 && (
         <div className="mb-8 animate-fade-in">
           <label className="field-label mb-3">Model <span className="text-accent">·</span> {form.make}</label>
-          <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
             {selectedModels.map(model => (
               <button
                 key={model}
@@ -493,7 +500,7 @@ function VehicleSelector({ form, set }) {
           </div>
           <div className="mt-2">
             <input
-              className="field-input text-sm"
+              className="field-input text-base md:text-sm"
               placeholder={`Other ${form.make} model…`}
               value={selectedModels.includes(form.model) ? '' : form.model}
               onChange={e => set('model', e.target.value)}
@@ -549,6 +556,7 @@ function VehicleSelector({ form, set }) {
               <input
                 className="field-input max-w-[140px]"
                 type="number"
+                inputMode="numeric"
                 placeholder="e.g. 2018"
                 min="1950"
                 max={CURRENT_YEAR + 1}
@@ -612,6 +620,15 @@ export default function Planner() {
   // this data is in PostHog. No separate "abandoned" event needed.
   useEffect(() => {
     analytics.capture('planner_step_viewed', { step_index: step, step_name: STEPS[step] })
+  }, [step])
+
+  // The make/model grid on step 0 is tall enough that picking a platform
+  // often leaves the page scrolled well past the top — without resetting
+  // on step change, the next step's content renders underneath the fixed
+  // navbar/email-banner at whatever scroll position was left behind
+  // (most visible on short mobile viewports, where that grid barely fits).
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [step])
 
   const canAdvance = () => {
@@ -693,6 +710,7 @@ export default function Planner() {
                 <input
                   className="field-input pl-8"
                   type="number"
+                  inputMode="numeric"
                   placeholder="5,000"
                   min="1"
                   value={form.budget}
@@ -741,7 +759,7 @@ export default function Planner() {
 
             <div className="mb-8">
               <label className="field-label mb-3">Experience Level</label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {EXPERIENCE_LEVELS.map(e => (
                   <button
                     key={e.value}
@@ -831,11 +849,11 @@ export default function Planner() {
               {REVIEW_ROWS.map(([k, v], i) => (
                 <div
                   key={k}
-                  className="flex items-start justify-between px-6 py-4 hover:bg-white/[0.02] transition-colors"
+                  className="flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-0 px-6 py-4 hover:bg-white/[0.02] transition-colors"
                   style={i < REVIEW_ROWS.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.05)' } : undefined}
                 >
-                  <span className="font-mono text-xs text-muted uppercase tracking-wider pt-0.5">{k}</span>
-                  <span className="text-white text-sm font-medium text-right max-w-[60%] capitalize">{v}</span>
+                  <span className="font-mono text-xs text-muted uppercase tracking-wider md:pt-0.5">{k}</span>
+                  <span className="text-white text-sm font-medium md:text-right md:max-w-[60%] capitalize">{v}</span>
                 </div>
               ))}
             </div>
@@ -850,14 +868,14 @@ export default function Planner() {
 
         {/* ── Navigation ── */}
         <div
-          className="flex items-center justify-between mt-10 pt-8"
+          className="flex items-center justify-between gap-4 mt-10 pt-8"
           style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
         >
           <button
             type="button"
             onClick={() => setStep(p => p - 1)}
             disabled={step === 0}
-            className="inline-flex items-center gap-2 text-body text-sm font-medium hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="tap-target md:min-h-0 md:min-w-0 inline-flex items-center gap-2 px-3 -ml-3 rounded-xl text-body text-sm font-medium hover:text-white hover:bg-white/[0.05] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

@@ -15,7 +15,10 @@ const VARIANTS = {
 }
 
 const SIZES = {
-  sm: 'text-xs px-3.5 py-1.5 rounded-lg',
+  // min-h-11 (44px, Apple HIG minimum) only below `md` — sm buttons are
+  // often compact/secondary actions, but on a touch screen they still need
+  // a real tap target; desktop's tighter py-1.5 visual size is unaffected.
+  sm: 'text-xs px-3.5 py-1.5 rounded-lg min-h-11 md:min-h-0',
   md: 'text-sm px-5 py-2.5 rounded-xl',
   lg: 'text-sm px-6 py-3 rounded-xl',
   xl: 'text-base px-8 py-3.5 rounded-xl',
