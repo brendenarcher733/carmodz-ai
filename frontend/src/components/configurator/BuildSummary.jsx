@@ -1,14 +1,13 @@
-import clsx from 'clsx'
-import { Link } from 'react-router-dom'
+import { Button } from '../ui/Button'
 
 export function BuildSummary({ summary, vehicleName }) {
   const { items, total } = summary
 
   return (
-    <div className="flex flex-col h-full" style={{ background: '#0f1014', borderLeft: '1px solid rgba(255,255,255,0.07)' }}>
+    <div className="flex flex-col h-full bg-panel border-l border-white/[0.07]">
 
       {/* Header */}
-      <div className="flex-shrink-0 px-4 pt-4 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="flex-shrink-0 px-4 pt-4 pb-3 border-b border-white/[0.05]">
         <p className="font-mono text-[10px] text-muted uppercase tracking-widest mb-1">Build Summary</p>
         {vehicleName && (
           <p className="font-display font-bold text-white text-sm truncate">{vehicleName}</p>
@@ -48,7 +47,7 @@ export function BuildSummary({ summary, vehicleName }) {
       </div>
 
       {/* Total */}
-      <div className="flex-shrink-0 px-4 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="flex-shrink-0 px-4 py-4 border-t border-white/[0.05]">
         <div className="flex items-center justify-between mb-1">
           <span className="font-mono text-[10px] text-muted uppercase tracking-wider">Mod Total</span>
           <span className="font-display font-black text-white text-lg leading-none">
@@ -59,21 +58,12 @@ export function BuildSummary({ summary, vehicleName }) {
           {items.length} modification{items.length !== 1 ? 's' : ''} selected
         </div>
 
-        <Link
-          to="/advisor"
-          className="block w-full text-center bg-accent text-obsidian font-display font-black text-sm px-4 py-3 rounded-xl hover:bg-amber-400 transition-colors duration-150"
-        >
+        <Button to="/advisor" variant="primary" size="lg" fullWidth>
           Get Expert Advice
-        </Link>
-        <Link
-          to="/planner"
-          className={clsx(
-            'block w-full text-center mt-2 text-body text-xs font-medium px-4 py-2.5 rounded-xl border border-white/[0.08]',
-            'hover:border-white/[0.18] hover:text-white transition-all duration-150',
-          )}
-        >
+        </Button>
+        <Button to="/planner" variant="outline" size="sm" fullWidth className="mt-2">
           New Build
-        </Link>
+        </Button>
       </div>
     </div>
   )

@@ -3,6 +3,18 @@ import * as THREE from 'three'
 import { GLTFLoader }    from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { DRACOLoader }   from 'three/examples/jsm/loaders/DRACOLoader.js'
+import { Spinner } from './Spinner'
+import { Button } from './Button'
+
+/* Small translucent label used for the orbit-controls hint — was inline
+   `style={{}}` duplicated verbatim in two places in this file. */
+function HintPill({ children }) {
+  return (
+    <span className="glass font-mono text-xs text-muted rounded-md px-2 py-1">
+      {children}
+    </span>
+  )
+}
 
 /* ─── Map mod category to which part of the car it affects ─── */
 const AREA_LABEL = {
@@ -175,12 +187,12 @@ export function InlineCarViewer({ height = 360 }) {
   return (
     <div
       ref={mountRef}
-      className="relative w-full rounded-2xl overflow-hidden"
-      style={{ height, border: '1px solid rgba(255,255,255,0.07)' }}
+      className="relative w-full rounded-2xl overflow-hidden border border-white/[0.07]"
+      style={{ height }}
     >
       {status === 'loading' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
-          <div className="w-8 h-8 rounded-full border-2 border-white/10 border-t-accent animate-spin" />
+          <Spinner size="md" className="w-8 h-8" />
           <p className="text-body text-xs font-mono">Rendering 3D model…</p>
         </div>
       )}
@@ -191,12 +203,7 @@ export function InlineCarViewer({ height = 360 }) {
       )}
       {status === 'ready' && (
         <div className="absolute bottom-3 left-3 z-10 pointer-events-none">
-          <span
-            className="font-mono text-xs text-muted"
-            style={{ background: 'rgba(8,9,11,0.6)', backdropFilter: 'blur(4px)', padding: '4px 8px', borderRadius: '6px' }}
-          >
-            drag to rotate · scroll to zoom
-          </span>
+          <HintPill>drag to rotate · scroll to zoom</HintPill>
         </div>
       )}
     </div>
@@ -224,14 +231,11 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian/90 backdrop-blur-2xl">
       <div
-        className="relative w-full bg-surface rounded-3xl shadow-card-lg overflow-y-auto md:overflow-hidden"
-        style={{ maxWidth: '960px', maxHeight: 'calc(100dvh - 2rem)', border: '1px solid rgba(255,255,255,0.09)' }}
+        className="relative w-full bg-surface rounded-3xl shadow-card-lg border border-white/[0.09] overflow-y-auto md:overflow-hidden"
+        style={{ maxWidth: '960px', maxHeight: 'calc(100dvh - 2rem)' }}
       >
         {/* ── Header ── */}
-        <div
-          className="flex items-center justify-between gap-3 px-4 md:px-6 py-3 md:py-4"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
-        >
+        <div className="flex items-center justify-between gap-3 px-4 md:px-6 py-3 md:py-4 border-b border-white/[0.07]">
           <div className="min-w-0">
             <h2 className="font-display font-black text-white text-lg md:text-xl tracking-tight truncate">
               {vehicle.year} {vehicle.make} {vehicle.model}
@@ -242,14 +246,11 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
               affects <span className="text-white">{area}</span>
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="tap-target md:w-9 md:h-9 md:min-h-0 md:min-w-0 rounded-xl bg-white/[0.06] flex items-center justify-center text-muted hover:text-white hover:bg-white/[0.1] transition-all flex-shrink-0"
-          >
+          <Button onClick={onClose} variant="subtle" size="icon" className="flex-shrink-0">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
-          </button>
+          </Button>
         </div>
 
         {/* ── 3D Canvas ── */}
@@ -258,7 +259,7 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
           {/* Loading overlay */}
           {status === 'loading' && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
-              <div className="w-10 h-10 rounded-full border-2 border-white/10 border-t-accent animate-spin" />
+              <Spinner size="lg" />
               <p className="text-body text-sm font-mono">Loading 3D model…</p>
             </div>
           )}
@@ -278,17 +279,9 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
                 <div className="w-4 h-4 rounded-full bg-accent flex items-center justify-center relative">
                   <div className="w-2 h-2 rounded-full bg-obsidian" />
                 </div>
-                {/* Label */}
-                <div
-                  className="absolute left-5 top-1/2 -translate-y-1/2 whitespace-nowrap"
-                  style={{
-                    background: 'rgba(8,9,11,0.85)',
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255,140,0,0.3)',
-                    borderRadius: '8px',
-                    padding: '4px 10px',
-                  }}
-                >
+                {/* Label — accent-tinted border, so it doesn't use the
+                    neutral `.glass` treatment used elsewhere in this file. */}
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg border border-accent/30 bg-obsidian/85 backdrop-blur-sm px-2.5 py-1">
                   <span className="font-mono text-xs text-accent font-semibold">{area}</span>
                 </div>
               </div>
@@ -298,21 +291,13 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
           {/* Controls hint */}
           {status === 'ready' && (
             <div className="absolute bottom-3 left-3 z-10 pointer-events-none">
-              <span
-                className="font-mono text-xs text-muted"
-                style={{ background: 'rgba(8,9,11,0.6)', backdropFilter: 'blur(4px)', padding: '4px 8px', borderRadius: '6px' }}
-              >
-                drag to rotate · scroll to zoom
-              </span>
+              <HintPill>drag to rotate · scroll to zoom</HintPill>
             </div>
           )}
         </div>
 
         {/* ── Footer — mod detail ── */}
-        <div
-          className="px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-start gap-3 md:gap-4"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
-        >
+        <div className="px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-start gap-3 md:gap-4 border-t border-white/[0.07] bg-white/[0.02]">
           <div className="flex-1">
             <p className="text-body text-sm leading-relaxed">{mod.description}</p>
           </div>

@@ -21,6 +21,16 @@
   --border:      rgba(255,255,255,0.07);
   --border-hover:rgba(255,255,255,0.14);
 
+  /* Canonical hairline-border opacity scale — every divider/card border in
+     the app should use one of these four (as `border-white/[0.0X]`), not a
+     one-off value. Before this pass, opacities from 0.02 to 0.2 were all in
+     use interchangeably for what were visually the same handful of roles.
+       soft     0.05  — dividers inside an already-bordered container
+       default  0.07  — the standard card/panel border
+       elevated 0.09  — modals, sheets, dropdowns (sits above other content)
+       hover    0.14  — hover/active state of a default border
+  */
+
   /* Reserved space for the mobile bottom tab bar (components/layout/BottomNav.jsx).
      Zero on desktop, where that component doesn't render at all. */
   --bottom-nav-height: 0px;
@@ -103,7 +113,33 @@
     @apply font-sans text-xs font-semibold tracking-[0.14em] uppercase text-muted;
   }
 
-  /* ── Glass surfaces ── */
+  /* ── Glass surfaces ──
+     Two tiers, matching the two real recipes that had independently
+     converged across Navbar/BottomNav/ProfileSheet/CarViewer3D/the auth
+     pages before this pass — each was previously hand-typed inline with
+     small unintentional drift (24px vs 32px blur, 85%/88%/92%/97% opacity)
+     between call sites that all meant the same thing. */
+
+  /* Fixed top/bottom chrome that sits directly on the page background —
+     Navbar, BottomNav. */
+  .glass-nav {
+    background: rgba(8,9,11,0.88);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+  }
+
+  /* Elevated surfaces that sit *above* other content — dropdowns, bottom
+     sheets, modals. Includes the dropdown shadow since nothing at this
+     elevation should render without one. */
+  .glass-strong {
+    background: rgba(13,14,19,0.95);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    @apply border border-white/[0.09] shadow-dropdown;
+  }
+
+  /* Lighter-weight glass for small inline overlays (hint pills, tooltips)
+     that don't need the elevated tier's shadow. */
   .glass {
     background: rgba(19,21,25,0.75);
     backdrop-filter: blur(24px) saturate(180%);
@@ -111,11 +147,20 @@
     @apply border border-white/[0.08];
   }
 
-  .glass-strong {
+  /* The shared shell for Login/Signup/ForgotPassword/ResetPassword/
+     VerifyEmail — was byte-identical inline styles copy-pasted 5 times. */
+  .auth-card {
     background: rgba(13,14,19,0.88);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    @apply border border-white/[0.1];
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border-radius: 20px;
+    @apply border border-white/[0.09];
+  }
+
+  .auth-shell-bg {
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 55%),
+      linear-gradient(180deg, #0a0b0d 0%, #08090b 100%);
   }
 
   /* ── Form inputs — shared across pages ── */

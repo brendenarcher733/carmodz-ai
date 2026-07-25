@@ -4,6 +4,8 @@ import * as analytics from '../services/analytics'
 import { Spinner } from '../components/ui/Spinner'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
+import { Alert } from '../components/ui/Alert'
+import { Button } from '../components/ui/Button'
 
 const PAGE_SIZE = 50
 
@@ -181,11 +183,7 @@ export default function Admin() {
           </div>
         )}
 
-        {error && !loading && (
-          <Card padding="lg" className="text-center">
-            <p className="text-red-400 text-sm">{error}</p>
-          </Card>
-        )}
+        {error && !loading && <Alert variant="error">{error}</Alert>}
 
         {!error && stats && (
           <>
@@ -200,12 +198,9 @@ export default function Admin() {
                 placeholder="Search by name or email…"
                 className="flex-1 max-w-sm bg-surface border border-white/[0.07] rounded-xl px-4 py-2.5 text-base md:text-sm text-white placeholder:text-muted focus:outline-none focus:border-white/[0.2] transition-colors"
               />
-              <button
-                type="submit"
-                className="tap-target md:min-h-0 px-5 text-sm font-medium text-body hover:text-white bg-white/[0.05] hover:bg-white/[0.08] rounded-xl transition-colors"
-              >
+              <Button type="submit" variant="subtle" size="md">
                 Search
-              </button>
+              </Button>
             </form>
 
             {/* Desktop: dense table. Mobile: stacked cards (same data) — a
@@ -265,20 +260,22 @@ export default function Admin() {
                   Page {page + 1} of {totalPages} · {total} users
                 </span>
                 <div className="flex gap-2">
-                  <button
+                  <Button
                     onClick={() => setPage((p) => Math.max(0, p - 1))}
                     disabled={page === 0}
-                    className="tap-target md:min-h-0 px-4 text-body hover:text-white bg-white/[0.05] hover:bg-white/[0.08] rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    variant="subtle"
+                    size="sm"
                   >
                     Previous
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                     disabled={page >= totalPages - 1}
-                    className="tap-target md:min-h-0 px-4 text-body hover:text-white bg-white/[0.05] hover:bg-white/[0.08] rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    variant="subtle"
+                    size="sm"
                   >
                     Next
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}

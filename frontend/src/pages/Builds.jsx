@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom'
 import { useBuilds } from '../hooks/useBuilds'
 import { useAuth } from '../contexts/AuthContext'
 import { Spinner } from '../components/ui/Spinner'
+import { Card } from '../components/ui/Card'
+import { Alert } from '../components/ui/Alert'
+import { Button } from '../components/ui/Button'
 import * as analytics from '../services/analytics'
 
 /* ─── Goal metadata ─── */
@@ -33,16 +36,12 @@ function GarageStats({ stats }) {
   return (
     <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-10">
       {items.map(({ label, value }) => (
-        <div
-          key={label}
-          className="rounded-xl border border-white/[0.07] px-4 py-3 text-center"
-          style={{ background: 'rgba(19,21,25,0.6)' }}
-        >
+        <Card key={label} padding="sm" className="rounded-xl text-center">
           <div className="font-display font-black text-white text-xl leading-none mb-1">
             {value}
           </div>
           <div className="text-muted text-xs font-mono uppercase tracking-widest">{label}</div>
-        </div>
+        </Card>
       ))}
     </div>
   )
@@ -54,16 +53,14 @@ function StarButton({ active, onClick }) {
     <button
       onClick={onClick}
       title={active ? 'Remove from favourites' : 'Add to favourites'}
-      className="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150"
-      style={{
-        background: active ? 'rgba(255,200,0,0.12)' : 'rgba(255,255,255,0.04)',
-        border: `1px solid ${active ? 'rgba(255,200,0,0.35)' : 'rgba(255,255,255,0.08)'}`,
-      }}
+      className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all duration-150 ${
+        active ? 'bg-gold/[0.12] border-gold/35 text-gold' : 'bg-white/[0.04] border-white/[0.08] text-muted'
+      }`}
     >
-      <svg width="14" height="14" viewBox="0 0 14 14" fill={active ? '#ffc800' : 'none'}>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill={active ? 'currentColor' : 'none'}>
         <path
           d="M7 1l1.6 3.4L12 5l-2.5 2.4.6 3.4L7 9.2 3.9 10.8l.6-3.4L2 5l3.4-.6L7 1z"
-          stroke={active ? '#ffc800' : '#6b7280'}
+          stroke="currentColor"
           strokeWidth="1.2"
           strokeLinejoin="round"
         />
@@ -78,7 +75,7 @@ function GarageBay({ build, onDelete, onToggleFavourite }) {
   const since = new Date(build.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-surface border border-white/[0.07] group transition-all duration-300 hover:border-white/[0.14]">
+    <Card padding="none" hover className="overflow-hidden group">
       <div className="px-5 py-5 md:px-7 md:py-7">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6">
 
@@ -127,15 +124,12 @@ function GarageBay({ build, onDelete, onToggleFavourite }) {
 
           {/* ── Right: Actions ── */}
           <div className="flex flex-col items-stretch sm:items-end gap-3 flex-shrink-0">
-            <Link
-              to={`/builds/${build.id}`}
-              className="inline-flex items-center justify-center gap-2 bg-accent text-obsidian font-display font-black text-sm px-6 py-3 rounded-xl hover:bg-accent-bright transition-all duration-150 whitespace-nowrap"
-            >
+            <Button to={`/builds/${build.id}`} size="lg" className="whitespace-nowrap">
               Continue Build
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </Link>
+            </Button>
             <button
               onClick={() => onDelete(build.id)}
               className="tap-target sm:min-h-0 text-muted text-xs font-mono hover:text-red-400 transition-colors px-2"
@@ -156,7 +150,7 @@ function GarageBay({ build, onDelete, onToggleFavourite }) {
           </div>
         )}
       </div>
-    </div>
+    </Card>
   )
 }
 
@@ -200,12 +194,7 @@ export default function Garage() {
             )}
           </div>
 
-          <Link
-            to="/planner"
-            className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-bold text-sm px-6 py-3 rounded-xl hover:bg-accent-bright transition-all duration-150"
-          >
-            + New Build
-          </Link>
+          <Button to="/planner" size="lg">+ New Build</Button>
         </div>
 
         {/* ── Stats Banner ── */}
@@ -221,18 +210,13 @@ export default function Garage() {
 
         {/* ── Error ── */}
         {error && !loading && (
-          <div className="bg-red-500/[0.07] border border-red-500/20 rounded-2xl p-6">
-            <p className="text-red-400 text-sm">Could not load your builds: {error}</p>
-          </div>
+          <Alert variant="error">Could not load your builds: {error}</Alert>
         )}
 
         {/* ── Empty Garage ── */}
         {!loading && !error && builds.length === 0 && (
           <div className="py-24">
-            <div
-              className="max-w-xl mx-auto text-center rounded-3xl border border-white/[0.06] py-20 px-10 relative overflow-hidden"
-              style={{ background: 'rgba(19,21,25,0.5)' }}
-            >
+            <Card padding="none" className="max-w-xl mx-auto text-center rounded-3xl py-20 px-10 relative overflow-hidden bg-surface/50">
               <div className="relative z-10">
                 <div className="w-20 h-20 rounded-2xl bg-accent/[0.08] border border-accent/20 flex items-center justify-center mx-auto mb-8">
                   <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="text-accent">
@@ -249,17 +233,14 @@ export default function Garage() {
                   a personalized upgrade roadmap — stage by stage.
                 </p>
 
-                <Link
-                  to="/planner"
-                  className="inline-flex items-center gap-2.5 bg-accent text-obsidian font-display font-black text-base px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow"
-                >
+                <Button to="/planner" size="xl" className="shadow-glow">
                   Park Your First Vehicle
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                </Link>
+                </Button>
               </div>
-            </div>
+            </Card>
           </div>
         )}
 

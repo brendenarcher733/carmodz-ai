@@ -19,10 +19,10 @@ const ICONS = {
   ),
   garage: (
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="3"  y="3"  width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
-      <rect x="12" y="3"  width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
-      <rect x="3"  y="12" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
-      <rect x="12" y="12" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+      <rect x="3"  y="3"  width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6"/>
+      <rect x="12" y="3"  width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6"/>
+      <rect x="3"  y="12" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6"/>
+      <rect x="12" y="12" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6"/>
     </svg>
   ),
   advisor: (
@@ -98,15 +98,8 @@ export function BottomNav() {
   return (
     <>
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-50 flex items-stretch"
-        style={{
-          height: '4rem',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          background: 'rgba(8,9,11,0.92)',
-          backdropFilter: 'blur(24px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-          borderTop: '1px solid rgba(255,255,255,0.07)',
-        }}
+        className="glass-nav md:hidden fixed bottom-0 inset-x-0 z-50 flex items-stretch border-t border-white/[0.07]"
+        style={{ height: '4rem', paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <TabLink to="/" label="Home" icon={ICONS.home} active={pathname === '/'} />
 

@@ -58,12 +58,8 @@ export function EmailVerificationBanner() {
   return (
     <div
       ref={ref}
-      className="fixed inset-x-0 z-40"
-      style={{
-        top: '5rem',
-        background: 'rgba(255,140,0,0.06)',
-        borderBottom: '1px solid rgba(255,140,0,0.15)',
-      }}
+      className="fixed inset-x-0 z-40 bg-accent/[0.06] border-b border-accent/[0.15]"
+      style={{ top: '5rem' }}
     >
       <div className="container-content w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 py-2.5">
         <p className="text-sm text-body">

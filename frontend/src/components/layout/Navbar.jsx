@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { Button } from '../ui/Button'
 import clsx from 'clsx'
 
 const NAV_LINKS = [
@@ -45,16 +46,8 @@ function UserMenu({ user, onLogout }) {
       </button>
 
       {open && (
-        <div
-          className="absolute right-0 top-full mt-2 w-52 rounded-2xl overflow-hidden z-50 py-1"
-          style={{
-            background: 'rgba(13,14,19,0.97)',
-            backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(255,255,255,0.09)',
-            boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
-          }}
-        >
-          <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="glass-strong absolute right-0 top-full mt-2 w-52 rounded-2xl overflow-hidden z-50 py-1">
+          <div className="px-4 py-3 border-b border-white/[0.05]">
             <div className="font-display font-semibold text-white text-sm truncate">{user.name}</div>
             <div className="font-mono text-xs text-muted truncate">{user.email}</div>
           </div>
@@ -105,20 +98,12 @@ export function Navbar() {
   return (
     <header className="fixed top-0 inset-x-0 z-50">
       {/* Main bar */}
-      <nav
-        className="h-20 flex items-center"
-        style={{
-          background: 'rgba(8,9,11,0.85)',
-          backdropFilter: 'blur(24px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
-        }}
-      >
+      <nav className="glass-nav h-20 flex items-center border-b border-white/[0.05]">
         <div className="container-content w-full flex items-center justify-between">
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 flex-shrink-0">
-            <div className="w-9 h-9 bg-accent rounded-[9px] flex items-center justify-center text-obsidian font-mono font-black text-base leading-none select-none">
+            <div className="w-9 h-9 bg-accent rounded-lg flex items-center justify-center text-obsidian font-mono font-black text-base leading-none select-none">
               C
             </div>
             <span className="font-display font-bold text-lg text-white tracking-tight">
@@ -155,18 +140,8 @@ export function Navbar() {
             ) : (
               /* Logged-out state */
               <div className="hidden md:flex items-center gap-2">
-                <Link
-                  to="/login"
-                  className="px-5 py-2.5 text-base font-medium text-body hover:text-white transition-colors rounded-lg hover:bg-white/[0.05]"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/signup"
-                  className="inline-flex items-center gap-2 bg-accent text-obsidian text-base font-display font-bold px-6 py-2.5 rounded-xl hover:bg-accent-bright transition-colors duration-150"
-                >
-                  Get Started
-                </Link>
+                <Button to="/login" variant="ghost" size="md">Sign In</Button>
+                <Button to="/signup" variant="primary" size="md">Get Started</Button>
               </div>
             )}
           </div>

@@ -12,19 +12,12 @@ export function ProfileSheet({ open, onClose, user, onLogout }) {
         onClick={onClose}
       />
       <div
-        className="absolute bottom-0 inset-x-0 rounded-t-3xl overflow-hidden animate-fade-up"
-        style={{
-          background: 'rgba(13,14,19,0.97)',
-          backdropFilter: 'blur(32px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-          border: '1px solid rgba(255,255,255,0.09)',
-          borderBottom: 'none',
-          paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
-        }}
+        className="glass-strong absolute bottom-0 inset-x-0 rounded-t-3xl border-b-0 overflow-hidden animate-fade-up"
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
       >
         <div className="w-9 h-1 rounded-full bg-white/[0.15] mx-auto mt-3 mb-1" />
 
-        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="px-6 py-4 border-b border-white/[0.05]">
           <div className="font-display font-semibold text-white text-base truncate">{user.name}</div>
           <div className="font-mono text-xs text-muted truncate">{user.email}</div>
         </div>

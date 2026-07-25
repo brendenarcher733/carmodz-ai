@@ -90,7 +90,7 @@ export function ShopLinks({ modName, vehicle }) {
   const query      = `${vehicleStr}${modName}`
 
   return (
-    <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+    <div className="mt-3 pt-3 border-t border-white/[0.05]">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}

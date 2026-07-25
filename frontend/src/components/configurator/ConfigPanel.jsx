@@ -40,7 +40,7 @@ export function ConfigPanel({ config, setSingle, toggleMulti, setCustomColor }) 
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ background: '#0f1014', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
+    <div className="flex flex-col h-full bg-panel border-r border-white/[0.07]">
 
       {/* Category tabs */}
       <div className="flex-shrink-0 px-3 pt-4 pb-2">
@@ -70,7 +70,7 @@ export function ConfigPanel({ config, setSingle, toggleMulti, setCustomColor }) 
       </div>
 
       {/* Divider */}
-      <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', margin: '4px 12px' }} />
+      <div className="h-px bg-white/[0.05] mx-3 my-1" />
 
       {/* Options list */}
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5">
@@ -85,7 +85,7 @@ export function ConfigPanel({ config, setSingle, toggleMulti, setCustomColor }) 
               className={clsx(
                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all duration-150',
                 selected
-                  ? 'bg-accent/[0.10] border-accent/40 text-white'
+                  ? 'bg-accent/[0.12] border-accent/40 text-white'
                   : 'bg-white/[0.02] border-white/[0.06] text-body hover:border-white/[0.16] hover:bg-white/[0.05] hover:text-white',
               )}
             >
@@ -104,8 +104,8 @@ export function ConfigPanel({ config, setSingle, toggleMulti, setCustomColor }) 
                   selected ? 'bg-accent border-accent' : 'border-white/20 bg-transparent',
                 )}>
                   {selected && (
-                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-                      <path d="M1.5 4.5l2 2 4-4" stroke="#0c0d10" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none" className="text-obsidian">
+                      <path d="M1.5 4.5l2 2 4-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   )}
                 </span>

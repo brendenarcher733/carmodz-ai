@@ -1,7 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { Badge } from '../components/ui/Badge'
-import { ShopLinks } from '../components/ui/ShopLinks'
+import { Card } from '../components/ui/Card'
+import { Button } from '../components/ui/Button'
+import { ModCard } from '../components/ui/ModCard'
 import * as analytics from '../services/analytics'
 
 const CarViewer3D = lazy(() =>
@@ -90,89 +91,6 @@ const STAGE_META = {
   2: { label: 'Stage 2', color: '#F59E0B', desc: 'Power — do after Stage 1 is complete'    },
 }
 
-const DIFF_VARIANT = { easy: 'easy', medium: 'medium', hard: 'hard' }
-
-/* ─── Mod card ─── */
-function ModCard({ mod, index, vehicle, onView3D }) {
-  const stage = STAGE_META[mod.stage]
-  return (
-    <div
-      className="animate-fade-up bg-surface border border-white/[0.07] rounded-2xl overflow-hidden transition-all duration-200 hover:bg-elevated"
-      style={{ animationDelay: `${index * 50}ms` }}
-    >
-      <div className="p-6">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div>
-            <h3 className="font-display font-bold text-white text-base leading-snug mb-0.5">{mod.name}</h3>
-            <span className="font-mono text-xs text-muted uppercase tracking-wider capitalize">{mod.category}</span>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Badge variant={DIFF_VARIANT[mod.difficulty] || 'default'} size="sm">{mod.difficulty}</Badge>
-            <Badge variant={`stage${mod.stage}`} size="sm">S{mod.stage}</Badge>
-          </div>
-        </div>
-
-        {/* Description */}
-        <p className="text-body text-sm leading-relaxed mb-5">{mod.description}</p>
-
-        {/* Footer row */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="font-mono text-xs text-muted uppercase tracking-wider mb-0.5">Investment</div>
-            <div className="font-mono text-white text-sm font-semibold">
-              ${mod.price_min.toLocaleString()} – ${mod.price_max.toLocaleString()}
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => onView3D(mod)}
-              className="inline-flex items-center gap-1.5 border border-white/[0.1] text-muted text-xs font-mono px-3 py-1.5 rounded-lg hover:border-accent/40 hover:text-accent transition-all duration-150"
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M6 1L11 3.5V8.5L6 11L1 8.5V3.5L6 1Z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
-                <path d="M6 1v10M1 3.5l5 2.5 5-2.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-              </svg>
-              View 3D
-            </button>
-            <div className="text-right">
-              <div className="font-mono text-xs text-muted uppercase tracking-wider mb-0.5">Priority</div>
-              <div className="font-display font-black text-accent text-2xl leading-none">#{mod.priority}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Brand tips */}
-        {mod.brand_tips?.length > 0 && (
-          <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-            <span className="font-mono text-xs text-muted uppercase tracking-wider mr-2">Brands</span>
-            <span className="text-sm text-body">{mod.brand_tips.join(' · ')}</span>
-          </div>
-        )}
-
-        {/* Warnings */}
-        {mod.warnings?.length > 0 && (
-          <div className="mt-3 space-y-2">
-            {mod.warnings.map((w, i) => (
-              <div key={i} className="flex items-start gap-2 bg-amber-500/[0.07] border border-amber-500/20 rounded-xl px-4 py-3">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-amber-400 flex-shrink-0 mt-0.5">
-                  <path d="M7 1.5l6 10.5H1L7 1.5z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round"/>
-                  <path d="M7 6v3M7 10v.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
-                </svg>
-                <span className="text-amber-400 text-sm leading-snug">{w}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Shop links */}
-        <ShopLinks modName={mod.name} vehicle={vehicle} />
-      </div>
-    </div>
-  )
-}
-
 /* ─── Stage timeline ─── */
 function StageTimeline({ mods }) {
   const stageMods = { 1: [], 2: [] }
@@ -199,7 +117,7 @@ function StageTimeline({ mods }) {
               </div>
             </div>
             {i < stages.length - 1 && (
-              <div className="flex-1 h-px mx-4 mb-7" style={{ background: 'rgba(255,255,255,0.08)' }} />
+              <div className="flex-1 h-px mx-4 mb-7 bg-white/[0.07]" />
             )}
           </div>
         )
@@ -277,30 +195,27 @@ export default function ExampleBuild() {
             <p className="text-body text-lg mt-3 mb-8">{DEMO.goal}</p>
 
             {/* Metrics strip */}
-            <div
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6"
-              style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}
-            >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-white/[0.07]">
               <div>
-                <div className="font-display font-black text-accent leading-none mb-1" style={{ fontSize: '1.8rem' }}>
+                <div className="font-display font-black text-accent leading-none mb-1" style={{ fontSize: '1.75rem' }}>
                   +{DEMO.hpMin}–{DEMO.hpMax} HP
                 </div>
                 <div className="font-mono text-xs text-muted uppercase tracking-wider">Est. Performance Gain</div>
               </div>
               <div>
-                <div className="font-display font-black text-white leading-none mb-1" style={{ fontSize: '1.8rem' }}>
+                <div className="font-display font-black text-white leading-none mb-1" style={{ fontSize: '1.75rem' }}>
                   $2,500
                 </div>
                 <div className="font-mono text-xs text-muted uppercase tracking-wider">Budget</div>
               </div>
               <div>
-                <div className="font-display font-black text-white leading-none mb-1" style={{ fontSize: '1.8rem' }}>
+                <div className="font-display font-black text-white leading-none mb-1" style={{ fontSize: '1.75rem' }}>
                   {DEMO.mods.length}
                 </div>
                 <div className="font-mono text-xs text-muted uppercase tracking-wider">Planned Upgrades</div>
               </div>
               <div>
-                <div className="font-display font-black text-white leading-none mb-1" style={{ fontSize: '1.8rem' }}>
+                <div className="font-display font-black text-white leading-none mb-1" style={{ fontSize: '1.75rem' }}>
                   2 of 3
                 </div>
                 <div className="font-mono text-xs text-muted uppercase tracking-wider">Stages Active</div>
@@ -311,12 +226,12 @@ export default function ExampleBuild() {
 
         {/* ── Stage timeline + AI summary ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-          <div className="md:col-span-2 bg-surface border border-white/[0.07] rounded-2xl p-6">
+          <Card padding="lg" className="md:col-span-2">
             <p className="font-mono text-xs text-muted uppercase tracking-wider mb-6">Build Timeline</p>
             <StageTimeline mods={DEMO.mods} />
-          </div>
+          </Card>
 
-          <div className="bg-surface border border-white/[0.07] rounded-2xl p-6">
+          <Card padding="lg">
             <p className="font-mono text-xs text-muted uppercase tracking-wider mb-3">Investment Range</p>
             <div className="space-y-3">
               <div>
@@ -338,11 +253,11 @@ export default function ExampleBuild() {
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* ── Advisor summary ── */}
-        <div className="bg-surface border border-white/[0.07] rounded-2xl p-6 mb-10">
+        <Card padding="lg" className="mb-10">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-xl bg-accent/[0.1] border border-accent/25 flex items-center justify-center flex-shrink-0">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-accent">
@@ -359,7 +274,7 @@ export default function ExampleBuild() {
             </div>
           </div>
           <p className="text-body text-base leading-relaxed">{DEMO.summary}</p>
-        </div>
+        </Card>
 
         {/* ── Stage 1 mods ── */}
         <section className="mb-12">
@@ -369,7 +284,7 @@ export default function ExampleBuild() {
               <h2 className="font-display font-bold text-xl text-stage-1">Stage 1</h2>
             </div>
             <span className="text-body text-sm">{STAGE_META[1].desc}</span>
-            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
+            <div className="flex-1 h-px bg-white/[0.05]" />
             <span className="font-mono text-xs text-muted">{stageMods[1].length} upgrades</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -388,7 +303,7 @@ export default function ExampleBuild() {
                 <h2 className="font-display font-bold text-xl text-stage-2">Stage 2</h2>
               </div>
               <span className="text-body text-sm">{STAGE_META[2].desc}</span>
-              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
+              <div className="flex-1 h-px bg-white/[0.05]" />
               <span className="font-mono text-xs text-muted">{stageMods[2].length} upgrade{stageMods[2].length !== 1 ? 's' : ''}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -419,21 +334,15 @@ export default function ExampleBuild() {
               not a generic list. Real parts. Real costs. Real order.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Link
-                to="/planner"
-                className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-lg px-10 py-4 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow"
-              >
+              <Button to="/planner" size="xl" className="shadow-glow">
                 Start My Build
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M4 9h10M10 5l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M4 9h10M10 5l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              </Link>
-              <Link
-                to="/advisor"
-                className="inline-flex items-center gap-2 border border-white/[0.15] text-white font-display font-semibold text-lg px-10 py-4 rounded-xl hover:border-white/[0.3] hover:bg-white/[0.05] transition-all duration-150"
-              >
+              </Button>
+              <Button to="/advisor" variant="secondary" size="xl">
                 Ask the Advisor
-              </Link>
+              </Button>
             </div>
           </div>
         </div>

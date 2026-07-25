@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
 import { useChat } from '../hooks/useChat'
 import { Spinner } from '../components/ui/Spinner'
+import { Card } from '../components/ui/Card'
+import { Button } from '../components/ui/Button'
 import clsx from 'clsx'
 
 const QUICK_STARTERS = [
@@ -43,7 +45,7 @@ function Message({ msg }) {
 
         {/* Suggestion chips */}
         {msg.suggestions?.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-white/[0.07]">
             {msg.suggestions.map(sug => (
               <button
                 key={sug}
@@ -153,7 +155,7 @@ export default function Advisor() {
         <aside className="max-h-[38vh] lg:max-h-none lg:w-72 flex-shrink-0 flex flex-col gap-3 md:gap-4 overflow-y-auto">
 
           {/* Advisor identity */}
-          <div className="bg-surface border border-white/[0.07] rounded-2xl p-3 md:p-5 flex-shrink-0">
+          <Card padding="none" className="p-3 md:p-5 flex-shrink-0">
             <div className="flex items-center gap-3 md:mb-3">
               <div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.1] flex items-center justify-center flex-shrink-0">
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="text-body">
@@ -174,10 +176,10 @@ export default function Advisor() {
               Expert build guidance — mod order, budget allocation, platform-specific
               picks, and what to skip spending money on.
             </p>
-          </div>
+          </Card>
 
           {/* Vehicle context */}
-          <div className="bg-surface border border-white/[0.07] rounded-2xl p-3 md:p-5 flex-shrink-0">
+          <Card padding="none" className="p-3 md:p-5 flex-shrink-0">
             <p className="eyebrow mb-2 md:mb-3">Your Vehicle</p>
             {hasVehicle ? (
               <div className="flex items-center justify-between">
@@ -215,10 +217,10 @@ export default function Advisor() {
                 </button>
               </form>
             )}
-          </div>
+          </Card>
 
           {/* Quick starters */}
-          <div className="bg-surface border border-white/[0.07] rounded-2xl p-3 md:p-5 flex-shrink-0">
+          <Card padding="none" className="p-3 md:p-5 flex-shrink-0">
             <p className="eyebrow mb-2 md:mb-3">Quick Questions</p>
             <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0 md:flex-col md:gap-0 md:space-y-1.5 md:overflow-visible">
               {QUICK_STARTERS.map(q => (
@@ -232,10 +234,10 @@ export default function Advisor() {
                 </button>
               ))}
             </div>
-          </div>
+          </Card>
 
           {/* Topics */}
-          <div className="hidden md:block bg-surface border border-white/[0.07] rounded-2xl p-5">
+          <Card padding="lg" className="hidden md:block">
             <p className="eyebrow mb-3">Topics I Cover</p>
             <div className="flex flex-wrap gap-1.5">
               {TOPICS.map(t => (
@@ -244,17 +246,14 @@ export default function Advisor() {
                 </span>
               ))}
             </div>
-          </div>
+          </Card>
         </aside>
 
         {/* ── Chat panel ── */}
-        <div className="flex-1 flex flex-col min-h-0 bg-surface border border-white/[0.07] rounded-2xl overflow-hidden">
+        <Card padding="none" className="flex-1 flex flex-col min-h-0 overflow-hidden">
 
           {/* Chat header */}
-          <div
-            className="flex items-center gap-3 px-4 md:px-5 py-3 md:py-4 flex-shrink-0"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
-          >
+          <div className="flex items-center gap-3 px-4 md:px-5 py-3 md:py-4 flex-shrink-0 border-b border-white/[0.05] bg-white/[0.02]">
             <div className="w-2 h-2 rounded-full bg-stage-1 animate-pulse-dot" />
             <div>
               <div className="font-display font-semibold text-white text-sm">Performance Advisor</div>
@@ -277,10 +276,7 @@ export default function Advisor() {
           </div>
 
           {/* Input bar */}
-          <div
-            className="flex items-end gap-3 p-4 flex-shrink-0"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
-          >
+          <div className="flex items-end gap-3 p-4 flex-shrink-0 border-t border-white/[0.05]">
             <textarea
               ref={inputRef}
               rows={1}
@@ -291,21 +287,18 @@ export default function Advisor() {
               className="flex-1 bg-elevated border border-white/[0.08] rounded-xl px-4 py-3 text-white text-base md:text-sm placeholder:text-muted resize-none focus:outline-none focus:border-accent/40 transition-colors leading-relaxed"
               style={{ minHeight: '46px', maxHeight: '140px' }}
             />
-            <button
+            <Button
               onClick={handleSend}
               disabled={!input.trim() || loading}
-              className="w-11 h-11 rounded-xl bg-accent text-obsidian flex items-center justify-center flex-shrink-0 hover:bg-accent-bright transition-all duration-150 shadow-glow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+              loading={loading}
+              className="w-11 h-11 min-h-0 rounded-xl p-0 flex-shrink-0 shadow-glow-sm disabled:shadow-none"
             >
-              {loading ? (
-                <Spinner size="sm" className="border-t-obsidian border-obsidian/25" />
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              )}
-            </button>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Button>
           </div>
-        </div>
+        </Card>
 
       </div>
     </div>

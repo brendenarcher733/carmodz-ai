@@ -2,6 +2,9 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { buildsApi } from '../services/api'
 import * as analytics from '../services/analytics'
+import { Spinner } from '../components/ui/Spinner'
+import { Button } from '../components/ui/Button'
+import { Alert } from '../components/ui/Alert'
 import clsx from 'clsx'
 
 /* ─── Vehicle data ─── */
@@ -321,7 +324,7 @@ function BuildingOverlay({ vehicle }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-obsidian/95 backdrop-blur-xl">
       <div className="relative text-center max-w-sm px-8">
         <div className="relative w-16 h-16 mx-auto mb-10">
-          <div className="absolute inset-0 rounded-full border-2 border-white/10 border-t-accent animate-spin" />
+          <Spinner size="lg" className="absolute inset-0 w-16 h-16" />
           <div className="absolute inset-0 flex items-center justify-center">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-accent">
               <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
@@ -365,8 +368,10 @@ function StepBar({ current }) {
                 </span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className="flex-1 h-px mx-2 transition-all duration-300"
-                  style={{ background: done ? '#FF8C00' : 'rgba(255,255,255,0.07)' }} />
+                <div className={clsx(
+                  'flex-1 h-px mx-2 transition-all duration-300',
+                  done ? 'bg-accent' : 'bg-white/[0.07]',
+                )} />
               )}
             </div>
           )
@@ -845,12 +850,14 @@ export default function Planner() {
             </h2>
             <p className="text-body text-sm mb-8">Review your build spec before we generate your plan.</p>
 
-            <div className="rounded-2xl overflow-hidden mb-6" style={{ border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div className="rounded-2xl overflow-hidden mb-6 border border-white/[0.07]">
               {REVIEW_ROWS.map(([k, v], i) => (
                 <div
                   key={k}
-                  className="flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-0 px-6 py-4 hover:bg-white/[0.02] transition-colors"
-                  style={i < REVIEW_ROWS.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.05)' } : undefined}
+                  className={clsx(
+                    'flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-0 px-6 py-4 hover:bg-white/[0.02] transition-colors',
+                    i < REVIEW_ROWS.length - 1 && 'border-b border-white/[0.05]',
+                  )}
                 >
                   <span className="font-mono text-xs text-muted uppercase tracking-wider md:pt-0.5">{k}</span>
                   <span className="text-white text-sm font-medium md:text-right md:max-w-[60%] capitalize">{v}</span>
@@ -858,19 +865,12 @@ export default function Planner() {
               ))}
             </div>
 
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/25 rounded-xl px-5 py-4 text-red-400 text-sm">
-                {error}
-              </div>
-            )}
+            {error && <Alert variant="error">{error}</Alert>}
           </div>
         )}
 
         {/* ── Navigation ── */}
-        <div
-          className="flex items-center justify-between gap-4 mt-10 pt-8"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
-        >
+        <div className="flex items-center justify-between gap-4 mt-10 pt-8 border-t border-white/[0.05]">
           <button
             type="button"
             onClick={() => setStep(p => p - 1)}
@@ -884,8 +884,8 @@ export default function Planner() {
           </button>
 
           {step < 3 ? (
-            <button
-              type="button"
+            <Button
+              size="lg"
               onClick={() => {
                 if (step === 0) {
                   analytics.capture('vehicle_selected', { year: form.year, make: form.make, model: form.model })
@@ -893,23 +893,16 @@ export default function Planner() {
                 setStep(p => p + 1)
               }}
               disabled={!canAdvance()}
-              className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-bold text-sm px-7 py-3 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
             >
               Continue
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </button>
+            </Button>
           ) : (
-            <button
-              type="button"
-              onClick={submit}
-              disabled={loading}
-              className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {loading && <span className="w-4 h-4 rounded-full border-2 border-obsidian/30 border-t-obsidian animate-spin" />}
+            <Button size="xl" onClick={submit} loading={loading} className="shadow-glow">
               Build My Garage
-            </button>
+            </Button>
           )}
         </div>
       </div>

@@ -9,6 +9,10 @@ export default {
         surface:   '#131519',
         elevated:  '#191C24',
         overlay:   '#1E2230',
+        // Recessed-panel background — one shade darker than `surface`, for
+        // content that sits *inside* a surface (e.g. the configurator's
+        // side panels). Was previously re-typed as raw hex in two files.
+        panel:     '#0F1014',
         accent: {
           DEFAULT: '#FF8C00',
           bright:  '#FFB347',
@@ -19,6 +23,9 @@ export default {
           2: '#F59E0B',
           3: '#EF4444',
         },
+        // Favorite/star accent — distinct from `accent` (orange) on purpose,
+        // matching the universal "starred" convention.
+        gold: '#FFC800',
         body:  '#9BA3AF',
         muted: '#4A4F5C',
       },
@@ -58,6 +65,10 @@ export default {
         'glow-lg': '0 16px 56px rgba(255,140,0,0.10)',
         'card':    '0 4px 24px rgba(0,0,0,0.5)',
         'card-lg': '0 8px 56px rgba(0,0,0,0.7)',
+        // Floating panels above other content (dropdowns, popovers) —
+        // tighter and darker than the card shadows above, which are for
+        // content sitting flat in the page.
+        'dropdown': '0 16px 48px rgba(0,0,0,0.6)',
       },
       animation: {
         'fade-up':   'fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both',

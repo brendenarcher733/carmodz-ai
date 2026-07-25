@@ -1,4 +1,6 @@
+import { Link } from 'react-router-dom'
 import clsx from 'clsx'
+import { Spinner } from './Spinner'
 
 const BASE = [
   'inline-flex items-center justify-center gap-2',
@@ -11,7 +13,12 @@ const VARIANTS = {
   primary:   'bg-accent text-obsidian hover:bg-accent-bright hover:shadow-glow-sm active:scale-[0.98]',
   secondary: 'bg-white/[0.06] border border-white/[0.12] text-white hover:bg-white/[0.1] hover:border-white/[0.2]',
   ghost:     'text-body hover:text-white hover:bg-white/[0.05]',
+  // Bordered, no fill — a lighter-weight secondary action than `secondary`.
+  outline:   'border border-white/[0.1] text-body hover:border-white/[0.22] hover:text-white',
   danger:    'border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50',
+  // Filled, borderless — icon-only chrome buttons (modal close, toggles)
+  // that need a visible resting state but no outline.
+  subtle:    'bg-white/[0.06] text-muted hover:text-white hover:bg-white/[0.1]',
 }
 
 const SIZES = {
@@ -22,6 +29,9 @@ const SIZES = {
   md: 'text-sm px-5 py-2.5 rounded-xl',
   lg: 'text-sm px-6 py-3 rounded-xl',
   xl: 'text-base px-8 py-3.5 rounded-xl',
+  // Square icon-only button (modal close buttons, toggle chevrons). Real
+  // 44px tap target on mobile, the tighter 36px it's always been on desktop.
+  icon: 'w-11 h-11 md:w-9 md:h-9 md:min-h-0 md:min-w-0 rounded-xl p-0',
 }
 
 export function Button({
@@ -34,19 +44,31 @@ export function Button({
   fullWidth,
   type = 'button',
   onClick,
+  to,
   ...rest
 }) {
+  const classes = clsx(BASE, VARIANTS[variant], SIZES[size], fullWidth && 'w-full', className)
+  const content = loading
+    ? <Spinner size="sm" className="border-t-current border-current/25" />
+    : children
+
+  if (to) {
+    return (
+      <Link to={to} className={classes} onClick={onClick} {...rest}>
+        {content}
+      </Link>
+    )
+  }
+
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
-      className={clsx(BASE, VARIANTS[variant], SIZES[size], fullWidth && 'w-full', className)}
+      className={classes}
       {...rest}
     >
-      {loading
-        ? <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-        : children}
+      {content}
     </button>
   )
 }
