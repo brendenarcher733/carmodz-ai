@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from core.database import init_db
 from core.redis_pool import get_redis_pool
-from routers import builds, advisor, auth, admin
+from routers import builds, advisor, auth, admin, billing
 
 
 @asynccontextmanager
@@ -67,6 +67,7 @@ app.include_router(auth.router)
 app.include_router(builds.router)
 app.include_router(advisor.router)
 app.include_router(admin.router)
+app.include_router(billing.router)
 
 
 @app.get("/health", tags=["System"])

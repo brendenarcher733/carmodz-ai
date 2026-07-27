@@ -36,6 +36,17 @@ export function ProfileSheet({ open, onClose, user, onLogout }) {
               <span className="text-sm font-medium">Admin Dashboard</span>
             </Link>
           )}
+          <Link
+            to="/billing"
+            onClick={onClose}
+            className="tap-target w-full flex items-center gap-3 px-3 rounded-xl text-body hover:text-white hover:bg-white/[0.05] transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-muted">
+              <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
+              <path d="M1.5 6h13" stroke="currentColor" strokeWidth="1.3"/>
+            </svg>
+            <span className="text-sm font-medium">Billing</span>
+          </Link>
           <button
             onClick={onLogout}
             className="tap-target w-full flex items-center gap-3 px-3 rounded-xl text-red-400 hover:bg-red-500/[0.06] transition-colors"

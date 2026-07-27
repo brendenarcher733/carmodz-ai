@@ -65,6 +65,17 @@ function UserMenu({ user, onLogout }) {
               </svg>
               My Builds
             </Link>
+            <Link
+              to="/billing"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-body hover:text-white hover:bg-white/[0.05] transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-muted">
+                <rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
+                <path d="M1.5 5.5h11" stroke="currentColor" strokeWidth="1.25"/>
+              </svg>
+              Billing
+            </Link>
             <button
               onClick={() => { onLogout(); setOpen(false) }}
               className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-body hover:text-red-400 hover:bg-red-500/[0.05] transition-colors"

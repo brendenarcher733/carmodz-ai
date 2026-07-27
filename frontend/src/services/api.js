@@ -136,7 +136,14 @@ export const advisorApi = {
         },
         body: JSON.stringify({ message, session_id: sessionId, vehicle, build_id: buildId }),
       })
-      if (!res.ok || !res.body) throw new Error(`Request failed with status ${res.status}`)
+      if (!res.ok || !res.body) {
+        // Surface the real backend message (e.g. a free-plan daily-limit
+        // 403) instead of a generic "request failed" — without this, a
+        // user who hits their cap sees nothing that tells them why.
+        let detail = null
+        try { detail = (await res.json())?.detail } catch { /* body wasn't JSON */ }
+        throw new Error(typeof detail === 'string' ? detail : `Request failed with status ${res.status}`)
+      }
 
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
@@ -192,6 +199,12 @@ export const adminApi = {
   stats:           ()     => api.get('/api/admin/stats'),
   users:           (params = {}) => api.get('/api/admin/users', { params }),
   popularVehicles: ()     => api.get('/api/admin/popular-vehicles'),
+}
+
+export const billingApi = {
+  usage:    () => api.get('/api/billing/usage'),
+  checkout: () => api.post('/api/billing/checkout'),
+  portal:   () => api.post('/api/billing/portal'),
 }
 
 export const healthApi = {

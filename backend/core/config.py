@@ -84,6 +84,17 @@ class Settings(BaseSettings):
     posthog_api_key: str = Field(default="", alias="POSTHOG_API_KEY")
     posthog_host:    str = Field(default="https://us.i.posthog.com", alias="POSTHOG_HOST")
 
+    # Billing — same off-by-default pattern as the providers above. Unset
+    # means routers/billing.py returns a clear "billing isn't configured"
+    # error instead of calling out to Stripe with an empty key.
+    stripe_secret_key:     str = Field(default="", alias="STRIPE_SECRET_KEY")
+    stripe_webhook_secret: str = Field(default="", alias="STRIPE_WEBHOOK_SECRET")
+    stripe_price_id_pro:   str = Field(default="", alias="STRIPE_PRICE_ID_PRO")
+
+    @property
+    def billing_configured(self) -> bool:
+        return bool(self.stripe_secret_key and self.stripe_price_id_pro)
+
     @property
     def email_verification_required_features(self) -> set[str]:
         return {

@@ -21,6 +21,7 @@ import VerifyEmail     from './pages/VerifyEmail'
 import ExampleBuild    from './pages/ExampleBuild'
 import Configurator    from './pages/Configurator'
 import Admin           from './pages/Admin'
+import Billing         from './pages/Billing'
 import './styles/globals.css'
 
 analytics.init()
@@ -75,6 +76,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path="/example-build"  element={<ExampleBuild />}  />
                   <Route path="/configurator"   element={<ProtectedRoute><Configurator /></ProtectedRoute>}  />
                   <Route path="/admin"          element={<AdminRoute><Admin /></AdminRoute>}  />
+                  <Route path="/billing"        element={<ProtectedRoute><Billing /></ProtectedRoute>}  />
                 </Routes>
               </>
             }

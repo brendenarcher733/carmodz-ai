@@ -11,6 +11,7 @@ from core.rate_limit import RateLimiter
 from models.schemas import ChatMessageIn
 from models.user import User
 from routers.auth import get_current_user_optional
+from services.billing_service import enforce_chat_limit
 from services.chat_service import handle_chat, handle_chat_stream
 
 router = APIRouter(prefix="/api/mod-advisor", tags=["Mod Advisor"])
@@ -53,13 +54,15 @@ def chat_with_advisor(
     db: Session = Depends(get_db),
     current_user: User | None = Depends(get_current_user_optional),
 ):
+    user_id = current_user.id if current_user else None
+    enforce_chat_limit(db, user_id)
     data = ChatMessageIn(
         session_id=payload.session_id,
         message=payload.message,
         build_id=payload.build_id,
         vehicle=payload.vehicle,
     )
-    reply = handle_chat(db, data, user_id=current_user.id if current_user else None)
+    reply = handle_chat(db, data, user_id=user_id)
     return ChatResponse(
         response=reply,
         suggestions=_suggestions_for(payload.message, reply),
@@ -69,23 +72,28 @@ def chat_with_advisor(
 @router.post("/chat/stream", dependencies=[Depends(chat_rate_limit)])
 async def chat_with_advisor_stream(
     payload: ChatRequest,
+    db: Session = Depends(get_db),
     current_user: User | None = Depends(get_current_user_optional),
 ):
     """SSE variant of /chat — same rate limit, same persistence, same
     suggestion-chip logic, but yields text as it's generated instead of
-    waiting for the full response. Manages its own DB session (rather than
-    Depends(get_db)) so its lifetime is unambiguous across the whole
-    streamed response regardless of how the ASGI server times dependency
-    teardown relative to StreamingResponse body consumption — same pattern
-    the arq worker already uses for its own DB session."""
+    waiting for the full response. The streaming body itself manages its
+    own separate DB session (rather than reusing the `db` above) so its
+    lifetime is unambiguous across the whole streamed response regardless
+    of how the ASGI server times dependency teardown relative to
+    StreamingResponse body consumption — same pattern the arq worker
+    already uses for its own DB session. `db` here is only for the
+    plan-limit check below, which has to happen before the streaming
+    response starts, not once it's already underway."""
+    user_id = current_user.id if current_user else None
+    enforce_chat_limit(db, user_id)
+
     data = ChatMessageIn(
         session_id=payload.session_id,
         message=payload.message,
         build_id=payload.build_id,
         vehicle=payload.vehicle,
     )
-
-    user_id = current_user.id if current_user else None
 
     async def event_stream():
         db = SessionLocal()

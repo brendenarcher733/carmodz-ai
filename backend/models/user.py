@@ -27,6 +27,16 @@ class User(Base):
     # different metrics and the admin dashboard wants the former.
     last_login_at  = Column(DateTime, nullable=True)
 
+    # ── Billing (routers/billing.py, services/billing_service.py) ──
+    plan                   = Column(String(20), nullable=False, default="free")  # "free" | "pro"
+    stripe_customer_id     = Column(String(255), nullable=True, index=True)
+    stripe_subscription_id = Column(String(255), nullable=True, index=True)
+    # Set from the Stripe subscription's `cancel_at` on a cancel-at-period-end
+    # cancellation — the user stays "pro" (still paid through the period) but
+    # the billing page needs this to show "cancels on <date>" instead of
+    # silently renewing forever.
+    subscription_cancel_at = Column(DateTime, nullable=True)
+
     def __repr__(self):
         return f"<User id={self.id} {self.email}>"
 
@@ -143,6 +153,7 @@ class UserResponse(BaseModel):
     email:          str
     email_verified: bool
     is_admin:       bool
+    plan:           str
     created_at:     datetime
 
     model_config = {"from_attributes": True}

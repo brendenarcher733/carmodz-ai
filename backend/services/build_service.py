@@ -5,20 +5,23 @@ import logging
 
 from sqlalchemy.orm import Session
 from models.build import Build, BuildCreate
+from models.user import User
 from models.recommendation import Recommendation, ModRecommendation
 from services.mock_ai import build_mod_plan
+from services.billing_service import enforce_build_limit
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
 
-def create_build(db: Session, data: BuildCreate, user_id: int) -> Build:
+def create_build(db: Session, data: BuildCreate, user: User) -> Build:
     """Creates the build row only. Recommendation generation is no longer
     inline here — it used to block this call for 25-45s on a Claude
     round-trip. The router enqueues the async job (workers/recommendation_worker.py)
     right after this returns and stores the resulting job_id on the build."""
+    enforce_build_limit(db, user)
     build = Build(
-        user_id=user_id,
+        user_id=user.id,
         title=data.title,
         year=data.year,
         make=data.make,

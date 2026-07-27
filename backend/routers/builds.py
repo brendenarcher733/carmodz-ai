@@ -20,13 +20,23 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/builds", tags=["Builds"])
 
 
-async def _enqueue_generation_job(request: Request, db: Session, build) -> None:
+async def _enqueue_generation_job(request: Request, db: Session, build, plan: str = "free") -> None:
     """Enqueue the async recommendation job and persist the resulting arq
     job_id on the build row. Lives in the router, not build_service, because
     it's the one place in this codebase that touches the async Redis pool —
-    build_service stays a plain sync module, no event loop assumptions."""
+    build_service stays a plain sync module, no event loop assumptions.
+
+    Pro's "priority queue position" is exactly this: a small artificial
+    defer on free-tier jobs, nothing on pro-tier ones, so a pro job enqueued
+    in that window gets pulled off the queue first. Deliberately not a real
+    priority heap (would mean a second arq queue + worker changes) — this
+    gets the same practical effect with a one-line change here, and it's
+    the only thing this feature touches in the whole job pipeline. The
+    generation logic itself (workers/recommendation_worker.py, services/ai_service.py)
+    is completely untouched."""
     pool = request.app.state.redis_pool
-    job = await pool.enqueue_job("generate_recommendations_task", build.id)
+    defer_by = None if plan == "pro" else 4
+    job = await pool.enqueue_job("generate_recommendations_task", build.id, _defer_by=defer_by)
     if job is not None:
         build.job_id = job.job_id
         db.commit()
@@ -57,13 +67,13 @@ async def create_new_build(
 
     Returns immediately (status='pending') — this used to block for 25-45s
     on a Claude round-trip. Poll GET /{id}/status until status='ready'."""
-    build = create_build(db, data, current_user.id)
+    build = create_build(db, data, current_user)
     analytics.capture(current_user.id, "build_created", {
         "year": data.year, "make": data.make, "model": data.model,
         "budget": data.budget, "goal": data.goal, "experience": data.experience,
         "categories": data.categories, "is_daily": data.is_daily,
     })
-    await _enqueue_generation_job(request, db, build)
+    await _enqueue_generation_job(request, db, build, plan=current_user.plan)
     return build
 
 
@@ -109,7 +119,7 @@ async def retry_build(
 ):
     """Re-enqueue generation for a build stuck in status='failed'."""
     build = retry_build_generation(db, build_id, current_user.id)
-    await _enqueue_generation_job(request, db, build)
+    await _enqueue_generation_job(request, db, build, plan=current_user.plan)
     return build
 
 

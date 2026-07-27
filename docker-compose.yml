@@ -48,6 +48,11 @@ services:
       AI_PROVIDER: ${AI_PROVIDER:-mock}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # Billing only lives in the web process (routers/billing.py) — the
+      # worker never touches Stripe, so these aren't needed below.
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PRICE_ID_PRO: ${STRIPE_PRICE_ID_PRO:-}
     depends_on:
       postgres:
         condition: service_healthy

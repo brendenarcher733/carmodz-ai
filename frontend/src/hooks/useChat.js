@@ -54,16 +54,20 @@ export function useChat(initialVehicle = null) {
           setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, suggestions } : m))
         }
       },
-      onError: () => {
+      onError: (err) => {
         setLoading(false)
+        // Surface the real backend message when there is one (e.g. a free
+        // plan's daily message limit) — only fall back to the generic
+        // apology for an actual unexpected failure with no clear reason.
+        const message = err?.message || "Sorry, I hit a snag. Try again?"
         if (started) {
           setMessages(prev => prev.map(m => m.id === assistantId
-            ? { ...m, content: m.content || "Sorry, I hit a snag. Try again?" }
+            ? { ...m, content: m.content || message }
             : m))
         } else {
           setMessages(prev => [...prev, {
             id: assistantId, role: 'assistant',
-            content: "Sorry, I hit a snag. Try again?", suggestions: null,
+            content: message, suggestions: null,
           }])
         }
       },
