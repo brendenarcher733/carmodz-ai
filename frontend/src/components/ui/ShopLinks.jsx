@@ -1,5 +1,20 @@
 import { useState } from 'react'
 
+/* Google's `site:` search restricts results to one domain — used below for
+   retailers whose own on-site search isn't a stable, documented URL (no
+   public API, or a client-side search that ignores query-string params
+   entirely). Confirmed by hand: RockAuto's `?query=` param lands on the
+   generic catalog nav, not results; FCP Euro's search is client-rendered and
+   ignores every URL param tried (`#q=`, `?q=`, `?query=`). Summit Racing and
+   CARiD's own search endpoints couldn't be verified at all (bot-walled), so
+   rather than ship another unverified guess, they get the same reliable
+   fallback. This always lands on a real results page listing that retailer's
+   actual matching pages — it just costs one extra hop through Google instead
+   of going straight to the retailer.
+   Amazon and eBay Motors keep their direct search params below — both are
+   long-documented, stable, and confirmed correct. */
+const siteSearch = (domain, q) => `https://www.google.com/search?q=${encodeURIComponent(`site:${domain} ${q}`)}`
+
 /* ─── Retailers — ordered by enthusiast preference ─── */
 const RETAILERS = [
   {
@@ -21,7 +36,7 @@ const RETAILERS = [
     label: 'Summit Racing',
     desc:  'Performance parts specialists',
     color: '#E31E26',
-    url:   (q) => `https://www.summitracing.com/search/keyword/${encodeURIComponent(q)}`,
+    url:   (q) => siteSearch('summitracing.com', q),
     icon: (
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M7 2l5 9H2L7 2z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round"/>
@@ -33,7 +48,7 @@ const RETAILERS = [
     label: 'CARiD',
     desc:  'OEM & aftermarket, all categories',
     color: '#0066CC',
-    url:   (q) => `https://www.carid.com/search/?wd=${encodeURIComponent(q)}`,
+    url:   (q) => siteSearch('carid.com', q),
     icon: (
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.25"/>
@@ -46,7 +61,7 @@ const RETAILERS = [
     label: 'RockAuto',
     desc:  'Lowest prices, OEM & discount',
     color: '#CC0000',
-    url:   (q) => `https://www.rockauto.com/en/partsearch/?romenu=topnav&query=${encodeURIComponent(q)}`,
+    url:   (q) => siteSearch('rockauto.com', q),
     icon: (
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <rect x="1.5" y="4" width="11" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
@@ -71,7 +86,7 @@ const RETAILERS = [
     label: 'FCP Euro',
     desc:  'European performance & OEM',
     color: '#003DA5',
-    url:   (q) => `https://www.fcpeuro.com/search#q=${encodeURIComponent(q)}`,
+    url:   (q) => siteSearch('fcpeuro.com', q),
     icon: (
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.25"/>
