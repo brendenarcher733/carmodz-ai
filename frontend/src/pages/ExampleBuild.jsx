@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { ModCard } from '../components/ui/ModCard'
+import { VehicleSilhouette } from '../components/ui/VehicleSilhouette'
 import * as analytics from '../services/analytics'
 
 const CarViewer3D = lazy(() =>
@@ -174,13 +175,23 @@ export default function ExampleBuild() {
 
         {/* ── Vehicle hero ── */}
         <div
-          className="relative overflow-hidden rounded-3xl mb-8"
+          className="dyno-frame relative overflow-hidden rounded-3xl mb-8"
           style={{ background: 'linear-gradient(135deg, rgba(255,140,0,0.07) 0%, rgba(19,21,25,1) 50%)' }}
         >
+          <div className="absolute inset-0 bg-blueprint-grid pointer-events-none opacity-70" />
+          <div className="dyno-frame-corner" />
+          <div className="dyno-frame-corner dyno-frame-corner--br" />
+
           <div
             className="absolute top-0 right-0 bottom-0 w-1/2 pointer-events-none"
             style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,140,0,0.05) 0%, transparent 70%)' }}
-          />
+          >
+            <VehicleSilhouette
+              make={DEMO.make} model={DEMO.model} year={DEMO.year}
+              tone="feature"
+              className="absolute inset-0 w-full h-full text-accent/[0.22]"
+            />
+          </div>
 
           <div className="relative z-10 px-8 py-10 md:px-12">
             <p className="eyebrow mb-3">Example Build</p>

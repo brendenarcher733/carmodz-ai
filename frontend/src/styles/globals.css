@@ -190,6 +190,94 @@
     background-size: 200% 100%;
     @apply animate-shimmer rounded-lg;
   }
+
+  /* ── Garage / dyno-sheet texture ──
+     The one texture family in the app — everything else is flat gradients.
+     Used sparingly on the three imagery-bearing surfaces (Landing hero,
+     Garage cards, build-detail hero), never as a blanket page background,
+     so it reads as a deliberate surface treatment rather than noise. */
+
+  /* Faint technical-drawing graph paper — accent-tinted so it reads as a
+     spec sheet grid, not a generic dashboard grid. */
+  .bg-blueprint-grid {
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,140,0,0.05) 0, rgba(255,140,0,0.05) 1px, transparent 1px, transparent 28px),
+      repeating-linear-gradient(90deg, rgba(255,140,0,0.05) 0, rgba(255,140,0,0.05) 1px, transparent 1px, transparent 28px);
+  }
+
+  /* Subtle film-grain, for shop-floor tactility instead of flat gradient
+     smoothness. SVG feTurbulence data-URI — no image request, no asset. */
+  .bg-grain {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+  }
+
+  /* Technical-drawing corner brackets — crop-mark style, for the one panel
+     per page that's the "hero" (build-detail vehicle panel). `.dyno-frame`
+     on the container plus two `.dyno-frame-corner` children (top-left via
+     default, `.dyno-frame-corner--br` modifier for the opposite corner)
+     draws the pair of L-brackets a technical drawing crops to. */
+  .dyno-frame {
+    position: relative;
+  }
+  .dyno-frame-corner {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    width: 18px;
+    height: 18px;
+    border-top: 1.5px solid rgba(255,140,0,0.35);
+    border-left: 1.5px solid rgba(255,140,0,0.35);
+    pointer-events: none;
+  }
+  .dyno-frame-corner--br {
+    top: auto;
+    left: auto;
+    bottom: 14px;
+    right: 14px;
+    border-top: none;
+    border-left: none;
+    border-bottom: 1.5px solid rgba(255,140,0,0.35);
+    border-right: 1.5px solid rgba(255,140,0,0.35);
+  }
+
+  /* ── Logo mark (components/layout/Logo.jsx) ──
+     `pathLength="1"` on each SVG path normalizes it to a 0-1 length
+     regardless of its real geometry, so `stroke-dasharray: 1` + animating
+     `stroke-dashoffset` 1→0 draws any path cleanly without hand-measuring
+     pixel lengths. The body draws in once on mount; the three accent
+     streaks keep a slow, staggered horizontal drift to read as motion. */
+  .logo-mark-body {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: logo-draw 0.9s 0.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  .logo-streak {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation:
+      logo-draw 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+      logo-drift 2.6s ease-in-out infinite;
+  }
+  .logo-streak-1 { animation-delay: 0.5s, 1.4s; }
+  .logo-streak-2 { animation-delay: 0.65s, 1.6s; }
+  .logo-streak-3 { animation-delay: 0.8s, 1.8s; }
+
+  @keyframes logo-draw {
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes logo-drift {
+    0%, 100% { transform: translateX(0); opacity: 1; }
+    50%      { transform: translateX(2px); opacity: 0.7; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo-mark-body, .logo-streak {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+  }
 }
 
 @layer utilities {

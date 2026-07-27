@@ -6,6 +6,8 @@ import { Spinner } from '../components/ui/Spinner'
 import { Card } from '../components/ui/Card'
 import { Alert } from '../components/ui/Alert'
 import { Button } from '../components/ui/Button'
+import { VehicleSilhouette } from '../components/ui/VehicleSilhouette'
+import { IconGarageBay, IconFuelPump, IconGauge, IconCheckeredFlag, IconWrench, IconTire } from '../components/icons/AutoIcons'
 import * as analytics from '../services/analytics'
 
 /* ─── Goal metadata ─── */
@@ -25,18 +27,19 @@ function GarageStats({ stats }) {
   if (!stats || stats.total_builds === 0) return null
 
   const items = [
-    { label: 'Builds',        value: stats.total_builds },
-    { label: 'Total Budget',  value: `$${stats.total_budget.toLocaleString()}` },
-    { label: 'Avg Budget',    value: `$${stats.avg_budget.toLocaleString()}` },
-    { label: 'Favourites',    value: stats.favourites },
-    { label: 'Top Make',      value: stats.top_make ?? '—' },
-    { label: 'Total Mods',    value: stats.total_mods },
+    { label: 'Builds',        value: stats.total_builds, Icon: IconGarageBay },
+    { label: 'Total Budget',  value: `$${stats.total_budget.toLocaleString()}`, Icon: IconFuelPump },
+    { label: 'Avg Budget',    value: `$${stats.avg_budget.toLocaleString()}`, Icon: IconGauge },
+    { label: 'Favourites',    value: stats.favourites, Icon: IconCheckeredFlag },
+    { label: 'Top Make',      value: stats.top_make ?? '—', Icon: IconWrench },
+    { label: 'Total Mods',    value: stats.total_mods, Icon: IconTire },
   ]
 
   return (
     <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-10">
-      {items.map(({ label, value }) => (
+      {items.map(({ label, value, Icon }) => (
         <Card key={label} padding="sm" className="rounded-xl text-center">
+          <Icon className="text-accent/60 mx-auto mb-1.5" width={14} height={14} />
           <div className="font-display font-black text-white text-xl leading-none mb-1">
             {value}
           </div>
@@ -75,8 +78,18 @@ function GarageBay({ build, onDelete, onToggleFavourite }) {
   const since = new Date(build.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 
   return (
-    <Card padding="none" hover className="overflow-hidden group">
-      <div className="px-5 py-5 md:px-7 md:py-7">
+    <Card padding="none" hover className="relative overflow-hidden group">
+      {/* Vehicle silhouette watermark — body-style matched to this build's
+          make/model/year via classifyVehicle(), tinted to the goal color,
+          bleeding off the right edge behind the text content below. */}
+      <VehicleSilhouette
+        make={build.make} model={build.model} year={build.year}
+        tone="watermark"
+        color={meta.color}
+        className="absolute -right-6 bottom-0 w-[60%] max-w-[380px] h-auto opacity-[0.07] pointer-events-none select-none"
+      />
+
+      <div className="relative z-10 px-5 py-5 md:px-7 md:py-7">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6">
 
           {/* ── Left: Vehicle Identity ── */}
@@ -219,10 +232,7 @@ export default function Garage() {
             <Card padding="none" className="max-w-xl mx-auto text-center rounded-3xl py-20 px-10 relative overflow-hidden bg-surface/50">
               <div className="relative z-10">
                 <div className="w-20 h-20 rounded-2xl bg-accent/[0.08] border border-accent/20 flex items-center justify-center mx-auto mb-8">
-                  <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="text-accent">
-                    <path d="M5 24h26M9 24l3-8h12l3 8M12 28a2 2 0 100-4 2 2 0 000 4zM24 28a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M13 16l2-5h6l2 5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <IconGarageBay width={36} height={36} strokeWidth={1.5} className="text-accent" />
                 </div>
 
                 <h2 className="font-display font-black text-white text-3xl mb-3 tracking-tight">

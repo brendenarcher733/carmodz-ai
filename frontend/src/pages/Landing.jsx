@@ -1,5 +1,13 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
+import { VehicleSilhouette } from '../components/ui/VehicleSilhouette'
+
+/* Lazy-loaded so the ~1.7MB Ferrari GLB (and Three.js itself) never blocks
+   the hero's initial paint — same lazy-import pattern already used for the
+   per-mod 3D modal (pages/BuildDetail.jsx). */
+const InlineCarViewer = lazy(() =>
+  import('../components/ui/CarViewer3D').then(m => ({ default: m.InlineCarViewer })),
+)
 
 /* ─── Scroll-reveal hook ─── */
 function useReveal(threshold = 0.12) {
@@ -148,6 +156,27 @@ export default function Landing() {
             linear-gradient(180deg, #0a0b0d 0%, #08090b 100%)
           `,
         }} />
+
+        {/* ── Vehicle render — atmospheric backdrop, not a foreground
+             element. A real 3D vehicle behind the copy/example-card, faded
+             into the gradient rather than boxed in like a widget. The
+             silhouette sits underneath at all times and shows through the
+             3D canvas's transparent background until the model finishes
+             loading (or permanently, if WebGL isn't available) — no loading
+             state to coordinate between the two. ── */}
+        <div
+          className="absolute inset-y-0 right-0 w-full lg:w-[64%] pointer-events-none opacity-[0.4] lg:opacity-[0.55]"
+          style={{ maskImage: 'linear-gradient(90deg, transparent 0%, black 30%)', WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 30%)' }}
+        >
+          <VehicleSilhouette
+            make="Ferrari" model="" year=""
+            tone="feature"
+            className="absolute inset-0 w-full h-full text-white/[0.06]"
+          />
+          <Suspense fallback={null}>
+            <InlineCarViewer height="100%" bare interactive={false} alpha />
+          </Suspense>
+        </div>
 
         {/* ── Content ── */}
         <div className="container-content relative z-10 w-full pt-32 pb-20">

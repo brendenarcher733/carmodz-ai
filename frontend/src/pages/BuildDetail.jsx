@@ -7,6 +7,8 @@ import { Card } from '../components/ui/Card'
 import { Alert } from '../components/ui/Alert'
 import { Button } from '../components/ui/Button'
 import { ModCard } from '../components/ui/ModCard'
+import { VehicleSilhouette } from '../components/ui/VehicleSilhouette'
+import { IconWrench, IconCheckeredFlag, IconCompassGauge, IconGauge } from '../components/icons/AutoIcons'
 
 const CarViewer3D = lazy(() =>
   import('../components/ui/CarViewer3D').then(m => ({ default: m.CarViewer3D }))
@@ -89,9 +91,7 @@ function GeneratingState({ vehicleLabel }) {
         <div className="relative w-16 h-16 mx-auto mb-8">
           <Spinner size="lg" className="absolute inset-0 w-16 h-16" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-accent">
-              <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-            </svg>
+            <IconCheckeredFlag width={22} height={22} strokeWidth={1.5} className="text-accent" />
           </div>
         </div>
         <h2 className="font-display font-black text-white text-xl mb-2 tracking-tight">Building your plan</h2>
@@ -200,12 +200,30 @@ export default function BuildDetail() {
       )}
       <div className="container-content pt-10 pb-16">
 
-        {/* ── Vehicle Hero ── */}
-        <div className="relative overflow-hidden rounded-3xl mb-8"
+        {/* ── Vehicle Hero — this panel is what gets screenshotted and
+             shared, so it gets the full treatment: the vehicle silhouette
+             (real body-style match via classifyVehicle), the blueprint-grid
+             texture, and technical-drawing corner brackets. ── */}
+        <div className="dyno-frame relative overflow-hidden rounded-3xl mb-8"
           style={{ background: 'linear-gradient(135deg, rgba(255,140,0,0.06) 0%, rgba(19,21,25,1) 50%)' }}>
 
+          {/* Grid texture as its own layer — the parent already carries an
+              inline `background` gradient, and an inline style always beats
+              a class's background-image, so .bg-blueprint-grid can't live
+              on that same element. */}
+          <div className="absolute inset-0 bg-blueprint-grid pointer-events-none opacity-70" />
+
+          <div className="dyno-frame-corner" />
+          <div className="dyno-frame-corner dyno-frame-corner--br" />
+
           <div className="absolute top-0 right-0 bottom-0 w-1/2 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,140,0,0.05) 0%, transparent 70%)' }} />
+            style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,140,0,0.05) 0%, transparent 70%)' }}>
+            <VehicleSilhouette
+              make={plan.make} model={plan.model} year={plan.year}
+              tone="feature"
+              className="absolute inset-0 w-full h-full text-accent/[0.22]"
+            />
+          </div>
 
           <div className="relative z-10 px-8 py-10">
             {/* Breadcrumb */}
@@ -281,10 +299,7 @@ export default function BuildDetail() {
           >
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-accent/[0.12] border border-accent/25 flex items-center justify-center group-hover:bg-accent/[0.2] transition-all duration-200">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="text-accent">
-                  <path d="M12 2L22 7V17L12 22L2 17V7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                  <path d="M12 2v20M2 7l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
+                <IconWrench width={24} height={24} strokeWidth={1.4} className="text-accent" />
               </div>
               <div className="text-center">
                 <div className="font-display font-black text-white text-lg mb-1 group-hover:text-accent transition-colors">
@@ -320,11 +335,7 @@ export default function BuildDetail() {
               className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07] hover:border-accent/30 hover:bg-accent/[0.05] transition-all duration-150 group"
             >
               <div className="w-8 h-8 rounded-lg bg-accent/[0.1] border border-accent/20 flex items-center justify-center flex-shrink-0">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-accent">
-                  <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.25"/>
-                  <path d="M5 7c0-1.1.9-2 2-2s2 .9 2 2-2 3-2 3" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
-                  <circle cx="7" cy="11" r=".5" fill="currentColor"/>
-                </svg>
+                <IconCompassGauge width={14} height={14} strokeWidth={1.25} className="text-accent" />
               </div>
               <div>
                 <div className="font-display font-semibold text-white text-sm group-hover:text-accent transition-colors">Ask the Advisor</div>
@@ -358,10 +369,7 @@ export default function BuildDetail() {
           <Card padding="lg" className="mb-10">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-8 rounded-lg bg-accent/[0.1] border border-accent/25 flex items-center justify-center flex-shrink-0">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-accent">
-                  <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.25"/>
-                  <circle cx="7" cy="7" r="1.5" fill="currentColor"/>
-                </svg>
+                <IconGauge width={14} height={14} strokeWidth={1.25} className="text-accent" />
               </div>
               <div>
                 <div className="font-display font-semibold text-white text-sm">Performance Advisor</div>

@@ -5,6 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { DRACOLoader }   from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { Spinner } from './Spinner'
 import { Button } from './Button'
+import { classifyVehicle } from '../../lib/vehicleUtils'
 
 /* Small translucent label used for the orbit-controls hint — was inline
    `style={{}}` duplicated verbatim in two places in this file. */
@@ -36,13 +37,33 @@ const AREA_POS = {
   interior:    { top: '32%', left: '46%' },
 }
 
-/* ─── Three.js scene setup ─── */
-function buildScene(mount, onLoad, onError) {
+/* ─── Three.js scene setup ───
+   `modelUrl` defaults to the Ferrari GLB — the per-mod modal's existing
+   behavior — so parameterizing this for other call sites (the Landing hero,
+   the vehicle-matched modal fix) doesn't change anything for existing
+   callers that don't pass it. `interactive=false` disables orbit/zoom
+   controls for decorative, non-modal placements (still auto-rotates).
+   `groundY`/`modelScale`/`modelPositionY` default to the exact values this
+   scene already used for the hardcoded Ferrari — so any call site that
+   doesn't pass them (the existing per-mod modal) renders byte-identically
+   to before. The vehicle-matched modal (below) passes the kenney-model
+   ground/scale/offset triple exactly as authored in lib/vehicleUtils.js
+   and proven working in the Configurator's own (separate, react-three-fiber)
+   scene — ported as-is rather than re-derived, since there's no way to
+   visually re-tune 3D placement in this environment. */
+function buildScene(mount, onLoad, onError, {
+  modelUrl,
+  modelScale = 0.52,
+  modelPositionY = -0.82,
+  groundY = -0.82,
+  interactive = true,
+  alpha = false,
+} = {}) {
   const w = mount.clientWidth
   const h = mount.clientHeight
 
   /* Renderer */
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha })
   renderer.setSize(w, h)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   renderer.shadowMap.enabled = true
@@ -53,7 +74,7 @@ function buildScene(mount, onLoad, onError) {
 
   /* Scene */
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x08090b)
+  if (!alpha) scene.background = new THREE.Color(0x08090b)
   scene.fog = new THREE.FogExp2(0x08090b, 0.04)
 
   /* Camera */
@@ -92,17 +113,18 @@ function buildScene(mount, onLoad, onError) {
   })
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), groundMat)
   ground.rotation.x = -Math.PI / 2
-  ground.position.y = -0.82
+  ground.position.y = groundY
   ground.receiveShadow = true
   scene.add(ground)
 
   /* Grid lines on ground */
   const grid = new THREE.GridHelper(20, 30, 0x1e2230, 0x1e2230)
-  grid.position.y = -0.81
+  grid.position.y = groundY + 0.01
   scene.add(grid)
 
   /* Controls */
   const controls = new OrbitControls(camera, renderer.domElement)
+  controls.enabled = interactive
   controls.enablePan = false
   controls.minDistance = 3
   controls.maxDistance = 14
@@ -118,11 +140,10 @@ function buildScene(mount, onLoad, onError) {
   const loader = new GLTFLoader()
   loader.setDRACOLoader(draco)
 
-  const MODEL_URL =
-    'https://threejs.org/examples/models/gltf/ferrari.glb'
+  const resolvedModelUrl = modelUrl || 'https://threejs.org/examples/models/gltf/ferrari.glb'
 
   loader.load(
-    MODEL_URL,
+    resolvedModelUrl,
     (gltf) => {
       const car = gltf.scene
       car.traverse((child) => {
@@ -135,8 +156,8 @@ function buildScene(mount, onLoad, onError) {
           }
         }
       })
-      car.scale.setScalar(0.52)
-      car.position.set(0, -0.82, 0)
+      car.scale.setScalar(modelScale)
+      car.position.set(0, modelPositionY, 0)
       scene.add(car)
       onLoad()
     },
@@ -174,34 +195,43 @@ function buildScene(mount, onLoad, onError) {
   }
 }
 
-/* ─── Inline (non-modal) viewer ─── */
-export function InlineCarViewer({ height = 360 }) {
+/* ─── Inline (non-modal) viewer ───
+   `bare` drops the border/rounded-corner card chrome and the drag/zoom hint
+   pill — for decorative, non-interactive placements (the Landing hero)
+   where this needs to blend into a background rather than read as a
+   bordered widget. `interactive=false` there also disables orbit/zoom. */
+export function InlineCarViewer({ height = 360, modelUrl, interactive = true, alpha = false, bare = false }) {
   const mountRef            = useRef(null)
   const [status, setStatus] = useState('loading')
 
   useEffect(() => {
     if (!mountRef.current) return
-    return buildScene(mountRef.current, () => setStatus('ready'), () => setStatus('error'))
-  }, [])
+    return buildScene(
+      mountRef.current,
+      () => setStatus('ready'),
+      () => setStatus('error'),
+      { modelUrl, interactive, alpha },
+    )
+  }, [modelUrl, interactive, alpha])
 
   return (
     <div
       ref={mountRef}
-      className="relative w-full rounded-2xl overflow-hidden border border-white/[0.07]"
+      className={bare ? 'relative w-full' : 'relative w-full rounded-2xl overflow-hidden border border-white/[0.07]'}
       style={{ height }}
     >
-      {status === 'loading' && (
+      {status === 'loading' && !bare && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
           <Spinner size="md" className="w-8 h-8" />
           <p className="text-body text-xs font-mono">Rendering 3D model…</p>
         </div>
       )}
-      {status === 'error' && (
+      {status === 'error' && !bare && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
           <p className="text-muted text-sm font-mono">3D preview unavailable</p>
         </div>
       )}
-      {status === 'ready' && (
+      {status === 'ready' && !bare && (
         <div className="absolute bottom-3 left-3 z-10 pointer-events-none">
           <HintPill>drag to rotate · scroll to zoom</HintPill>
         </div>
@@ -215,15 +245,33 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
   const mountRef              = useRef(null)
   const [status, setStatus]   = useState('loading') // loading | ready | error
 
+  /* Body-style-matched model instead of always showing the Ferrari — reuses
+     the same classifyVehicle() classifier already driving the Configurator's
+     model picker. The exotic/sports/porsche classes still resolve to the
+     Ferrari GLB (that's classifyVehicle's own mapping, not a special case
+     here), so those three keep the exact scale/position tuning this scene
+     already had — only non-Ferrari classes pass a different model, and they
+     reuse the ground/scale/offset triple exactly as authored in
+     lib/vehicleUtils.js and already proven in the Configurator's own scene,
+     rather than re-deriving new numbers for this renderer. */
+  const vehicleClass = classifyVehicle(vehicle.make, vehicle.model, vehicle.year)
+  const isFerrari     = vehicleClass.type === 'ferrari'
+
   useEffect(() => {
     if (!mountRef.current) return
     const cleanup = buildScene(
       mountRef.current,
       () => setStatus('ready'),
       () => setStatus('error'),
+      isFerrari ? {} : {
+        modelUrl: vehicleClass.model,
+        modelScale: vehicleClass.scale,
+        modelPositionY: vehicleClass.yOffset,
+        groundY: -0.02,
+      },
     )
     return cleanup
-  }, [])
+  }, [vehicleClass.model])
 
   const area    = AREA_LABEL[mod.category] || 'Vehicle'
   const areaPos = AREA_POS[mod.category]   || { top: '40%', left: '50%' }
@@ -312,7 +360,7 @@ export function CarViewer3D({ mod, vehicle, onClose }) {
         {/* Note about model */}
         <div className="px-4 md:px-6 pb-4">
           <p className="font-mono text-xs text-muted">
-            3D model shown is representative — vehicle-specific models coming in v2.
+            3D model shown is a {vehicleClass.label.toLowerCase()} body-style match, not your exact vehicle.
           </p>
         </div>
       </div>

@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../ui/Button'
+import { Logo } from './Logo'
+import { IconGarageBay, IconFuelPump } from '../icons/AutoIcons'
 import clsx from 'clsx'
 
 const NAV_LINKS = [
@@ -57,12 +59,7 @@ function UserMenu({ user, onLogout }) {
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-body hover:text-white hover:bg-white/[0.05] transition-colors"
             >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-muted">
-                <rect x="1" y="1" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
-                <rect x="8" y="1" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
-                <rect x="1" y="8" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
-                <rect x="8" y="8" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
-              </svg>
+              <IconGarageBay width={14} height={14} strokeWidth={1.25} className="text-muted" />
               My Builds
             </Link>
             <Link
@@ -70,10 +67,7 @@ function UserMenu({ user, onLogout }) {
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-body hover:text-white hover:bg-white/[0.05] transition-colors"
             >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-muted">
-                <rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
-                <path d="M1.5 5.5h11" stroke="currentColor" strokeWidth="1.25"/>
-              </svg>
+              <IconFuelPump width={14} height={14} strokeWidth={1.25} className="text-muted" />
               Billing
             </Link>
             <button
@@ -113,13 +107,8 @@ export function Navbar() {
         <div className="container-content w-full flex items-center justify-between">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 flex-shrink-0">
-            <div className="w-9 h-9 bg-accent rounded-lg flex items-center justify-center text-obsidian font-mono font-black text-base leading-none select-none">
-              C
-            </div>
-            <span className="font-display font-bold text-lg text-white tracking-tight">
-              CarMods<span className="text-accent">AI</span>
-            </span>
+          <Link to="/" className="flex-shrink-0">
+            <Logo size="md" />
           </Link>
 
           {/* Desktop nav links */}

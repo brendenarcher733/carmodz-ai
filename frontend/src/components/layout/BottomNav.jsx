@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { ProfileSheet } from './ProfileSheet'
+import { IconWrench, IconGarageBay, IconCompassGauge } from '../icons/AutoIcons'
 import clsx from 'clsx'
 
 const ICONS = {
@@ -11,25 +12,9 @@ const ICONS = {
       <path d="M6 9v8a1 1 0 001 1h3v-5h2v5h3a1 1 0 001-1V9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
-  planner: (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="4" y="3" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.6"/>
-      <path d="M11 8v6M8 11h6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-    </svg>
-  ),
-  garage: (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="3"  y="3"  width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6"/>
-      <rect x="12" y="3"  width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6"/>
-      <rect x="3"  y="12" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6"/>
-      <rect x="12" y="12" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.6"/>
-    </svg>
-  ),
-  advisor: (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <path d="M4 5.5A2.5 2.5 0 016.5 3h9A2.5 2.5 0 0118 5.5v6a2.5 2.5 0 01-2.5 2.5H10l-4 3v-3H6.5A2.5 2.5 0 014 11.5v-6z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
-    </svg>
-  ),
+  planner: <IconWrench width={22} height={22} strokeWidth={1.5} />,
+  garage:  <IconGarageBay width={22} height={22} strokeWidth={1.5} />,
+  advisor: <IconCompassGauge width={22} height={22} strokeWidth={1.5} />,
   signIn: (
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
       <path d="M9 4H5a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
