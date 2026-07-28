@@ -9,9 +9,9 @@
 
 :root {
   /* Keep legacy vars for any residual CSS module references */
-  --accent:      #FF8C00;
-  --accent-dim:  rgba(255,140,0,0.12);
-  --accent-glow: rgba(255,140,0,0.2);
+  --accent:      #FF6B00;
+  --accent-dim:  rgba(255,107,0,0.12);
+  --accent-glow: rgba(255,107,0,0.2);
   --stage1:      #22C55E;
   --stage2:      #F59E0B;
   --stage3:      #EF4444;
@@ -65,12 +65,16 @@
     line-height: 1.65;
   }
 
-  /* Background root glow */
+  /* Background root glow — two-tone (accent orange + the cool blue already
+     used as the 3D scenes' fill light / the "Sound Build" goal color, not a
+     new hue) so every screen has some atmosphere behind it instead of flat
+     black. Richer than the original single faint orange wash. */
   #root {
     background:
-      radial-gradient(ellipse 70% 40% at 70% 0%, rgba(255,140,0,0.04) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 30% at 0% 70%, rgba(255,140,0,0.02) 0%, transparent 50%),
-      #08090B;
+      radial-gradient(ellipse 70% 40% at 70% 0%, rgba(255,107,0,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 55% 35% at 0% 15%, rgba(59,130,246,0.05) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 30% at 0% 70%, rgba(255,107,0,0.03) 0%, transparent 50%),
+      #090909;
     min-height: 100vh;
   }
 
@@ -84,11 +88,11 @@
   /* ── Scrollbar ── */
   ::-webkit-scrollbar         { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track   { @apply bg-charcoal; }
-  ::-webkit-scrollbar-thumb   { background: rgba(255,140,0,0.2); border-radius: 9999px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255,140,0,0.4); }
+  ::-webkit-scrollbar-thumb   { background: rgba(255,107,0,0.2); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,107,0,0.4); }
 
   /* ── Selection ── */
-  ::selection { background: rgba(255,140,0,0.15); color: #FFB347; }
+  ::selection { background: rgba(255,107,0,0.15); color: #FF8833; }
 }
 
 @layer components {
@@ -102,6 +106,33 @@
     @apply min-h-screen;
     padding-top: var(--page-shell-offset, 5rem);
     padding-bottom: var(--bottom-nav-height, 0px);
+  }
+
+  /* Per-page atmospheric glow — Planner/Builds/Billing/Advisor each had a
+     byte-identical inline `radial-gradient(ellipse 60% 60% at 50% 0%,
+     rgba(255,255,255,0.04)...)` div copy-pasted independently; consolidated
+     here and given real color (the same orange/blue pairing as #root's
+     global glow) instead of a flat white wash, so every tab reads as having
+     a background rather than just a slightly-lighter patch of black. Taller
+     and stronger than the original so it actually registers on first
+     glance, not just on close inspection. Apply as
+     `absolute top-0 inset-x-0 h-[32rem] pointer-events-none page-glow`. */
+  .page-glow {
+    background:
+      radial-gradient(ellipse 60% 55% at 20% 0%, rgba(255,107,0,0.09) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 45% at 100% 10%, rgba(59,130,246,0.06) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgba(255,255,255,0.03) 0%, transparent 65%);
+  }
+
+  /* Cyan-tinted twin of .page-glow — used only on pages/Advisor.jsx, the one
+     page that's entirely an AI surface, so its atmosphere reads as "AI" even
+     before you look at any individual button. Every other page keeps the
+     orange .page-glow above. */
+  .page-glow-ai {
+    background:
+      radial-gradient(ellipse 60% 55% at 20% 0%, rgba(0,200,255,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 45% at 100% 10%, rgba(0,200,255,0.05) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgba(255,255,255,0.03) 0%, transparent 65%);
   }
 
   .container-content {
@@ -124,8 +155,8 @@
      Navbar, BottomNav. */
   .glass-nav {
     background: rgba(8,9,11,0.88);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
   }
 
   /* Elevated surfaces that sit *above* other content — dropdowns, bottom
@@ -133,8 +164,8 @@
      elevation should render without one. */
   .glass-strong {
     background: rgba(13,14,19,0.95);
-    backdrop-filter: blur(32px) saturate(180%);
-    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    backdrop-filter: blur(32px) saturate(140%);
+    -webkit-backdrop-filter: blur(32px) saturate(140%);
     @apply border border-white/[0.09] shadow-dropdown;
   }
 
@@ -142,8 +173,8 @@
      that don't need the elevated tier's shadow. */
   .glass {
     background: rgba(19,21,25,0.75);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
     @apply border border-white/[0.08];
   }
 
@@ -151,9 +182,9 @@
      VerifyEmail — was byte-identical inline styles copy-pasted 5 times. */
   .auth-card {
     background: rgba(13,14,19,0.88);
-    backdrop-filter: blur(32px) saturate(180%);
-    -webkit-backdrop-filter: blur(32px) saturate(180%);
-    border-radius: 20px;
+    backdrop-filter: blur(32px) saturate(140%);
+    -webkit-backdrop-filter: blur(32px) saturate(140%);
+    border-radius: 16px;
     @apply border border-white/[0.09];
   }
 
@@ -169,17 +200,17 @@
   }
 
   .field-input {
-    @apply w-full bg-surface border border-white/[0.08] rounded-xl px-5 py-3.5
+    @apply w-full bg-surface border border-white/[0.08] rounded-2xl px-5 py-3.5
            text-white text-base placeholder:text-muted
            focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20
-           transition-all duration-150;
+           transition-all duration-200;
   }
 
   .field-textarea {
-    @apply w-full bg-surface border border-white/[0.08] rounded-xl px-5 py-3.5
+    @apply w-full bg-surface border border-white/[0.08] rounded-2xl px-5 py-3.5
            text-white text-base placeholder:text-muted resize-none
            focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20
-           transition-all duration-150;
+           transition-all duration-200;
   }
 
   /* ── Skeleton loader ── */
@@ -201,8 +232,8 @@
      spec sheet grid, not a generic dashboard grid. */
   .bg-blueprint-grid {
     background-image:
-      repeating-linear-gradient(0deg, rgba(255,140,0,0.05) 0, rgba(255,140,0,0.05) 1px, transparent 1px, transparent 28px),
-      repeating-linear-gradient(90deg, rgba(255,140,0,0.05) 0, rgba(255,140,0,0.05) 1px, transparent 1px, transparent 28px);
+      repeating-linear-gradient(0deg, rgba(255,107,0,0.05) 0, rgba(255,107,0,0.05) 1px, transparent 1px, transparent 28px),
+      repeating-linear-gradient(90deg, rgba(255,107,0,0.05) 0, rgba(255,107,0,0.05) 1px, transparent 1px, transparent 28px);
   }
 
   /* Subtle film-grain, for shop-floor tactility instead of flat gradient
@@ -227,8 +258,8 @@
     left: 14px;
     width: 18px;
     height: 18px;
-    border-top: 1.5px solid rgba(255,140,0,0.35);
-    border-left: 1.5px solid rgba(255,140,0,0.35);
+    border-top: 1.5px solid rgba(255,107,0,0.35);
+    border-left: 1.5px solid rgba(255,107,0,0.35);
     pointer-events: none;
   }
   .dyno-frame-corner--br {
@@ -238,8 +269,8 @@
     right: 14px;
     border-top: none;
     border-left: none;
-    border-bottom: 1.5px solid rgba(255,140,0,0.35);
-    border-right: 1.5px solid rgba(255,140,0,0.35);
+    border-bottom: 1.5px solid rgba(255,107,0,0.35);
+    border-right: 1.5px solid rgba(255,107,0,0.35);
   }
 
   /* ── Logo mark (components/layout/Logo.jsx) ──
@@ -276,6 +307,43 @@
     .logo-mark-body, .logo-streak {
       animation: none;
       stroke-dashoffset: 0;
+    }
+  }
+
+  /* ── Hero vehicle mark (pages/Landing.jsx) ──
+     A bigger, slower sibling of the logo-mark draw-in above — used for the
+     Landing hero's vehicle silhouette + motion streaks instead of a 3D
+     render. Same `pathLength="1"` + stroke-dashoffset technique as the
+     navbar Logo, just paced for a hero-scale reveal rather than a small
+     persistent mark. */
+  .vs-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: logo-draw 1.6s 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .hero-streak {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation:
+      logo-draw 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+      hero-streak-drift 3.2s ease-in-out infinite;
+  }
+  .hero-streak-1 { animation-delay: 0.9s, 1.8s; }
+  .hero-streak-2 { animation-delay: 1.05s, 2.05s; }
+  .hero-streak-3 { animation-delay: 1.2s, 2.3s; }
+  .hero-streak-4 { animation-delay: 1.35s, 2.55s; }
+
+  @keyframes hero-streak-drift {
+    0%, 100% { transform: translateX(0); opacity: 0.9; }
+    50%      { transform: translateX(10px); opacity: 0.5; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vs-draw, .hero-streak {
+      animation: none;
+      stroke-dashoffset: 0;
+      transform: none;
     }
   }
 }

@@ -42,7 +42,7 @@ function UserMenu({ user, onLogout }) {
         <span className="hidden md:block text-sm text-body group-hover:text-white transition-colors font-medium max-w-[120px] truncate">
           {user.name.split(' ')[0]}
         </span>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={clsx('text-muted transition-transform duration-150', open && 'rotate-180')}>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={clsx('text-muted transition-transform duration-200', open && 'rotate-180')}>
           <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </button>
@@ -118,7 +118,7 @@ export function Navbar() {
                 <Link
                   to={to}
                   className={clsx(
-                    'px-5 py-2.5 text-base font-medium rounded-lg transition-all duration-150',
+                    'px-5 py-2.5 text-base font-medium rounded-lg transition-all duration-200',
                     pathname === to
                       ? 'text-white bg-white/[0.08]'
                       : 'text-body hover:text-white hover:bg-white/[0.05]',

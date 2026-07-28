@@ -7,6 +7,7 @@ import { Button } from '../components/ui/Button'
 import { Alert } from '../components/ui/Alert'
 import { Badge } from '../components/ui/Badge'
 import { Spinner } from '../components/ui/Spinner'
+import { IconFuelPump } from '../components/icons/AutoIcons'
 
 function UsageRow({ label, used, limit }) {
   const unlimited = limit == null
@@ -76,15 +77,13 @@ export default function Billing() {
 
   return (
     <div className="page-shell relative">
-      <div
-        className="absolute top-0 inset-x-0 h-64 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 60% 60% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 65%)',
-        }}
-      />
+      <div className="page-glow absolute top-0 inset-x-0 h-[28rem] pointer-events-none" />
 
       <div className="container-content py-12 max-w-2xl relative z-10">
         <div className="mb-8">
+          <div className="w-12 h-12 rounded-2xl bg-accent/[0.1] border border-accent/25 flex items-center justify-center mb-5">
+            <IconFuelPump width={22} height={22} strokeWidth={1.4} className="text-accent" />
+          </div>
           <p className="eyebrow mb-2">Account</p>
           <h1
             className="font-display font-black text-white leading-none tracking-tight"

@@ -12,6 +12,9 @@ const VARIANTS = {
   stage2:   'bg-amber-500/10 text-amber-400 border border-amber-500/20',
   stage3:   'bg-red-500/10  text-red-400  border border-red-500/20',
   accent:   'bg-accent/10 text-accent border border-accent/25',
+  // AI-generated-content labeling only (mirrors `accent` 1:1 on the cyan
+  // token) — never used for build/save/upgrade badges.
+  ai:       'bg-ai/10 text-ai border border-ai/25',
 }
 
 const SIZES = {

@@ -89,9 +89,9 @@ function GeneratingState({ vehicleLabel }) {
     <div className="page-shell flex items-center justify-center" style={{ minHeight: '60vh' }}>
       <div className="text-center max-w-sm px-8">
         <div className="relative w-16 h-16 mx-auto mb-8">
-          <Spinner size="lg" className="absolute inset-0 w-16 h-16" />
+          <Spinner variant="ai" size="lg" className="absolute inset-0 w-16 h-16" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <IconCheckeredFlag width={22} height={22} strokeWidth={1.5} className="text-accent" />
+            <IconCheckeredFlag width={22} height={22} strokeWidth={1.5} className="text-ai" />
           </div>
         </div>
         <h2 className="font-display font-black text-white text-xl mb-2 tracking-tight">Building your plan</h2>
@@ -205,7 +205,7 @@ export default function BuildDetail() {
              (real body-style match via classifyVehicle), the blueprint-grid
              texture, and technical-drawing corner brackets. ── */}
         <div className="dyno-frame relative overflow-hidden rounded-3xl mb-8"
-          style={{ background: 'linear-gradient(135deg, rgba(255,140,0,0.06) 0%, rgba(19,21,25,1) 50%)' }}>
+          style={{ background: 'linear-gradient(135deg, rgba(255,107,0,0.06) 0%, rgba(19,21,25,1) 50%)' }}>
 
           {/* Grid texture as its own layer — the parent already carries an
               inline `background` gradient, and an inline style always beats
@@ -217,11 +217,11 @@ export default function BuildDetail() {
           <div className="dyno-frame-corner dyno-frame-corner--br" />
 
           <div className="absolute top-0 right-0 bottom-0 w-1/2 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,140,0,0.05) 0%, transparent 70%)' }}>
+            style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,107,0,0.09) 0%, transparent 70%)' }}>
             <VehicleSilhouette
               make={plan.make} model={plan.model} year={plan.year}
               tone="feature"
-              className="absolute inset-0 w-full h-full text-accent/[0.22]"
+              className="absolute inset-0 w-full h-full text-accent/[0.35]"
             />
           </div>
 
@@ -290,15 +290,15 @@ export default function BuildDetail() {
           className="block mb-8 group"
         >
           <div
-            className="relative w-full rounded-2xl overflow-hidden transition-all duration-200 group-hover:scale-[1.01]"
+            className="relative w-full rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-[1.01]"
             style={{
               height: 200,
-              background: 'linear-gradient(135deg, rgba(255,140,0,0.08) 0%, rgba(12,13,16,1) 60%)',
-              border: '1px solid rgba(255,140,0,0.2)',
+              background: 'linear-gradient(135deg, rgba(255,107,0,0.08) 0%, rgba(12,13,16,1) 60%)',
+              border: '1px solid rgba(255,107,0,0.2)',
             }}
           >
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-accent/[0.12] border border-accent/25 flex items-center justify-center group-hover:bg-accent/[0.2] transition-all duration-200">
+              <div className="w-14 h-14 rounded-2xl bg-accent/[0.12] border border-accent/25 flex items-center justify-center group-hover:bg-accent/[0.2] transition-all duration-300">
                 <IconWrench width={24} height={24} strokeWidth={1.4} className="text-accent" />
               </div>
               <div className="text-center">
@@ -309,7 +309,7 @@ export default function BuildDetail() {
                   Customize paint · tint · wheels · mods in real-time 3D
                 </div>
               </div>
-              <div className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-bold text-sm px-6 py-2.5 rounded-xl group-hover:bg-accent-bright transition-colors duration-150">
+              <div className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-bold text-sm px-6 py-2.5 rounded-xl group-hover:bg-accent-bright transition-colors duration-200">
                 Launch Configurator
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -332,19 +332,19 @@ export default function BuildDetail() {
             <p className="font-mono text-xs text-muted uppercase tracking-wider mb-2">Quick Actions</p>
             <Link
               to="/advisor"
-              className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07] hover:border-accent/30 hover:bg-accent/[0.05] transition-all duration-150 group"
+              className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07] hover:border-ai/30 hover:bg-ai/[0.05] transition-all duration-200 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-accent/[0.1] border border-accent/20 flex items-center justify-center flex-shrink-0">
-                <IconCompassGauge width={14} height={14} strokeWidth={1.25} className="text-accent" />
+              <div className="w-8 h-8 rounded-lg bg-ai/[0.1] border border-ai/20 flex items-center justify-center flex-shrink-0">
+                <IconCompassGauge width={14} height={14} strokeWidth={1.25} className="text-ai" />
               </div>
               <div>
-                <div className="font-display font-semibold text-white text-sm group-hover:text-accent transition-colors">Ask the Advisor</div>
+                <div className="font-display font-semibold text-white text-sm group-hover:text-ai transition-colors">Ask the Advisor</div>
                 <div className="text-muted text-xs">Get expert guidance</div>
               </div>
             </Link>
             <Link
               to="/planner"
-              className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07] hover:border-white/[0.14] transition-all duration-150"
+              className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07] hover:border-white/[0.14] transition-all duration-200"
             >
               <div className="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/[0.1] flex items-center justify-center flex-shrink-0">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-body">
@@ -368,14 +368,17 @@ export default function BuildDetail() {
         {plan.summary && (
           <Card padding="lg" className="mb-10">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-accent/[0.1] border border-accent/25 flex items-center justify-center flex-shrink-0">
-                <IconGauge width={14} height={14} strokeWidth={1.25} className="text-accent" />
+              <div className="w-8 h-8 rounded-lg bg-ai/[0.1] border border-ai/25 flex items-center justify-center flex-shrink-0">
+                <IconGauge width={14} height={14} strokeWidth={1.25} className="text-ai" />
               </div>
               <div>
                 <div className="font-display font-semibold text-white text-sm">Performance Advisor</div>
                 <div className="flex items-center gap-1.5">
                   {plan.used_mock_fallback ? (
                     <>
+                      {/* Amber, deliberately not cyan — this specifically means
+                          the AI was NOT used (fallback engine instead), so
+                          tinting it with the AI color would be misleading. */}
                       <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                       <span className="font-mono text-xs text-amber-400" title="The AI was unavailable when this build was generated, so this plan came from our quick-match engine instead.">
                         Generated with quick-match engine
@@ -383,8 +386,8 @@ export default function BuildDetail() {
                     </>
                   ) : (
                     <>
-                      <div className="w-1.5 h-1.5 rounded-full bg-stage-1" />
-                      <span className="font-mono text-xs text-muted">AI analysis complete</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-ai animate-pulse-dot" />
+                      <span className="font-mono text-xs text-ai">AI analysis complete</span>
                     </>
                   )}
                 </div>

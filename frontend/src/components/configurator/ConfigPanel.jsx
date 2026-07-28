@@ -51,7 +51,7 @@ export function ConfigPanel({ config, setSingle, toggleMulti, setCustomColor }) 
               key={key}
               onClick={() => setActiveTab(key)}
               className={clsx(
-                'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-150',
+                'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200',
                 activeTab === key
                   ? 'bg-accent/[0.12] text-accent'
                   : 'text-muted hover:text-body hover:bg-white/[0.04]',
@@ -83,7 +83,7 @@ export function ConfigPanel({ config, setSingle, toggleMulti, setCustomColor }) 
               key={opt.id}
               onClick={() => handleOption(opt.id)}
               className={clsx(
-                'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all duration-150',
+                'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all duration-200',
                 selected
                   ? 'bg-accent/[0.12] border-accent/40 text-white'
                   : 'bg-white/[0.02] border-white/[0.06] text-body hover:border-white/[0.16] hover:bg-white/[0.05] hover:text-white',

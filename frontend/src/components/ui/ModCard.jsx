@@ -14,7 +14,7 @@ const STAGE_VARIANT = { 1: 'stage1', 2: 'stage2', 3: 'stage3' }
 export function ModCard({ mod, index, vehicle, onView3D }) {
   return (
     <div
-      className="animate-fade-up bg-surface border border-white/[0.07] rounded-2xl overflow-hidden transition-all duration-200 hover:bg-elevated"
+      className="animate-fade-up bg-surface border border-white/[0.07] rounded-2xl overflow-hidden transition-all duration-300 hover:bg-elevated"
       style={{ animationDelay: `${index * 40}ms` }}
     >
       <div className="p-5">
@@ -45,7 +45,7 @@ export function ModCard({ mod, index, vehicle, onView3D }) {
             <button
               type="button"
               onClick={() => onView3D(mod)}
-              className="inline-flex items-center gap-1.5 border border-white/[0.1] text-muted text-xs font-mono px-3 py-1.5 rounded-lg hover:border-accent/40 hover:text-accent transition-all duration-150"
+              className="inline-flex items-center gap-1.5 border border-white/[0.1] text-muted text-xs font-mono px-3 py-1.5 rounded-lg hover:border-accent/40 hover:text-accent transition-all duration-200"
               title="View this mod on the car in 3D"
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -56,7 +56,9 @@ export function ModCard({ mod, index, vehicle, onView3D }) {
             </button>
             <div className="text-right">
               <div className="font-mono text-xs text-muted uppercase tracking-wider mb-0.5">Priority</div>
-              <div className="font-display font-black text-accent text-xl leading-none">#{mod.priority}</div>
+              {/* AI-assigned rank on this recommendation — cyan, distinct
+                  from the orange "View 3D" action button above. */}
+              <div className="font-display font-black text-ai text-xl leading-none">#{mod.priority}</div>
             </div>
           </div>
         </div>

@@ -32,9 +32,9 @@ export function Logo({ size = 'md', className = '' }) {
           stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
         />
         {/* Motion streaks */}
-        <path className="logo-streak logo-streak-1" pathLength="1" d="M2 22h20" stroke="#FF8C00" strokeWidth="2" strokeLinecap="round" />
-        <path className="logo-streak logo-streak-2" pathLength="1" d="M8 26h16" stroke="#FFB347" strokeWidth="2" strokeLinecap="round" />
-        <path className="logo-streak logo-streak-3" pathLength="1" d="M26 22h12" stroke="#FF8C00" strokeWidth="2" strokeLinecap="round" />
+        <path className="logo-streak logo-streak-1" pathLength="1" d="M2 22h20" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" />
+        <path className="logo-streak logo-streak-2" pathLength="1" d="M8 26h16" stroke="#FF8833" strokeWidth="2" strokeLinecap="round" />
+        <path className="logo-streak logo-streak-3" pathLength="1" d="M26 22h12" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" />
       </svg>
       <span className={`font-display font-bold text-white tracking-tight ${font}`}>
         CarModz<span className="text-accent">-AI</span>

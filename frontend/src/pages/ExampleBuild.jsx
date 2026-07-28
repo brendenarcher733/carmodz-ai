@@ -176,7 +176,7 @@ export default function ExampleBuild() {
         {/* ── Vehicle hero ── */}
         <div
           className="dyno-frame relative overflow-hidden rounded-3xl mb-8"
-          style={{ background: 'linear-gradient(135deg, rgba(255,140,0,0.07) 0%, rgba(19,21,25,1) 50%)' }}
+          style={{ background: 'linear-gradient(135deg, rgba(255,107,0,0.07) 0%, rgba(19,21,25,1) 50%)' }}
         >
           <div className="absolute inset-0 bg-blueprint-grid pointer-events-none opacity-70" />
           <div className="dyno-frame-corner" />
@@ -184,12 +184,12 @@ export default function ExampleBuild() {
 
           <div
             className="absolute top-0 right-0 bottom-0 w-1/2 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,140,0,0.05) 0%, transparent 70%)' }}
+            style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,107,0,0.09) 0%, transparent 70%)' }}
           >
             <VehicleSilhouette
               make={DEMO.make} model={DEMO.model} year={DEMO.year}
               tone="feature"
-              className="absolute inset-0 w-full h-full text-accent/[0.22]"
+              className="absolute inset-0 w-full h-full text-accent/[0.35]"
             />
           </div>
 
@@ -270,8 +270,8 @@ export default function ExampleBuild() {
         {/* ── Advisor summary ── */}
         <Card padding="lg" className="mb-10">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-xl bg-accent/[0.1] border border-accent/25 flex items-center justify-center flex-shrink-0">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-accent">
+            <div className="w-9 h-9 rounded-xl bg-ai/[0.1] border border-ai/25 flex items-center justify-center flex-shrink-0">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-ai">
                 <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.4"/>
                 <circle cx="8" cy="8" r="2" fill="currentColor"/>
               </svg>
@@ -279,8 +279,8 @@ export default function ExampleBuild() {
             <div>
               <div className="font-display font-semibold text-white text-base">Performance Advisor</div>
               <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-stage-1" />
-                <span className="font-mono text-xs text-muted">Analysis complete</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-ai animate-pulse-dot" />
+                <span className="font-mono text-xs text-ai">Analysis complete</span>
               </div>
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function ExampleBuild() {
         {/* ── CTA block ── */}
         <div
           className="relative overflow-hidden rounded-3xl text-center px-8 py-16"
-          style={{ background: 'linear-gradient(135deg, rgba(255,140,0,0.08) 0%, rgba(19,21,25,1) 60%)' }}
+          style={{ background: 'linear-gradient(135deg, rgba(255,107,0,0.08) 0%, rgba(19,21,25,1) 60%)' }}
         >
           <div className="relative z-10">
             <p className="eyebrow mb-4">Ready to build?</p>

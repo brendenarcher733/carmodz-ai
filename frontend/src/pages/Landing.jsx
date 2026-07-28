@@ -1,13 +1,22 @@
-import { useEffect, useRef, lazy, Suspense } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { VehicleSilhouette } from '../components/ui/VehicleSilhouette'
 
-/* Lazy-loaded so the ~1.7MB Ferrari GLB (and Three.js itself) never blocks
-   the hero's initial paint — same lazy-import pattern already used for the
-   per-mod 3D modal (pages/BuildDetail.jsx). */
-const InlineCarViewer = lazy(() =>
-  import('../components/ui/CarViewer3D').then(m => ({ default: m.InlineCarViewer })),
-)
+/* Large diagonal motion-streak lines behind the hero silhouette — same
+   draw-in + drift technique as the navbar Logo mark, just hero-scaled.
+   Kept as a sibling overlay (not inside VehicleSilhouette) since it's a
+   one-off composition specific to this hero, not something the garage-card
+   or build-detail silhouette placements need. */
+function HeroStreaks() {
+  return (
+    <svg viewBox="0 0 240 100" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+      <path className="hero-streak hero-streak-1" pathLength="1" d="M0 82h150" stroke="#FF6B00" strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
+      <path className="hero-streak hero-streak-2" pathLength="1" d="M20 90h190" stroke="#FF8833" strokeWidth="1.4" strokeLinecap="round" opacity="0.7" />
+      <path className="hero-streak hero-streak-3" pathLength="1" d="M0 66h90"  stroke="#FF6B00" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
+      <path className="hero-streak hero-streak-4" pathLength="1" d="M60 96h170" stroke="#FF8833" strokeWidth="1.2" strokeLinecap="round" opacity="0.55" />
+    </svg>
+  )
+}
 
 /* ─── Scroll-reveal hook ─── */
 function useReveal(threshold = 0.12) {
@@ -152,30 +161,28 @@ export default function Landing() {
         <div className="absolute inset-0 pointer-events-none" style={{
           background: `
             radial-gradient(ellipse 60% 50% at 80% 15%, rgba(255,255,255,0.05) 0%, transparent 60%),
-            radial-gradient(ellipse 50% 40% at 10% 85%, rgba(255,140,0,0.03) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 40% at 10% 85%, rgba(255,107,0,0.03) 0%, transparent 60%),
             linear-gradient(180deg, #0a0b0d 0%, #08090b 100%)
           `,
         }} />
 
-        {/* ── Vehicle render — atmospheric backdrop, not a foreground
-             element. A real 3D vehicle behind the copy/example-card, faded
-             into the gradient rather than boxed in like a widget. The
-             silhouette sits underneath at all times and shows through the
-             3D canvas's transparent background until the model finishes
-             loading (or permanently, if WebGL isn't available) — no loading
-             state to coordinate between the two. ── */}
+        {/* ── Vehicle mark — atmospheric backdrop, not a foreground element.
+             An animated silhouette + motion streaks (draws in once on load,
+             streaks keep drifting) rather than a 3D render — holding off on
+             3D here until that renderer gets more visual polish; this reuses
+             the same silhouette system already backing the garage cards and
+             build-detail hero, just larger and animated. ── */}
         <div
-          className="absolute inset-y-0 right-0 w-full lg:w-[64%] pointer-events-none opacity-[0.4] lg:opacity-[0.55]"
+          className="absolute inset-y-0 right-0 w-full lg:w-[64%] pointer-events-none opacity-[0.5] lg:opacity-[0.7]"
           style={{ maskImage: 'linear-gradient(90deg, transparent 0%, black 30%)', WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 30%)' }}
         >
+          <HeroStreaks />
           <VehicleSilhouette
             make="Ferrari" model="" year=""
             tone="feature"
-            className="absolute inset-0 w-full h-full text-white/[0.06]"
+            animated
+            className="absolute inset-0 w-full h-full text-accent/[0.5]"
           />
-          <Suspense fallback={null}>
-            <InlineCarViewer height="100%" bare interactive={false} alpha />
-          </Suspense>
         </div>
 
         {/* ── Content ── */}
@@ -195,7 +202,7 @@ export default function Landing() {
               >
                 Plan Your Car Build
                 <br />
-                <span className="text-accent" style={{ textShadow: '0 0 60px rgba(255,140,0,0.35), 0 0 120px rgba(255,140,0,0.15)' }}>
+                <span className="text-accent" style={{ textShadow: '0 0 60px rgba(255,107,0,0.35), 0 0 120px rgba(255,107,0,0.15)' }}>
                   Before You Waste Money.
                 </span>
               </h1>
@@ -210,7 +217,7 @@ export default function Landing() {
                   <li key={b} className="flex items-start gap-3">
                     <div className="w-5 h-5 rounded-full bg-accent/[0.12] border border-accent/30 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                        <path d="M2 5l2.5 2.5 3.5-4" stroke="#FF8C00" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M2 5l2.5 2.5 3.5-4" stroke="#FF6B00" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                     <span className="text-body text-base leading-snug">{b}</span>
@@ -220,14 +227,14 @@ export default function Landing() {
 
               <div className="animate-fade-up anim-delay-5 flex flex-wrap gap-4 mb-6">
                 <Link to="/planner"
-                  className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow">
+                  className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-200 shadow-glow">
                   Start My Build
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </Link>
                 <Link to="/example-build"
-                  className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/[0.12] text-white font-display font-semibold text-base px-8 py-4 rounded-xl hover:bg-white/[0.09] hover:border-white/[0.2] transition-all duration-150 backdrop-blur-sm">
+                  className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/[0.12] text-white font-display font-semibold text-base px-8 py-4 rounded-xl hover:bg-white/[0.09] hover:border-white/[0.2] transition-all duration-200 backdrop-blur-sm">
                   See Example Build
                 </Link>
               </div>
@@ -294,9 +301,9 @@ export default function Landing() {
           >
             {FEATURES.map(f => (
               <div key={f.num}
-                className="p-8 group hover:bg-elevated transition-colors duration-200"
+                className="p-8 group hover:bg-elevated transition-colors duration-300"
                 style={{ borderRight: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <div className="font-mono text-xs text-muted mb-6 group-hover:text-accent transition-colors duration-200">{f.num}</div>
+                <div className="font-mono text-xs text-muted mb-6 group-hover:text-accent transition-colors duration-300">{f.num}</div>
                 <h3 className="font-display font-semibold text-white text-base mb-3 leading-snug">{f.title}</h3>
                 <p className="text-body text-sm leading-relaxed">{f.desc}</p>
               </div>
@@ -324,11 +331,11 @@ export default function Landing() {
             </div>
             <div className="flex gap-3 flex-shrink-0">
               <Link to="/planner"
-                className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-7 py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-150 shadow-glow">
+                className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-7 py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-200 shadow-glow">
                 Start My Build
               </Link>
               <Link to="/advisor"
-                className="inline-flex items-center gap-2 border border-white/[0.1] text-body font-display font-medium text-base px-7 py-3.5 rounded-xl hover:border-white/[0.22] hover:text-white transition-all duration-150">
+                className="inline-flex items-center gap-2 border border-white/[0.1] text-body font-display font-medium text-base px-7 py-3.5 rounded-xl hover:border-white/[0.22] hover:text-white transition-all duration-200">
                 Talk to Advisor
               </Link>
             </div>

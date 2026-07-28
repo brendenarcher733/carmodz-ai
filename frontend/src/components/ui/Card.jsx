@@ -13,7 +13,7 @@ export function Card({ children, className, padding = 'md', hover = false, glow 
     <div className={clsx(
       'bg-surface border border-white/[0.07] rounded-2xl',
       PADDING[padding],
-      hover && 'transition-all duration-200 cursor-pointer hover:border-white/[0.14] hover:bg-elevated hover:shadow-card',
+      hover && 'transition-all duration-300 cursor-pointer hover:border-white/[0.14] hover:bg-elevated hover:shadow-card',
       glow && 'shadow-card border-white/[0.12]',
       className,
     )}>

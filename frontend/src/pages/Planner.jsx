@@ -324,9 +324,9 @@ function BuildingOverlay({ vehicle }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-obsidian/95 backdrop-blur-xl">
       <div className="relative text-center max-w-sm px-8">
         <div className="relative w-16 h-16 mx-auto mb-10">
-          <Spinner size="lg" className="absolute inset-0 w-16 h-16" />
+          <Spinner variant="ai" size="lg" className="absolute inset-0 w-16 h-16" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-accent">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-ai">
               <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
             </svg>
           </div>
@@ -455,7 +455,7 @@ function VehicleSelector({ form, set }) {
                   type="button"
                   onClick={() => selectMake(make)}
                   className={clsx(
-                    'px-3 py-2.5 rounded-xl border text-sm font-display font-semibold transition-all duration-150 text-left leading-tight',
+                    'px-3 py-2.5 rounded-xl border text-sm font-display font-semibold transition-all duration-200 text-left leading-tight',
                     form.make === make
                       ? 'bg-accent/10 border-accent/40 text-accent'
                       : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.18] hover:text-white',
@@ -493,7 +493,7 @@ function VehicleSelector({ form, set }) {
                 type="button"
                 onClick={() => set('model', model)}
                 className={clsx(
-                  'px-4 py-2.5 rounded-xl border text-sm font-medium transition-all duration-150 text-left leading-snug',
+                  'px-4 py-2.5 rounded-xl border text-sm font-medium transition-all duration-200 text-left leading-snug',
                   form.model === model
                     ? 'bg-accent/10 border-accent/40 text-white'
                     : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.14] hover:text-white',
@@ -539,7 +539,7 @@ function VehicleSelector({ form, set }) {
                   type="button"
                   onClick={() => { set('year', String(y)); setYearMode('quick') }}
                   className={clsx(
-                    'px-4 py-2.5 rounded-xl border text-sm font-mono font-semibold transition-all duration-150',
+                    'px-4 py-2.5 rounded-xl border text-sm font-mono font-semibold transition-all duration-200',
                     form.year === String(y)
                       ? 'bg-accent/10 border-accent/40 text-accent'
                       : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.14] hover:text-white',
@@ -551,7 +551,7 @@ function VehicleSelector({ form, set }) {
               <button
                 type="button"
                 onClick={() => setYearMode('manual')}
-                className="px-4 py-2.5 rounded-xl border border-dashed border-white/[0.1] text-sm font-mono text-muted hover:border-white/[0.2] hover:text-body transition-all duration-150"
+                className="px-4 py-2.5 rounded-xl border border-dashed border-white/[0.1] text-sm font-mono text-muted hover:border-white/[0.2] hover:text-body transition-all duration-200"
               >
                 Other…
               </button>
@@ -677,12 +677,7 @@ export default function Planner() {
       {loading && <BuildingOverlay vehicle={vehicleLabel} />}
 
       {/* Atmospheric background */}
-      <div
-        className="absolute top-0 inset-x-0 h-72 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 60% 60% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 65%)',
-        }}
-      />
+      <div className="page-glow absolute top-0 inset-x-0 h-[32rem] pointer-events-none" />
 
       <div className="container-content py-16 max-w-[760px] relative z-10">
         <div className="mb-10">
@@ -739,7 +734,7 @@ export default function Planner() {
                     type="button"
                     onClick={() => set('goal', g.value)}
                     className={clsx(
-                      'text-left p-4 rounded-xl border transition-all duration-150',
+                      'text-left p-4 rounded-xl border transition-all duration-200',
                       form.goal === g.value
                         ? 'bg-accent/10 border-accent/40 text-white'
                         : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.15] hover:bg-elevated',
@@ -771,7 +766,7 @@ export default function Planner() {
                     type="button"
                     onClick={() => set('experience', e.value)}
                     className={clsx(
-                      'text-left p-5 rounded-xl border transition-all duration-150',
+                      'text-left p-5 rounded-xl border transition-all duration-200',
                       form.experience === e.value
                         ? 'bg-accent/10 border-accent/40 text-white'
                         : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.15] hover:bg-elevated',
@@ -796,7 +791,7 @@ export default function Planner() {
                     type="button"
                     onClick={() => toggle(c.value)}
                     className={clsx(
-                      'px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-150',
+                      'px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200',
                       form.categories.includes(c.value)
                         ? 'bg-accent/10 border-accent/40 text-accent'
                         : 'bg-surface border-white/[0.08] text-body hover:border-white/[0.18] hover:text-white',
@@ -817,7 +812,7 @@ export default function Planner() {
                     type="button"
                     onClick={() => set('is_daily', val)}
                     className={clsx(
-                      'flex-1 py-3 rounded-xl border text-sm font-display font-semibold transition-all duration-150',
+                      'flex-1 py-3 rounded-xl border text-sm font-display font-semibold transition-all duration-200',
                       form.is_daily === val
                         ? 'bg-accent/10 border-accent/40 text-white'
                         : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.15]',

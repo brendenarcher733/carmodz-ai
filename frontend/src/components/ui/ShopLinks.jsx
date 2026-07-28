@@ -136,7 +136,7 @@ export function ShopLinks({ modName, vehicle }) {
               href={r.url(query)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/[0.12] transition-all duration-150 group"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/[0.12] transition-all duration-200 group"
             >
               {/* Color dot */}
               <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: r.color }} />

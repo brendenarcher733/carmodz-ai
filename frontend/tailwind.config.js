@@ -4,19 +4,39 @@ export default {
   theme: {
     extend: {
       colors: {
-        obsidian:  '#08090B',
-        charcoal:  '#0D0E13',
-        surface:   '#131519',
-        elevated:  '#191C24',
-        overlay:   '#1E2230',
+        // Premium-automotive palette: near-black matte + graphite, rather
+        // than the previous slightly-blue-tinted dark-SaaS grays.
+        obsidian:  '#090909',
+        charcoal:  '#0A0A0A',
+        surface:   '#141414',
+        elevated:  '#1C1C1C',
+        overlay:   '#242424',
         // Recessed-panel background — one shade darker than `surface`, for
         // content that sits *inside* a surface (e.g. the configurator's
         // side panels). Was previously re-typed as raw hex in two files.
-        panel:     '#0F1014',
+        panel:     '#0C0C0C',
+        // Overrides Tailwind's built-in `white` — every existing
+        // `text-white` / `border-white/[0.0X]` hairline across the app
+        // picks up this crisp off-white automatically; pure #FFFFFF reads
+        // slightly harsher against the new matte-black background.
+        white: '#F5F5F5',
+        // Electric Orange — performance/build actions (Build, Save,
+        // Upgrade, Garage). The app's primary accent.
         accent: {
-          DEFAULT: '#FF8C00',
-          bright:  '#FFB347',
-          dim:     'rgba(255,140,0,0.12)',
+          DEFAULT: '#FF6B00',
+          bright:  '#FF8833',
+          dim:     'rgba(255,107,0,0.12)',
+        },
+        // Electric Cyan — reserved EXCLUSIVELY for AI-generated content and
+        // AI-powered actions (Ask AI, Recommendations, Smart Analysis), so
+        // it stays meaningful signal rather than a second decorative color.
+        // Never use `ai` for a build/commerce/navigation element even when
+        // the underlying data originated from the AI (see globals.css and
+        // the per-page usage this backs).
+        ai: {
+          DEFAULT: '#00C8FF',
+          bright:  '#33D3FF',
+          dim:     'rgba(0,200,255,0.12)',
         },
         stage: {
           1: '#22C55E',
@@ -60,9 +80,13 @@ export default {
       boxShadow: {
         // Soft, restrained lift with a whisper of warmth — never a glowing ring.
         // Reserved for primary CTAs only.
-        'glow-sm': '0 6px 20px rgba(255,140,0,0.10)',
-        'glow':    '0 10px 32px rgba(255,140,0,0.14)',
-        'glow-lg': '0 16px 56px rgba(255,140,0,0.10)',
+        'glow-sm': '0 6px 20px rgba(255,107,0,0.10)',
+        'glow':    '0 10px 32px rgba(255,107,0,0.14)',
+        'glow-lg': '0 16px 56px rgba(255,107,0,0.10)',
+        // Same restrained recipe as glow-sm/glow, keyed to the `ai` cyan —
+        // for the small set of genuine AI-action buttons only.
+        'glow-ai-sm': '0 6px 20px rgba(0,200,255,0.12)',
+        'glow-ai':    '0 10px 32px rgba(0,200,255,0.16)',
         'card':    '0 4px 24px rgba(0,0,0,0.5)',
         'card-lg': '0 8px 56px rgba(0,0,0,0.7)',
         // Floating panels above other content (dropdowns, popovers) —

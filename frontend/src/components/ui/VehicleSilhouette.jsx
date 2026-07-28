@@ -68,24 +68,36 @@ const CLASS_TO_SHAPE = {
  * `tone`:
  *   'watermark' — large, low-opacity, sits behind other content (garage cards)
  *   'feature'   — brighter, accent-tinted linework for a hero/spotlight slot
+ * `animated` — feature-mode only: the outline draws itself in once on mount
+ *   (same stroke-dashoffset technique as the navbar Logo mark, via the
+ *   `.vs-draw` keyframes in globals.css). Off by default — the garage-card
+ *   and build-detail placements are meant to sit quietly, not animate every
+ *   time they scroll into view.
  */
-export function VehicleSilhouette({ make, model, year, tone = 'watermark', color, className }) {
+export function VehicleSilhouette({ make, model, year, tone = 'watermark', color, className, animated = false }) {
   const cls = classifyVehicle(make, model, year)
   const shape = SHAPES[CLASS_TO_SHAPE[cls.id]] || SHAPES.sedan
   const stroke = color || 'currentColor'
 
   const isFeature = tone === 'feature'
+  const draw = isFeature && animated
 
   return (
     <svg viewBox="0 0 240 100" className={className} preserveAspectRatio="xMidYMax meet" aria-hidden="true">
       {isFeature ? (
-        <path d={shape.body} fill="none" stroke={stroke} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
+        <path
+          d={shape.body} fill="none" stroke={stroke} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round"
+          {...(draw ? { pathLength: '1', className: 'vs-draw' } : {})}
+        />
       ) : (
         <path d={shape.body} fill={stroke} />
       )}
       {shape.wheels.map(([cx, cy, r], i) =>
         isFeature ? (
-          <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={stroke} strokeWidth="1.6" />
+          <circle
+            key={i} cx={cx} cy={cy} r={r} fill="none" stroke={stroke} strokeWidth="1.6"
+            {...(draw ? { pathLength: '1', className: 'vs-draw', style: { animationDelay: `${0.7 + i * 0.15}s` } } : {})}
+          />
         ) : (
           <circle key={i} cx={cx} cy={cy} r={r} fill={stroke} />
         )

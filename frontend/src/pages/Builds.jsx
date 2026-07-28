@@ -14,7 +14,7 @@ import * as analytics from '../services/analytics'
 const GOAL_META = {
   'daily driver upgrades':    { label: 'Daily Driver',       color: '#22C55E', dim: 'rgba(34,197,94,0.08)'    },
   'budget performance build': { label: 'Budget Build',       color: '#F59E0B', dim: 'rgba(245,158,11,0.08)'   },
-  'street performance':       { label: 'Street Performance', color: '#FF8C00', dim: 'rgba(255,140,0,0.08)'    },
+  'street performance':       { label: 'Street Performance', color: '#FF6B00', dim: 'rgba(255,107,0,0.08)'    },
   'track focused setup':      { label: 'Track Build',        color: '#EF4444', dim: 'rgba(239,68,68,0.08)'    },
   'cosmetic upgrades':        { label: 'Cosmetic',           color: '#A855F7', dim: 'rgba(168,85,247,0.08)'   },
   'sound upgrades':           { label: 'Sound Build',        color: '#3B82F6', dim: 'rgba(59,130,246,0.08)'   },
@@ -56,7 +56,7 @@ function StarButton({ active, onClick }) {
     <button
       onClick={onClick}
       title={active ? 'Remove from favourites' : 'Add to favourites'}
-      className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all duration-150 ${
+      className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all duration-200 ${
         active ? 'bg-gold/[0.12] border-gold/35 text-gold' : 'bg-white/[0.04] border-white/[0.08] text-muted'
       }`}
     >
@@ -74,7 +74,7 @@ function StarButton({ active, onClick }) {
 
 /* ─── Vehicle bay card ─── */
 function GarageBay({ build, onDelete, onToggleFavourite }) {
-  const meta  = GOAL_META[build.goal] || { label: build.goal, color: '#FF8C00', dim: 'rgba(255,140,0,0.08)' }
+  const meta  = GOAL_META[build.goal] || { label: build.goal, color: '#FF6B00', dim: 'rgba(255,107,0,0.08)' }
   const since = new Date(build.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 
   return (
@@ -86,7 +86,7 @@ function GarageBay({ build, onDelete, onToggleFavourite }) {
         make={build.make} model={build.model} year={build.year}
         tone="watermark"
         color={meta.color}
-        className="absolute -right-6 bottom-0 w-[60%] max-w-[380px] h-auto opacity-[0.07] pointer-events-none select-none"
+        className="absolute -right-6 bottom-0 w-[60%] max-w-[380px] h-auto opacity-[0.13] pointer-events-none select-none"
       />
 
       <div className="relative z-10 px-5 py-5 md:px-7 md:py-7">
@@ -179,12 +179,7 @@ export default function Garage() {
   return (
     <div className="page-shell relative">
       {/* Garage background */}
-      <div
-        className="absolute top-0 inset-x-0 h-64 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 60% 60% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 65%)',
-        }}
-      />
+      <div className="page-glow absolute top-0 inset-x-0 h-[32rem] pointer-events-none" />
 
       <div className="container-content py-12 relative z-10">
 
@@ -268,7 +263,7 @@ export default function Garage() {
 
             <Link
               to="/planner"
-              className="flex items-center justify-center gap-3 rounded-2xl border border-dashed border-white/[0.1] py-6 text-muted text-sm hover:border-accent/30 hover:text-accent transition-all duration-200 group"
+              className="flex items-center justify-center gap-3 rounded-2xl border border-dashed border-white/[0.1] py-6 text-muted text-sm hover:border-accent/30 hover:text-accent transition-all duration-300 group"
             >
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="group-hover:scale-110 transition-transform">
                 <path d="M9 3v12M3 9h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>

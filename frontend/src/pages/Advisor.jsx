@@ -136,12 +136,7 @@ export default function Advisor() {
   return (
     <div className="page-shell relative">
       {/* Atmospheric background */}
-      <div
-        className="absolute top-0 inset-x-0 h-56 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 60% 60% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 65%)',
-        }}
-      />
+      <div className="page-glow-ai absolute top-0 inset-x-0 h-[28rem] pointer-events-none" />
       <div className="container-content py-4 md:py-10 h-[calc(100dvh-var(--page-shell-offset,5rem)-var(--bottom-nav-height,0px))] flex flex-col lg:flex-row gap-3 md:gap-5 relative z-10">
 
         {/* ── Sidebar ──
@@ -187,7 +182,7 @@ export default function Advisor() {
                   {[vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(' ')}
                 </span>
                 <button
-                  className="text-accent text-xs hover:underline"
+                  className="text-ai text-xs hover:underline"
                   onClick={() => { updateVehicle(null); setCarYear(''); setCarMake(''); setCarModel('') }}
                 >
                   Change
@@ -202,7 +197,7 @@ export default function Advisor() {
                 ].map(({ val, set: setter, ph }) => (
                   <input
                     key={ph}
-                    className="w-full bg-elevated border border-white/[0.07] rounded-xl px-3 py-2 text-white text-base md:text-xs placeholder:text-muted focus:outline-none focus:border-accent/40 transition-colors"
+                    className="w-full bg-elevated border border-white/[0.07] rounded-xl px-3 py-2 text-white text-base md:text-xs placeholder:text-muted focus:outline-none focus:border-ai/40 transition-colors"
                     placeholder={ph}
                     value={val}
                     onChange={e => setter(e.target.value)}
@@ -228,7 +223,7 @@ export default function Advisor() {
                   key={q}
                   onClick={() => sendMessage(q)}
                   disabled={loading}
-                  className="flex-shrink-0 whitespace-nowrap md:whitespace-normal md:w-full text-left text-body text-xs px-3 py-2.5 rounded-lg bg-elevated md:bg-transparent hover:bg-elevated hover:text-white transition-all duration-150 disabled:opacity-40"
+                  className="flex-shrink-0 whitespace-nowrap md:whitespace-normal md:w-full text-left text-body text-xs px-3 py-2.5 rounded-lg bg-elevated md:bg-transparent hover:bg-elevated hover:text-white transition-all duration-200 disabled:opacity-40"
                 >
                   {q}
                 </button>
@@ -284,14 +279,15 @@ export default function Advisor() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKey}
-              className="flex-1 bg-elevated border border-white/[0.08] rounded-xl px-4 py-3 text-white text-base md:text-sm placeholder:text-muted resize-none focus:outline-none focus:border-accent/40 transition-colors leading-relaxed"
+              className="flex-1 bg-elevated border border-white/[0.08] rounded-xl px-4 py-3 text-white text-base md:text-sm placeholder:text-muted resize-none focus:outline-none focus:border-ai/40 transition-colors leading-relaxed"
               style={{ minHeight: '46px', maxHeight: '140px' }}
             />
             <Button
+              variant="ai"
               onClick={handleSend}
               disabled={!input.trim() || loading}
               loading={loading}
-              className="w-11 h-11 min-h-0 rounded-xl p-0 flex-shrink-0 shadow-glow-sm disabled:shadow-none"
+              className="w-11 h-11 min-h-0 rounded-xl p-0 flex-shrink-0 shadow-glow-ai-sm disabled:shadow-none"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
