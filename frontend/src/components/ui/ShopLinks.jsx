@@ -12,8 +12,59 @@ import { useState } from 'react'
    actual matching pages — it just costs one extra hop through Google instead
    of going straight to the retailer.
    Amazon and eBay Motors keep their direct search params below — both are
-   long-documented, stable, and confirmed correct. */
+   long-documented, stable, and confirmed correct.
+
+   ── Affiliate tracking (Amazon + eBay only) ──
+   A Google search-results page can't carry affiliate attribution for any
+   network — the click has to land on the merchant's own domain. That's why
+   only Amazon and eBay (which keep their direct-domain links above) get
+   affiliate wrapping below; Summit/CARiD/RockAuto/FCP Euro stay on the
+   Google fallback and are NOT affiliate-tracked as a structural consequence
+   of that, not a missing config value. Real findings on the other four,
+   for whenever their link situation changes:
+     - CARiD has a real, confirmed program via the Impact network (~9%
+       commission, 14-day cookie) — but requires a direct carid.com link to
+       wrap, which was deliberately left on the Google fallback (see above).
+     - Summit Racing is genuinely contradictory: summitracing.com/summit-
+       racing-affiliate advertises 5% commission, but Summit's own FAQ states
+       they have no affiliate program. Unresolved — verify directly before
+       assuming either is current.
+     - RockAuto shows no evidence of a joinable affiliate program on any
+       major network (Awin, Pepperjam, Conversant, Rakuten) — only an
+       unrelated personal referral-code system, not a trackable link format.
+     - FCP Euro shows no active affiliate program either — only a B2B
+       wholesale/commercial reseller application, not a content affiliate deal.
+   Both new env vars below are non-secret by design (an Associate Tag/
+   Campaign ID is meant to be visible in the outbound URL itself — same
+   reasoning as this app's other public, client-safe VITE_ keys) and are
+   both no-ops when unset, so an unconfigured deploy behaves exactly as
+   before this change. */
 const siteSearch = (domain, q) => `https://www.google.com/search?q=${encodeURIComponent(`site:${domain} ${q}`)}`
+
+const AMAZON_TAG    = import.meta.env.VITE_AMAZON_ASSOCIATE_TAG || ''
+const EBAY_CAMPID   = import.meta.env.VITE_EBAY_CAMPAIGN_ID || ''
+
+/* Amazon Associates: a plain `tag=` query param on any amazon.com URL —
+   confirmed stable, hasn't changed in years. Get a tag at
+   affiliate-program.amazon.com (real account + tax/payout info required —
+   Amazon also requires 3 qualifying sales within 180 days to stay enrolled). */
+function amazonUrl(q) {
+  const base = `https://www.amazon.com/s?k=${encodeURIComponent(q)}&i=automotive`
+  return AMAZON_TAG ? `${base}&tag=${encodeURIComponent(AMAZON_TAG)}` : base
+}
+
+/* eBay Partner Network: `campid` (a 10-digit Campaign ID from your EPN
+   dashboard) is the required tracking parameter on any ebay.com URL;
+   `toolid=10001` is EPN's documented default for a manually-built (not
+   API-generated) link. `customid` is optional free-form sub-tracking —
+   used here to carry which mod drove the click, real signal for which
+   recommendations actually convert. Sign up at partnernetwork.ebay.com. */
+function ebayUrl(q, modName) {
+  const base = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(q)}&_sacat=6000`
+  if (!EBAY_CAMPID) return base
+  const customId = modName ? `&customid=${encodeURIComponent(modName.slice(0, 100))}` : ''
+  return `${base}&campid=${encodeURIComponent(EBAY_CAMPID)}&toolid=10001${customId}`
+}
 
 /* ─── Retailers — ordered by enthusiast preference ─── */
 const RETAILERS = [
@@ -22,7 +73,7 @@ const RETAILERS = [
     label: 'Amazon',
     desc:  'Broadest selection, fast shipping',
     color: '#FF9900',
-    url:   (q) => `https://www.amazon.com/s?k=${encodeURIComponent(q)}&i=automotive`,
+    url:   (q, modName) => amazonUrl(q),
     icon: (
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M2 7c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
@@ -74,7 +125,7 @@ const RETAILERS = [
     label: 'eBay Motors',
     desc:  'New, used & rare — contact sellers directly',
     color: '#E53238',
-    url:   (q) => `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(q)}&_sacat=6000`,
+    url:   (q, modName) => ebayUrl(q, modName),
     icon: (
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M2 5h10M2 7h6M2 9h8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
@@ -133,7 +184,7 @@ export function ShopLinks({ modName, vehicle }) {
           {RETAILERS.map((r) => (
             <a
               key={r.id}
-              href={r.url(query)}
+              href={r.url(query, modName)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/[0.12] transition-all duration-200 group"

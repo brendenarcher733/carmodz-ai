@@ -108,9 +108,13 @@ App → http://localhost:5173 · API docs → http://localhost:8000/docs
 
 ### Frontend (`frontend/.env`)
 
-| Variable       | Default                  |
-|----------------|--------------------------|
-| `VITE_API_URL` | `http://localhost:8000`  |
+| Variable                     | Default                  | Notes                                                                 |
+|------------------------------|---------------------------|------------------------------------------------------------------------|
+| `VITE_API_URL`               | `http://localhost:8000`  |                                                                          |
+| `VITE_AMAZON_ASSOCIATE_TAG`  | *(empty)*                 | Amazon Associates tag — appended to outbound Amazon shop links. Sign up at [affiliate-program.amazon.com](https://affiliate-program.amazon.com) |
+| `VITE_EBAY_CAMPAIGN_ID`      | *(empty)*                 | eBay Partner Network Campaign ID — appended to outbound eBay shop links. Sign up at [partnernetwork.ebay.com](https://partnernetwork.ebay.com) |
+
+Both are optional and unset by default — outbound shop links (`components/ui/ShopLinks.jsx`) work exactly as before without them, just untracked. Summit Racing, CARiD, RockAuto, and FCP Euro currently route through a Google site-search fallback (their own on-site search couldn't be verified/was broken — see that file's comments) and can't carry affiliate attribution at all under that link shape, regardless of these env vars — see the same file for what's actually known about each of those four programs' current status.
 
 ---
 
