@@ -1,22 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { VehicleSilhouette } from '../components/ui/VehicleSilhouette'
-
-/* Large diagonal motion-streak lines behind the hero silhouette — same
-   draw-in + drift technique as the navbar Logo mark, just hero-scaled.
-   Kept as a sibling overlay (not inside VehicleSilhouette) since it's a
-   one-off composition specific to this hero, not something the garage-card
-   or build-detail silhouette placements need. */
-function HeroStreaks() {
-  return (
-    <svg viewBox="0 0 240 100" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-      <path className="hero-streak hero-streak-1" pathLength="1" d="M0 82h150" stroke="#FF6B00" strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
-      <path className="hero-streak hero-streak-2" pathLength="1" d="M20 90h190" stroke="#FF8833" strokeWidth="1.4" strokeLinecap="round" opacity="0.7" />
-      <path className="hero-streak hero-streak-3" pathLength="1" d="M0 66h90"  stroke="#FF6B00" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
-      <path className="hero-streak hero-streak-4" pathLength="1" d="M60 96h170" stroke="#FF8833" strokeWidth="1.2" strokeLinecap="round" opacity="0.55" />
-    </svg>
-  )
-}
+import { HeroConfigurator } from '../components/home/HeroConfigurator'
 
 /* ─── Scroll-reveal hook ─── */
 function useReveal(threshold = 0.12) {
@@ -146,6 +130,7 @@ function ExampleCard() {
 export default function Landing() {
   /* Refs for scroll-reveal sections */
   const statsRef    = useReveal(0.2)
+  const planRef     = useReveal(0.1)
   const featuresRef = useReveal(0.05)
   const ctaRef      = useReveal(0.2)
 
@@ -153,105 +138,13 @@ export default function Landing() {
     <div className="bg-obsidian">
 
       {/* ═══════════════════════════════════════════
-          HERO — calm gradient backdrop, no video/imagery
+          HERO — the real 3D Configurator, pre-loaded with a default
+          vehicle. The front door is now something a visitor touches
+          immediately, not a wall of text — see components/home/
+          HeroConfigurator.jsx for why this doesn't require touching the
+          configurator's own code at all.
       ═══════════════════════════════════════════ */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-
-        {/* ── Neutral atmospheric gradient ── */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: `
-            radial-gradient(ellipse 60% 50% at 80% 15%, rgba(255,255,255,0.05) 0%, transparent 60%),
-            radial-gradient(ellipse 50% 40% at 10% 85%, rgba(255,107,0,0.03) 0%, transparent 60%),
-            linear-gradient(180deg, #0a0b0d 0%, #08090b 100%)
-          `,
-        }} />
-
-        {/* ── Vehicle mark — atmospheric backdrop, not a foreground element.
-             An animated silhouette + motion streaks (draws in once on load,
-             streaks keep drifting) rather than a 3D render — holding off on
-             3D here until that renderer gets more visual polish; this reuses
-             the same silhouette system already backing the garage cards and
-             build-detail hero, just larger and animated. ── */}
-        <div
-          className="absolute inset-y-0 right-0 w-full lg:w-[64%] pointer-events-none opacity-[0.5] lg:opacity-[0.7]"
-          style={{ maskImage: 'linear-gradient(90deg, transparent 0%, black 30%)', WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 30%)' }}
-        >
-          <HeroStreaks />
-          <VehicleSilhouette
-            make="Ferrari" model="" year=""
-            tone="feature"
-            animated
-            className="absolute inset-0 w-full h-full text-accent/[0.5]"
-          />
-        </div>
-
-        {/* ── Content ── */}
-        <div className="container-content relative z-10 w-full pt-32 pb-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-16 items-center">
-
-            {/* LEFT — Copy */}
-            <div>
-              <div className="animate-fade-up anim-delay-1 inline-flex items-center gap-2.5 bg-white/[0.05] border border-white/[0.1] text-body text-xs font-semibold tracking-[0.14em] uppercase px-4 py-2 rounded-full mb-8">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                AI Car Modification Planner
-              </div>
-
-              <h1
-                className="animate-fade-up anim-delay-2 font-display font-black text-white leading-[0.96] tracking-[-0.03em] mb-6"
-                style={{ fontSize: 'clamp(2.6rem, 5.5vw, 4.4rem)' }}
-              >
-                Plan Your Car Build
-                <br />
-                <span className="text-accent" style={{ textShadow: '0 0 60px rgba(255,107,0,0.35), 0 0 120px rgba(255,107,0,0.15)' }}>
-                  Before You Waste Money.
-                </span>
-              </h1>
-
-              <p className="animate-fade-up anim-delay-3 text-body text-lg leading-relaxed max-w-lg mb-8">
-                CarMods AI creates a personalized mod roadmap for your car, budget, goals, and skill level —
-                including upgrade order, estimated costs, install difficulty, and performance impact.
-              </p>
-
-              <ul className="animate-fade-up anim-delay-4 space-y-3 mb-10">
-                {VALUE_BULLETS.map(b => (
-                  <li key={b} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-accent/[0.12] border border-accent/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                        <path d="M2 5l2.5 2.5 3.5-4" stroke="#FF6B00" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <span className="text-body text-base leading-snug">{b}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="animate-fade-up anim-delay-5 flex flex-wrap gap-4 mb-6">
-                <Link to="/planner"
-                  className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-200 shadow-glow">
-                  Start My Build
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </Link>
-                <Link to="/example-build"
-                  className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/[0.12] text-white font-display font-semibold text-base px-8 py-4 rounded-xl hover:bg-white/[0.09] hover:border-white/[0.2] transition-all duration-200 backdrop-blur-sm">
-                  See Example Build
-                </Link>
-              </div>
-
-              <p className="animate-fade-up anim-delay-5 text-muted text-sm">
-                Built for real car enthusiasts — from daily drivers to full performance builds.
-              </p>
-            </div>
-
-            {/* RIGHT — Example build card */}
-            <div className="relative">
-              <ExampleCard />
-            </div>
-
-          </div>
-        </div>
-      </section>
+      <HeroConfigurator />
 
       {/* ═══════════════════════════════════════════
           STATS BAR — scroll reveal
@@ -272,6 +165,80 @@ export default function Landing() {
           </div>
         </div>
       </div>
+
+      {/* ═══════════════════════════════════════════
+          PLAN PREVIEW — the old hero's copy + ExampleCard, relocated
+          here rather than deleted. The configurator above is the
+          first touch; this is the "here's the other half" pitch —
+          a real AI-generated mod roadmap, not just a paint job.
+      ═══════════════════════════════════════════ */}
+      <section ref={planRef} className="reveal py-28" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="container-content">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-16 items-center">
+
+            {/* LEFT — Copy */}
+            <div>
+              <div className="inline-flex items-center gap-2.5 bg-white/[0.05] border border-white/[0.1] text-body text-xs font-semibold tracking-[0.14em] uppercase px-4 py-2 rounded-full mb-8">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                Beyond the paint job
+              </div>
+
+              <h2
+                className="font-display font-black text-white leading-[0.96] tracking-[-0.03em] mb-6"
+                style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.6rem)' }}
+              >
+                Now get a real mod roadmap
+                <br />
+                <span className="text-accent" style={{ textShadow: '0 0 60px rgba(255,107,0,0.35), 0 0 120px rgba(255,107,0,0.15)' }}>
+                  Before You Waste Money.
+                </span>
+              </h2>
+
+              <p className="text-body text-lg leading-relaxed max-w-lg mb-8">
+                CarMods AI creates a personalized mod roadmap for your car, budget, goals, and skill level —
+                including upgrade order, estimated costs, install difficulty, and performance impact.
+              </p>
+
+              <ul className="space-y-3 mb-10">
+                {VALUE_BULLETS.map(b => (
+                  <li key={b} className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full bg-accent/[0.12] border border-accent/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 5l2.5 2.5 3.5-4" stroke="#FF6B00" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <span className="text-body text-base leading-snug">{b}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex flex-wrap gap-4 mb-6">
+                <Link to="/planner"
+                  className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-200 shadow-glow">
+                  Start My Build
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
+                <Link to="/example-build"
+                  className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/[0.12] text-white font-display font-semibold text-base px-8 py-4 rounded-xl hover:bg-white/[0.09] hover:border-white/[0.2] transition-all duration-200 backdrop-blur-sm">
+                  See Example Build
+                </Link>
+              </div>
+
+              <p className="text-muted text-sm">
+                Built for real car enthusiasts — from daily drivers to full performance builds.
+              </p>
+            </div>
+
+            {/* RIGHT — Example build card */}
+            <div className="relative">
+              <ExampleCard />
+            </div>
+
+          </div>
+        </div>
+      </section>
 
       {/* ═══════════════════════════════════════════
           FEATURES GRID — scroll reveal

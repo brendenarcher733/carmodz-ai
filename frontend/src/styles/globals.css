@@ -310,37 +310,22 @@
     }
   }
 
-  /* ── Hero vehicle mark (pages/Landing.jsx) ──
-     A bigger, slower sibling of the logo-mark draw-in above — used for the
-     Landing hero's vehicle silhouette + motion streaks instead of a 3D
-     render. Same `pathLength="1"` + stroke-dashoffset technique as the
-     navbar Logo, just paced for a hero-scale reveal rather than a small
-     persistent mark. */
+  /* ── Feature vehicle mark (build-detail hero, example-build hero) ──
+     A bigger, slower sibling of the logo-mark draw-in above — the outline
+     draws itself in once on mount. Same `pathLength="1"` + stroke-dashoffset
+     technique as the navbar Logo, just paced for a hero-scale reveal rather
+     than a small persistent mark. (Landing's own hero no longer uses this —
+     it's the real 3D Configurator now, see components/home/
+     HeroConfigurator.jsx — this class is still used by the VehicleSilhouette
+     placements on BuildDetail.jsx/ExampleBuild.jsx.) */
   .vs-draw {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
     animation: logo-draw 1.6s 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
-  .hero-streak {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation:
-      logo-draw 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards,
-      hero-streak-drift 3.2s ease-in-out infinite;
-  }
-  .hero-streak-1 { animation-delay: 0.9s, 1.8s; }
-  .hero-streak-2 { animation-delay: 1.05s, 2.05s; }
-  .hero-streak-3 { animation-delay: 1.2s, 2.3s; }
-  .hero-streak-4 { animation-delay: 1.35s, 2.55s; }
-
-  @keyframes hero-streak-drift {
-    0%, 100% { transform: translateX(0); opacity: 0.9; }
-    50%      { transform: translateX(10px); opacity: 0.5; }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .vs-draw, .hero-streak {
+    .vs-draw {
       animation: none;
       stroke-dashoffset: 0;
       transform: none;
