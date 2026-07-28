@@ -11,10 +11,6 @@ export default {
         surface:   '#141414',
         elevated:  '#1C1C1C',
         overlay:   '#242424',
-        // Recessed-panel background — one shade darker than `surface`, for
-        // content that sits *inside* a surface (e.g. the configurator's
-        // side panels). Was previously re-typed as raw hex in two files.
-        panel:     '#0C0C0C',
         // Overrides Tailwind's built-in `white` — every existing
         // `text-white` / `border-white/[0.0X]` hairline across the app
         // picks up this crisp off-white automatically; pure #FFFFFF reads

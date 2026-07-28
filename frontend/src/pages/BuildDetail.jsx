@@ -8,7 +8,7 @@ import { Alert } from '../components/ui/Alert'
 import { Button } from '../components/ui/Button'
 import { ModCard } from '../components/ui/ModCard'
 import { VehicleSilhouette } from '../components/ui/VehicleSilhouette'
-import { IconWrench, IconCheckeredFlag, IconCompassGauge, IconGauge } from '../components/icons/AutoIcons'
+import { IconCheckeredFlag, IconCompassGauge, IconGauge } from '../components/icons/AutoIcons'
 
 const STAGE_META = {
   1: { label: 'Stage 1', color: '#22C55E', desc: 'Foundation — best return on investment'  },
@@ -268,41 +268,6 @@ export default function BuildDetail() {
             </div>
           </div>
         </div>
-
-        {/* ── Visual Configurator launch ── */}
-        <Link
-          to={`/configurator?make=${encodeURIComponent(plan.make)}&model=${encodeURIComponent(plan.model)}&year=${plan.year}`}
-          className="block mb-8 group"
-        >
-          <div
-            className="relative w-full rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-[1.01]"
-            style={{
-              height: 200,
-              background: 'linear-gradient(135deg, rgba(255,107,0,0.08) 0%, rgba(12,13,16,1) 60%)',
-              border: '1px solid rgba(255,107,0,0.2)',
-            }}
-          >
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-accent/[0.12] border border-accent/25 flex items-center justify-center group-hover:bg-accent/[0.2] transition-all duration-300">
-                <IconWrench width={24} height={24} strokeWidth={1.4} className="text-accent" />
-              </div>
-              <div className="text-center">
-                <div className="font-display font-black text-white text-lg mb-1 group-hover:text-accent transition-colors">
-                  Open Visual Configurator
-                </div>
-                <div className="font-mono text-xs text-muted">
-                  Customize paint · tint · wheels · mods in real-time 3D
-                </div>
-              </div>
-              <div className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-bold text-sm px-6 py-2.5 rounded-xl group-hover:bg-accent-bright transition-colors duration-200">
-                Launch Configurator
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </Link>
 
         {/* ── Stage timeline + actions ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">

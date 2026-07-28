@@ -146,9 +146,9 @@
 
   /* ── Glass surfaces ──
      Two tiers, matching the two real recipes that had independently
-     converged across Navbar/BottomNav/ProfileSheet/CarViewer3D/the auth
-     pages before this pass — each was previously hand-typed inline with
-     small unintentional drift (24px vs 32px blur, 85%/88%/92%/97% opacity)
+     converged across Navbar/BottomNav/ProfileSheet/the auth pages before
+     this pass — each was previously hand-typed inline with small
+     unintentional drift (24px vs 32px blur, 85%/88%/92%/97% opacity)
      between call sites that all meant the same thing. */
 
   /* Fixed top/bottom chrome that sits directly on the page background —
@@ -314,10 +314,8 @@
      A bigger, slower sibling of the logo-mark draw-in above — the outline
      draws itself in once on mount. Same `pathLength="1"` + stroke-dashoffset
      technique as the navbar Logo, just paced for a hero-scale reveal rather
-     than a small persistent mark. (Landing's own hero no longer uses this —
-     it's the real 3D Configurator now, see components/home/
-     HeroConfigurator.jsx — this class is still used by the VehicleSilhouette
-     placements on BuildDetail.jsx/ExampleBuild.jsx.) */
+     than a small persistent mark. Used by the VehicleSilhouette placements
+     on BuildDetail.jsx/ExampleBuild.jsx. */
   .vs-draw {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;

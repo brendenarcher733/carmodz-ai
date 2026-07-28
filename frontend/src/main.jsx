@@ -19,7 +19,6 @@ import ForgotPassword  from './pages/ForgotPassword'
 import ResetPassword   from './pages/ResetPassword'
 import VerifyEmail     from './pages/VerifyEmail'
 import ExampleBuild    from './pages/ExampleBuild'
-import Configurator    from './pages/Configurator'
 import Admin           from './pages/Admin'
 import Billing         from './pages/Billing'
 import './styles/globals.css'
@@ -36,16 +35,6 @@ function RouteTracker() {
     analytics.capture('$pageview', { path: location.pathname })
   }, [location.pathname])
   return null
-}
-
-// Configurator gets its own immersive full-screen mobile layout with its
-// own floating action buttons (see Configurator.jsx) — a persistent tab
-// bar would sit on top of that, so it's the one route the bottom nav
-// doesn't render on.
-function ConditionalBottomNav() {
-  const location = useLocation()
-  if (location.pathname.startsWith('/configurator')) return null
-  return <BottomNav />
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -66,7 +55,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               <>
                 <Navbar />
                 <EmailVerificationBanner />
-                <ConditionalBottomNav />
+                <BottomNav />
                 <Routes>
                   <Route path="/"           element={<Landing />}     />
                   <Route path="/planner"    element={<ProtectedRoute><Planner /></ProtectedRoute>}     />
@@ -74,7 +63,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path="/builds/:id" element={<ProtectedRoute><BuildDetail /></ProtectedRoute>} />
                   <Route path="/advisor"       element={<Advisor />}      />
                   <Route path="/example-build"  element={<ExampleBuild />}  />
-                  <Route path="/configurator"   element={<ProtectedRoute><Configurator /></ProtectedRoute>}  />
                   <Route path="/admin"          element={<AdminRoute><Admin /></AdminRoute>}  />
                   <Route path="/billing"        element={<ProtectedRoute><Billing /></ProtectedRoute>}  />
                 </Routes>
