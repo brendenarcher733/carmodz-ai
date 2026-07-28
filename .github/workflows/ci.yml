@@ -62,3 +62,46 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm install
       - run: npm run build
+
+  backend-tests:
+    name: Auth + billing test suite (>80% coverage gate)
+    # Real correctness testing, not the boot/migration smoke gate above —
+    # unit/integration tests for every auth code path (login, refresh,
+    # logout, session revocation, CSRF) and every billing/webhook handler,
+    # gated independently at >80% coverage each so one strong area can't
+    # mask a weak one. Uses a temp file-based SQLite DB (see
+    # backend/tests/conftest.py for why not Postgres — this is testing
+    # application logic, not schema/migration correctness, which is already
+    # backend-boot-smoke's job), so no Postgres service is needed here —
+    # only Redis, since the rate limiter and FastAPI's own lifespan both
+    # depend on a real Redis connection.
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      REDIS_URL: redis://localhost:6379
+      SECRET_KEY: ci-only-secret-not-used-anywhere-real
+      AI_PROVIDER: mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt -r requirements-test.txt
+      - name: Run auth + billing test suite
+        run: pytest --cov=routers.auth --cov=core.security --cov=routers.billing --cov=services.billing_service --cov-report=
+      - name: Auth coverage gate (>80%)
+        run: coverage report --include="*/routers/auth.py,*/core/security.py" --fail-under=80
+      - name: Billing coverage gate (>80%)
+        run: coverage report --include="*/routers/billing.py,*/services/billing_service.py" --fail-under=80

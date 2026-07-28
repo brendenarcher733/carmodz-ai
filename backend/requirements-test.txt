@@ -1,0 +1,6 @@
+# Test-only dependencies — kept separate from requirements.txt so prod
+# installs stay lean. CI installs both (see .github/workflows/ci.yml's
+# backend-tests job); locally: pip install -r requirements.txt -r requirements-test.txt
+pytest==8.3.3
+pytest-cov==5.0.0
+httpx==0.28.1
