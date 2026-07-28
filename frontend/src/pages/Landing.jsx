@@ -138,11 +138,34 @@ export default function Landing() {
     <div className="bg-obsidian">
 
       {/* ═══════════════════════════════════════════
-          HERO — the real 3D Configurator, pre-loaded with a default
-          vehicle. The front door is now something a visitor touches
-          immediately, not a wall of text — see components/home/
-          HeroConfigurator.jsx for why this doesn't require touching the
-          configurator's own code at all.
+          HEADLINE — text only, deliberately no vehicle graphic of any
+          kind. This is the first thing a visitor sees; the visual
+          configurator is the second (immediately below).
+      ═══════════════════════════════════════════ */}
+      <section className="relative overflow-hidden">
+        <div className="page-glow absolute top-0 inset-x-0 h-[36rem] pointer-events-none" />
+        <div className="container-content pt-32 md:pt-40 pb-10 md:pb-14 relative z-10 text-center">
+          <div className="animate-fade-up inline-flex items-center gap-2.5 bg-white/[0.05] border border-white/[0.1] text-body text-xs font-semibold tracking-[0.14em] uppercase px-4 py-2 rounded-full mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+            Try it — no signup
+          </div>
+          <h1
+            className="animate-fade-up anim-delay-1 font-display font-black text-white leading-[0.98] tracking-[-0.03em] mb-4"
+            style={{ fontSize: 'clamp(2rem, 4.4vw, 3.2rem)' }}
+          >
+            Build your dream <span className="text-accent">Ford Mustang GT</span> right now.
+          </h1>
+          <p className="animate-fade-up anim-delay-2 text-body text-base md:text-lg max-w-xl mx-auto">
+            Paint, wheels, tint, real mods — watch the price add up live.
+            This is the real tool, working right now. Your own car takes about 60 seconds
+            in the planner below.
+          </p>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════
+          VISUAL CONFIGURATOR — the second thing a visitor sees, not the
+          first. See components/home/HeroConfigurator.jsx.
       ═══════════════════════════════════════════ */}
       <HeroConfigurator />
 
