@@ -1,11 +1,11 @@
 import { classifyVehicle } from '../../lib/vehicleUtils'
 
 /* Side-profile vehicle silhouettes, one per body-style shape. Reuses the same
-   `classifyVehicle()` classifier already driving the Configurator's 3D model
-   picker (lib/vehicleUtils.js) so a build's silhouette here and its 3D model
-   elsewhere always agree — several of classifyVehicle's 12 buckets already
-   intentionally share a GLB model (e.g. exotic/sports-exotic/porsche all use
-   ferrari.glb), so they share a silhouette shape here too.
+   `classifyVehicle()` classifier (lib/vehicleUtils.js) used elsewhere for
+   body-style classification (e.g. the Configurator's vehicle-class badge) —
+   several of classifyVehicle's 12 buckets are visually similar enough
+   (exotic/sports-exotic/porsche) that they intentionally share one
+   silhouette shape here.
    Single continuous body path + two wheel circles per shape, drawn on a
    shared 240x100 baseline — proportions (ride height, hood/greenhouse
    length, roofline) carry the body-style read, not literal per-model detail.

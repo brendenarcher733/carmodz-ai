@@ -11,7 +11,7 @@ const STAGE_VARIANT = { 1: 'stage1', 2: 'stage2', 3: 'stage3' }
  * (padding, animation timing, warning-box radius) — now one component so
  * both pages render identically and stay that way.
  */
-export function ModCard({ mod, index, vehicle, onView3D }) {
+export function ModCard({ mod, index, vehicle }) {
   return (
     <div
       className="animate-fade-up bg-surface border border-white/[0.07] rounded-2xl overflow-hidden transition-all duration-300 hover:bg-elevated"
@@ -32,7 +32,7 @@ export function ModCard({ mod, index, vehicle, onView3D }) {
 
         <p className="text-body text-sm leading-relaxed mb-4">{mod.description}</p>
 
-        {/* Investment + priority + 3D button */}
+        {/* Investment + priority */}
         <div className="flex items-center justify-between">
           <div>
             <div className="font-mono text-xs text-muted uppercase tracking-wider mb-0.5">Investment</div>
@@ -40,26 +40,10 @@ export function ModCard({ mod, index, vehicle, onView3D }) {
               ${mod.price_min.toLocaleString()} – ${mod.price_max.toLocaleString()}
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            {/* View in 3D */}
-            <button
-              type="button"
-              onClick={() => onView3D(mod)}
-              className="inline-flex items-center gap-1.5 border border-white/[0.1] text-muted text-xs font-mono px-3 py-1.5 rounded-lg hover:border-accent/40 hover:text-accent transition-all duration-200"
-              title="View this mod on the car in 3D"
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M6 1L11 3.5V8.5L6 11L1 8.5V3.5L6 1Z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
-                <path d="M6 1v10M1 3.5l5 2.5 5-2.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-              </svg>
-              View 3D
-            </button>
-            <div className="text-right">
-              <div className="font-mono text-xs text-muted uppercase tracking-wider mb-0.5">Priority</div>
-              {/* AI-assigned rank on this recommendation — cyan, distinct
-                  from the orange "View 3D" action button above. */}
-              <div className="font-display font-black text-ai text-xl leading-none">#{mod.priority}</div>
-            </div>
+          <div className="text-right">
+            <div className="font-mono text-xs text-muted uppercase tracking-wider mb-0.5">Priority</div>
+            {/* AI-assigned rank on this recommendation. */}
+            <div className="font-display font-black text-ai text-xl leading-none">#{mod.priority}</div>
           </div>
         </div>
 

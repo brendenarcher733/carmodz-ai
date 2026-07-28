@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100">
+  
+  <circle cx="58" cy="76" r="14.5" fill="none" stroke="#707070" stroke-width="2.5"/>
+  <circle cx="58" cy="76" r="5.800000000000001" fill="none" stroke="#707070" stroke-width="1.5"/>
+  <line x1="58" y1="76" x2="70.3" y2="76.0" stroke="#707070" stroke-width="1.5"/><line x1="58" y1="76" x2="64.2" y2="86.7" stroke="#707070" stroke-width="1.5"/><line x1="58" y1="76" x2="51.8" y2="86.7" stroke="#707070" stroke-width="1.5"/><line x1="58" y1="76" x2="45.7" y2="76.0" stroke="#707070" stroke-width="1.5"/><line x1="58" y1="76" x2="51.8" y2="65.3" stroke="#707070" stroke-width="1.5"/><line x1="58" y1="76" x2="64.2" y2="65.3" stroke="#707070" stroke-width="1.5"/>
+  
+  <circle cx="198" cy="76" r="14.5" fill="none" stroke="#707070" stroke-width="2.5"/>
+  <circle cx="198" cy="76" r="5.800000000000001" fill="none" stroke="#707070" stroke-width="1.5"/>
+  <line x1="198" y1="76" x2="210.3" y2="76.0" stroke="#707070" stroke-width="1.5"/><line x1="198" y1="76" x2="204.2" y2="86.7" stroke="#707070" stroke-width="1.5"/><line x1="198" y1="76" x2="191.8" y2="86.7" stroke="#707070" stroke-width="1.5"/><line x1="198" y1="76" x2="185.7" y2="76.0" stroke="#707070" stroke-width="1.5"/><line x1="198" y1="76" x2="191.8" y2="65.3" stroke="#707070" stroke-width="1.5"/><line x1="198" y1="76" x2="204.2" y2="65.3" stroke="#707070" stroke-width="1.5"/>
+  <text x="120" y="20" font-family="ui-monospace,monospace" font-size="9" font-weight="700" fill="#707070" text-anchor="middle">PLACEHOLDER WHEEL: Brixton</text>
+</svg>

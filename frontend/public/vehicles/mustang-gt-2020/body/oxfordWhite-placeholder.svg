@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100">
+  <rect width="240" height="100" fill="#1a1a1a"/>
+  <path d="M6 74 L6 68 C6 62 14 58 26 57 L96 50 C110 32 128 22 148 20 C166 18 182 22 194 32 C206 38 216 48 222 60 C228 64 232 68 232 74 Z" fill="#f4f0eb" stroke="#000" stroke-opacity="0.25" stroke-width="1"/>
+  <circle cx="58" cy="76" r="14.5" fill="#0a0a0a" stroke="#333" stroke-width="1"/><circle cx="58" cy="76" r="6.525" fill="#2a2a2a"/>
+  <circle cx="198" cy="76" r="14.5" fill="#0a0a0a" stroke="#333" stroke-width="1"/><circle cx="198" cy="76" r="6.525" fill="#2a2a2a"/>
+  
+    <g opacity="0.55">
+      <text x="120" y="45" font-family="ui-monospace,monospace" font-size="13" font-weight="700"
+        fill="#ffffff" text-anchor="middle" transform="rotate(-14 120 45)">PLACEHOLDER</text>
+    </g>
+  <text x="120" y="92" font-family="ui-monospace,monospace" font-size="8" fill="#ffffff" text-anchor="middle" opacity="0.8">2020 Mustang GT — Pearl White (placeholder)</text>
+</svg>

@@ -1,14 +1,10 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { ModCard } from '../components/ui/ModCard'
 import { VehicleSilhouette } from '../components/ui/VehicleSilhouette'
 import * as analytics from '../services/analytics'
-
-const CarViewer3D = lazy(() =>
-  import('../components/ui/CarViewer3D').then(m => ({ default: m.CarViewer3D }))
-)
 
 /* ─── Hardcoded demo plan — 2018 Honda Civic Si ─── */
 
@@ -131,8 +127,6 @@ function StageTimeline({ mods }) {
 export default function ExampleBuild() {
   useEffect(() => { analytics.capture('example_build_viewed') }, [])
 
-  const [viewing3D, setViewing3D] = useState(null)
-
   const stageMods = { 1: [], 2: [] }
   DEMO.mods.forEach(m => { if (stageMods[m.stage]) stageMods[m.stage].push(m) })
 
@@ -140,15 +134,6 @@ export default function ExampleBuild() {
 
   return (
     <div className="page-shell">
-      {viewing3D && (
-        <Suspense fallback={null}>
-          <CarViewer3D
-            mod={viewing3D}
-            vehicle={vehicle}
-            onClose={() => setViewing3D(null)}
-          />
-        </Suspense>
-      )}
       <div className="container-content pt-10 pb-20">
 
         {/* ── Header breadcrumb ── */}
@@ -300,7 +285,7 @@ export default function ExampleBuild() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {stageMods[1].map((mod, i) => (
-              <ModCard key={mod.name} mod={mod} index={i} vehicle={vehicle} onView3D={setViewing3D} />
+              <ModCard key={mod.name} mod={mod} index={i} vehicle={vehicle} />
             ))}
           </div>
         </section>
@@ -319,7 +304,7 @@ export default function ExampleBuild() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {stageMods[2].map((mod, i) => (
-                <ModCard key={mod.name} mod={mod} index={i} vehicle={vehicle} onView3D={setViewing3D} />
+                <ModCard key={mod.name} mod={mod} index={i} vehicle={vehicle} />
               ))}
             </div>
           </section>

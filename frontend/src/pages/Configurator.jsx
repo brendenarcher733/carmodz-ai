@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { CarScene }    from '../components/configurator/CarScene'
+import { VehicleVisualConfigurator } from '../components/vehicle-visual/VehicleVisualConfigurator'
 import { ConfigPanel } from '../components/configurator/ConfigPanel'
 import { BuildSummary } from '../components/configurator/BuildSummary'
 import { useCarConfig } from '../hooks/useCarConfig'
@@ -88,13 +88,6 @@ export default function Configurator() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        // dvh (not vh) so this tracks the real visual viewport on mobile —
-        // the 56px offset is unchanged from before, so this renders
-        // pixel-identical to the previous 100vh-based calc on desktop.
-        // Mobile gets a corrected formula (see .configurator-shell in
-        // globals.css) that actually clears the navbar + email-verification
-        // banner instead of relying on this page's pre-existing (and, on
-        // desktop, unchanged) 56px assumption.
         height: 'calc(100dvh - 56px - var(--bottom-nav-height, 0px))',
         background: '#0c0d10',
         overflow: 'hidden',
@@ -154,27 +147,13 @@ export default function Configurator() {
           />
         </div>
 
-        {/* Center — 3D viewer (single mount, shared by both layouts) */}
-        <div style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex', flexDirection: 'column' }}>
-          <CarScene config={config} make={make || legacyName} model={model} year={year} />
-
-          {/* Floating controls hint */}
-          <div style={{
-            position: 'absolute', bottom: 14, left: '50%', transform: 'translateX(-50%)',
-            background: 'rgba(8,9,11,0.75)', backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8,
-            padding: '5px 12px', pointerEvents: 'none',
-          }}
-          className="hidden md:block"
-          >
-            <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#6b7280' }}>
-              drag to orbit · scroll to zoom
-            </span>
-          </div>
+        {/* Center — 2D visual configurator (single mount, shared by both layouts) */}
+        <div style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex', flexDirection: 'column', padding: 12 }}>
+          <VehicleVisualConfigurator make={make || legacyName} model={model} year={year} config={config} />
 
           {/* Vehicle class badge */}
           <div style={{
-            position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
+            position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)',
             display: 'flex', alignItems: 'center', gap: 8,
             background: 'rgba(8,9,15,0.72)', backdropFilter: 'blur(8px)',
             border: '1px solid rgba(255,255,255,0.1)',

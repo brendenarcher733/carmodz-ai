@@ -1,23 +1,22 @@
 import { useEffect } from 'react'
-import { CarScene } from '../configurator/CarScene'
+import { VehicleVisualConfigurator } from '../vehicle-visual/VehicleVisualConfigurator'
 import { ConfigPanel } from '../configurator/ConfigPanel'
 import { BuildSummary } from '../configurator/BuildSummary'
 import { useCarConfig } from '../../hooks/useCarConfig'
 import * as analytics from '../../services/analytics'
 
-/* The homepage's front door — the real 3D Configurator (CarScene/
-   ConfigPanel/BuildSummary/useCarConfig, all unmodified, same components
-   pages/Configurator.jsx uses) pre-loaded with a hardcoded default vehicle
-   instead of a build's real make/model/year, so a brand-new anonymous
-   visitor can start orbiting and repainting a car in the first second on
-   the site — no signup, no query params, no saved build required (none of
-   these four components have any backend/auth dependency to begin with).
+/* The homepage's front door — the real 2D photo-layer visual configurator
+   (VehicleVisualConfigurator/ConfigPanel/BuildSummary/useCarConfig, all
+   unmodified from pages/Configurator.jsx's own usage) pre-loaded with a
+   hardcoded default vehicle instead of a build's real make/model/year, so a
+   brand-new anonymous visitor can start repainting a car in the first
+   second on the site — no signup, no query params, no saved build required
+   (none of these four components have any backend/auth dependency).
 
-   "Mustang GT" is a deliberate choice, not arbitrary: it matches
-   lib/vehicleUtils.js's `muscle` classification pattern, so it resolves to
-   a real, correctly-matched 3D model rather than classifyVehicle's generic
-   empty-string catch-all (what pages/Configurator.jsx itself falls back to
-   when no query params are present at all).
+   "Mustang GT" is a deliberate choice, not arbitrary: it's the one vehicle
+   with a real (currently placeholder) asset catalog entry in
+   data/vehicleCatalog.js — see that file for why this is a deliberately
+   curated, closed list rather than "any car."
 
    BuildSummary already ships its own "Get Expert Advice" (-> /advisor) and
    "New Build" (-> /planner) buttons — reused here as-is, which is exactly
@@ -50,7 +49,7 @@ export function HeroConfigurator() {
           Build your dream <span className="text-accent">{DEFAULT_VEHICLE.make} {DEFAULT_VEHICLE.model}</span> right now.
         </h1>
         <p className="animate-fade-up anim-delay-2 text-body text-base md:text-lg max-w-xl mx-auto">
-          Paint, wheels, tint, real mods — drag to orbit, watch the price add up live.
+          Paint, wheels, tint, real mods — watch the price add up live.
           This is the real tool, working right now. Your own car takes about 60 seconds
           in the planner below.
         </p>
@@ -69,7 +68,7 @@ export function HeroConfigurator() {
           </div>
 
           <div className="flex-1 min-w-0 rounded-2xl overflow-hidden border border-white/[0.07]" style={{ height: 380 }}>
-            <CarScene
+            <VehicleVisualConfigurator
               config={config}
               make={DEFAULT_VEHICLE.make}
               model={DEFAULT_VEHICLE.model}
