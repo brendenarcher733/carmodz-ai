@@ -3,6 +3,7 @@ import { useChat } from '../hooks/useChat'
 import { Spinner } from '../components/ui/Spinner'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
+import { WouldYouPayPrompt } from '../components/ui/WouldYouPayPrompt'
 import clsx from 'clsx'
 
 const QUICK_STARTERS = [
@@ -265,6 +266,7 @@ export default function Advisor() {
             className="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 min-h-0"
             onClick={handleClick}
           >
+            <WouldYouPayPrompt feature="chat" />
             {messages.map(msg => <Message key={msg.id} msg={msg} />)}
             {loading && <TypingIndicator />}
             <div ref={bottomRef} />

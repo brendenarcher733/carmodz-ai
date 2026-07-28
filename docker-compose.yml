@@ -53,6 +53,9 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       STRIPE_PRICE_ID_PRO: ${STRIPE_PRICE_ID_PRO:-}
+      # Soft-launch: free-tier caps aren't blocking anyone right now (see
+      # core/config.py) — flip to "true" locally to test enforcement itself.
+      ENFORCE_USAGE_LIMITS: ${ENFORCE_USAGE_LIMITS:-false}
     depends_on:
       postgres:
         condition: service_healthy

@@ -7,6 +7,7 @@ import { Card } from '../components/ui/Card'
 import { Alert } from '../components/ui/Alert'
 import { Button } from '../components/ui/Button'
 import { VehicleSilhouette } from '../components/ui/VehicleSilhouette'
+import { WouldYouPayPrompt } from '../components/ui/WouldYouPayPrompt'
 import { IconGarageBay, IconFuelPump, IconGauge, IconCheckeredFlag, IconWrench, IconTire } from '../components/icons/AutoIcons'
 import * as analytics from '../services/analytics'
 
@@ -204,6 +205,8 @@ export default function Garage() {
 
           <Button to="/planner" size="lg">+ New Build</Button>
         </div>
+
+        {!loading && <WouldYouPayPrompt feature="builds" />}
 
         {/* ── Stats Banner ── */}
         {!loading && <GarageStats stats={stats} />}

@@ -10,6 +10,7 @@ from fastapi import HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from core.config import settings
 from models.build import Build
 from models.user import AiRequestLog, User
 
@@ -64,6 +65,13 @@ def get_usage(db: Session, user: User) -> dict:
 
 
 def enforce_build_limit(db: Session, user: User) -> None:
+    # Soft-launch: enforcement is a feature flag (core/config.py), off by
+    # default. The cap logic and the Stripe integration behind it are
+    # untouched — this just stops it from blocking anyone until real
+    # willingness-to-pay signal (captured client-side instead) justifies
+    # turning it back on.
+    if not settings.enforce_usage_limits:
+        return
     if _is_pro(user):
         return
     if _build_count(db, user.id) >= FREE_BUILD_LIMIT:
@@ -76,7 +84,10 @@ def enforce_build_limit(db: Session, user: User) -> None:
 def enforce_chat_limit(db: Session, user_id: int | None) -> None:
     """No-op for anonymous callers (user_id is None) — the Mod Advisor chat
     stays usable while logged out exactly as it was before billing existed;
-    this only gates authenticated free-plan usage."""
+    this only gates authenticated free-plan usage. Also a no-op entirely
+    while settings.enforce_usage_limits is off — see enforce_build_limit."""
+    if not settings.enforce_usage_limits:
+        return
     if user_id is None:
         return
     user = db.query(User).filter(User.id == user_id).first()

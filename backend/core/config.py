@@ -95,6 +95,16 @@ class Settings(BaseSettings):
     def billing_configured(self) -> bool:
         return bool(self.stripe_secret_key and self.stripe_price_id_pro)
 
+    # Soft-launch switch: default OFF so the free-tier caps (1 saved build,
+    # 15 advisor messages/day — services/billing_service.py) stop blocking
+    # anyone, without deleting the enforcement code or the Stripe
+    # integration behind it. The caps were sized from a guess, not real
+    # usage data; this lets real usage happen first and captures actual
+    # willingness-to-pay signal (the "Would you pay for more of this?"
+    # prompt) instead. Flip back to True once that signal justifies
+    # re-enabling the paywall.
+    enforce_usage_limits: bool = Field(default=False, alias="ENFORCE_USAGE_LIMITS")
+
     @property
     def email_verification_required_features(self) -> set[str]:
         return {
