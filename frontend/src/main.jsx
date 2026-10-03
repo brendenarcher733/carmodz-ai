@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import * as analytics from './services/analytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -14,12 +14,12 @@ import Builds          from './pages/Builds'
 import BuildDetail     from './pages/BuildDetail'
 import Advisor         from './pages/Advisor'
 import Login           from './pages/Login'
-import Signup          from './pages/Signup'
 import ForgotPassword  from './pages/ForgotPassword'
 import ResetPassword   from './pages/ResetPassword'
 import VerifyEmail     from './pages/VerifyEmail'
 import ExampleBuild    from './pages/ExampleBuild'
 import Admin           from './pages/Admin'
+import Analytics       from './pages/Analytics'
 import Billing         from './pages/Billing'
 import './styles/globals.css'
 
@@ -42,10 +42,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <AuthProvider>
         <RouteTracker />
-        {/* Login / Signup render without the Navbar */}
+        {/* Login renders without the Navbar. Registration is closed — /signup
+            redirects to login instead of 404ing for anyone with an old link. */}
         <Routes>
           <Route path="/login"           element={<Login />}          />
-          <Route path="/signup"          element={<Signup />}         />
+          <Route path="/signup"          element={<Navigate to="/login" replace />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password"  element={<ResetPassword />}  />
           <Route path="/verify-email"    element={<VerifyEmail />}    />
@@ -64,6 +65,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path="/advisor"       element={<Advisor />}      />
                   <Route path="/example-build"  element={<ExampleBuild />}  />
                   <Route path="/admin"          element={<AdminRoute><Admin /></AdminRoute>}  />
+                  <Route path="/admin/analytics" element={<AdminRoute><Analytics /></AdminRoute>}  />
                   <Route path="/billing"        element={<ProtectedRoute><Billing /></ProtectedRoute>}  />
                 </Routes>
               </>

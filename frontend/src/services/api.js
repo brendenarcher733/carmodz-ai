@@ -42,7 +42,7 @@ function extractErrorMessage(err) {
 let refreshPromise = null
 
 // Exported so AuthContext can reuse the exact same read/write logic for
-// explicit login/signup instead of a second, driftable copy of it.
+// explicit login instead of a second, driftable copy of it.
 export function persistSession(data) {
   localStorage.setItem('cm_token', data.access_token)
   localStorage.setItem('cm_csrf',  data.csrf_token)
@@ -59,7 +59,7 @@ api.interceptors.response.use(
   res => res.data,
   async err => {
     const original = err.config
-    const isAuthEndpoint = /\/api\/auth\/(login|signup|refresh)$/.test(original?.url || '')
+    const isAuthEndpoint = /\/api\/auth\/(login|refresh)$/.test(original?.url || '')
 
     // Silent refresh-and-retry, once, for anything that isn't itself part
     // of the login/refresh flow (retrying a failed /refresh with another
@@ -171,8 +171,6 @@ export const advisorApi = {
 }
 
 export const authApi = {
-  signup: (name, email, password) =>
-    api.post('/api/auth/signup', { name, email, password }),
   login: (email, password) =>
     api.post('/api/auth/login', { email, password }),
   me: () => api.get('/api/auth/me'),
@@ -199,6 +197,7 @@ export const adminApi = {
   stats:           ()     => api.get('/api/admin/stats'),
   users:           (params = {}) => api.get('/api/admin/users', { params }),
   popularVehicles: ()     => api.get('/api/admin/popular-vehicles'),
+  traffic:         (days = 30) => api.get('/api/admin/analytics/traffic', { params: { days } }),
 }
 
 export const billingApi = {

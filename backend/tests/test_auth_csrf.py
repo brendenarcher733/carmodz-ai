@@ -38,17 +38,11 @@ def test_csrf_header_missing_entirely_fails(client, db):
     assert resp.status_code == 403
 
 
-def test_csrf_not_required_for_login_or_signup(client, db):
-    """No prior session exists yet at signup/login, so there's nothing to
-    check the header against — neither endpoint should ever 403 for a
-    missing X-CSRF-Token."""
+def test_csrf_not_required_for_login(client, db):
+    """No prior session exists yet at login, so there's nothing to check the
+    header against — it should never 403 for a missing X-CSRF-Token."""
     make_user(db, email="csrf-none@example.com", password="CorrectHorse9")
     login_resp = client.post("/api/auth/login", json={
         "email": "csrf-none@example.com", "password": "CorrectHorse9",
     })
     assert login_resp.status_code == 200
-
-    signup_resp = client.post("/api/auth/signup", json={
-        "name": "New", "email": "csrf-signup@example.com", "password": "CorrectHorse9",
-    })
-    assert signup_resp.status_code == 201

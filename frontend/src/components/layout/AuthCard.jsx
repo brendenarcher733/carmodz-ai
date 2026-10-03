@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import { Logo } from './Logo'
 
-/* Shared shell for Login/Signup/ForgotPassword/ResetPassword/VerifyEmail —
-   the atmospheric background, glass card, and logo mark were byte-identical
-   inline styles copy-pasted across all five pages. */
+/* Shared shell for Login/ForgotPassword/ResetPassword/VerifyEmail — the
+   atmospheric background, glass card, and logo mark were byte-identical
+   inline styles copy-pasted across all four pages. */
 export function AuthCard({ children, className }) {
   return (
     <div className="auth-shell-bg min-h-screen flex items-center justify-center relative overflow-hidden">

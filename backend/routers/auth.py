@@ -254,32 +254,13 @@ def _consume_action_token(db: Session, raw_token: str, purpose: str) -> User:
 
 @router.post("/signup", response_model=Token, status_code=201, dependencies=[Depends(signup_rate_limit)])
 def signup(data: UserCreate, request: Request, response: Response, db: Session = Depends(get_db)):
-    """Create a new account, send a verification email, and return a session.
-    Verification is a soft gate today — the account is fully usable
-    immediately (see require_verified_email() above for why, and how that
-    can change later without touching this endpoint)."""
-    existing = db.query(User).filter(User.email == data.email).first()
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="An account with this email already exists",
-        )
-    user = User(
-        name          = data.name,
-        email         = data.email,
-        password_hash = hash_password(data.password),
+    """Registration is closed — new accounts aren't being created right now.
+    The original account-creation flow is preserved in git history if this
+    needs to reopen later."""
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="New account registration is currently closed.",
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    verify_token = _create_action_token(db, user, "verify_email", EMAIL_VERIFICATION_TTL_HOURS)
-    _send_verification_email(user, verify_token)
-
-    analytics.identify(user.id, {"email": user.email, "name": user.name})
-    analytics.capture(user.id, "user_signed_up")
-
-    return _issue_session(db, user, request, response)
 
 
 @router.post("/login", response_model=Token, dependencies=[Depends(login_rate_limit)])

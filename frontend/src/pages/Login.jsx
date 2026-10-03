@@ -86,13 +86,6 @@ export default function Login() {
           Sign In
         </Button>
       </form>
-
-      <p className="text-center text-body text-sm mt-6">
-        No account?{' '}
-        <Link to="/signup" className="text-accent hover:text-accent-bright transition-colors">
-          Create one free
-        </Link>
-      </p>
     </AuthCard>
   )
 }

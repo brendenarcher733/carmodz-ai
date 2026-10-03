@@ -140,8 +140,7 @@ export function Navbar() {
             ) : (
               /* Logged-out state */
               <div className="hidden md:flex items-center gap-2">
-                <Button to="/login" variant="ghost" size="md">Sign In</Button>
-                <Button to="/signup" variant="primary" size="md">Get Started</Button>
+                <Button to="/login" variant="primary" size="md">Sign In</Button>
               </div>
             )}
           </div>
