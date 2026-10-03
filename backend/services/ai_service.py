@@ -178,7 +178,21 @@ Rules:
 - Stage 1 mods should fit within the first 50% of budget
 - Beginner builds: avoid stage 3 and "hard" difficulty
 - Prioritise reliability/foundation work before power mods if high mileage or beginner
-- Use real brands: K&N, Borla, Cobb, KW, Brembo, Mishimoto, etc."""
+- Use real brands: K&N, Borla, Cobb, KW, Brembo, Mishimoto, etc.
+
+For `exact_product`: this is what turns a vague "shop for this" link into a direct
+link to the actual part, so it matters a lot — but only when it's genuinely correct.
+- If you are confident a specific, real, currently-sold product fits this exact
+  {build.year} {build.make} {build.model} (not just the general platform or a
+  different year/trim), name it precisely: brand + model/part name, and the part
+  number if you know it — e.g. "K&N 57-3516 69-Series Typhoon Cold Air Intake",
+  "Borla S-Type Cat-Back Exhaust 140697", "Cobb Accessport V3".
+- If you are not confident enough to name one real product that fits THIS vehicle
+  — fitment varies too much by year/trim/engine, or you'd be guessing — leave
+  `exact_product` as an empty string. Do not invent a plausible-sounding part
+  number or model variant you aren't sure exists or fits; a wrong exact_product
+  is worse than none, since the user may check out on it without double-checking
+  fitment themselves."""
 
 
 def generate_build_recommendations(build) -> Optional[list[dict]]:

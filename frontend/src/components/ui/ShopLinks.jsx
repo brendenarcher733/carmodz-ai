@@ -148,12 +148,18 @@ const RETAILERS = [
 ]
 
 /* ─── Component ─── */
-export function ShopLinks({ modName, vehicle }) {
+export function ShopLinks({ modName, exactProduct, vehicle }) {
   const [open, setOpen] = useState(false)
 
-  /* Build the search query from vehicle + mod name */
-  const vehicleStr = vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model} ` : ''
-  const query      = `${vehicleStr}${modName}`
+  /* When the AI named a specific real product (brand + model/part name), that
+     search string is far more targeted than the generic mod name — searching
+     "K&N 57-3516 69-Series Typhoon Cold Air Intake" lands on or right next to
+     the actual product, vs. "Cold Air Intake" landing on a broad category
+     page. Falls back to the original vehicle+category query whenever the AI
+     wasn't confident enough to name one (see models/recommendation.py). */
+  const isPrecise   = Boolean(exactProduct)
+  const vehicleStr  = vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model} ` : ''
+  const query       = isPrecise ? `${vehicleStr}${exactProduct}` : `${vehicleStr}${modName}`
 
   return (
     <div className="mt-3 pt-3 border-t border-white/[0.05]">
@@ -208,7 +214,9 @@ export function ShopLinks({ modName, vehicle }) {
           ))}
 
           <p className="font-mono text-xs text-muted px-1 mt-1">
-            Links auto-search for your {vehicle?.make} {vehicle?.model}. Results may vary.
+            {isPrecise
+              ? `Searching for the exact part: "${exactProduct}" — confirm fitment before buying.`
+              : `General search for your ${vehicle?.make} ${vehicle?.model}. Results may vary.`}
           </p>
         </div>
       )}

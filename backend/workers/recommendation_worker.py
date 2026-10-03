@@ -111,6 +111,7 @@ def _persist_recommendations(db, build: Build, mods: list[ModRecommendation]) ->
             priority=mod.priority,
             warnings=mod.warnings,
             brand_tips=mod.brand_tips,
+            exact_product=mod.exact_product,
         ))
 
 

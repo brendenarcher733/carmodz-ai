@@ -151,6 +151,7 @@ def get_build_plan(db: Session, build_id: int, user_id: int):
             price_min=r.price_min, price_max=r.price_max,
             difficulty=r.difficulty, stage=r.stage, priority=r.priority,
             warnings=r.warnings or [], brand_tips=r.brand_tips or [],
+            exact_product=r.exact_product or "",
         )
         for r in recs
     ]

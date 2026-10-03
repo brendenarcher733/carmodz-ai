@@ -30,6 +30,7 @@ const DEMO = {
       priority:    1,
       stage:       1,
       brand_tips:  ['Michelin Pilot Sport 4S', 'Continental ExtremeContact Sport', 'Bridgestone RE-71RS'],
+      exact_product: 'Michelin Pilot Sport 4S 235/40R18',
       warnings:    [],
     },
     {
@@ -78,6 +79,7 @@ const DEMO = {
       priority:    5,
       stage:       2,
       brand_tips:  ['KTuner', 'Hondata Flashpro'],
+      exact_product: 'KTuner Flash Pro V2',
       warnings:    ['Requires a tuning session with a qualified shop. Use 93 octane fuel after tuning.'],
     },
   ],

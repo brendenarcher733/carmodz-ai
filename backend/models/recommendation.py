@@ -26,6 +26,7 @@ class Recommendation(Base):
     priority    = Column(Integer, nullable=False)     # 1=highest
     warnings    = Column(JSON, default=list)          # list of warning strings
     brand_tips  = Column(JSON, default=list)          # suggested brands
+    exact_product = Column(String(200), nullable=False, server_default="", default="")   # specific real product, e.g. "K&N 57-3516 69-Series Typhoon Cold Air Intake" — "" when the AI isn't confident enough to name one
     created_at  = Column(DateTime, default=datetime.utcnow)
 
     build = relationship("Build", back_populates="recommendations")
@@ -70,6 +71,13 @@ class ModRecommendation(BaseModel):
     priority:    int = Field(..., ge=1, le=20)
     warnings:    list[str] = Field(default=[], max_length=10)
     brand_tips:  list[str] = Field(default=[], max_length=10)
+    # The specific, real, purchasable product — e.g. "K&N 57-3516 69-Series
+    # Typhoon Cold Air Intake" — this is what makes a shop link land on (or
+    # very near) the exact part instead of a generic category search. Left as
+    # "" when the model isn't confident a specific product genuinely fits
+    # this vehicle; a wrong guess here is worse than no guess, since the
+    # whole point is a buyer trusting the link enough to check out on it.
+    exact_product: str = Field(default="", max_length=200)
 
     @field_validator("price_max")
     @classmethod

@@ -65,7 +65,7 @@ export function ModCard({ mod, index, vehicle }) {
         )}
 
         {/* Shop links */}
-        <ShopLinks modName={mod.name} vehicle={vehicle} />
+        <ShopLinks modName={mod.name} exactProduct={mod.exact_product} vehicle={vehicle} />
       </div>
     </div>
   )
