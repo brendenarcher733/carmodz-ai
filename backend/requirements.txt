@@ -13,3 +13,4 @@ psycopg2-binary==2.9.9
 alembic==1.13.2
 posthog==7.29.0
 stripe==11.4.1
+httpx==0.28.1

@@ -84,6 +84,20 @@ class Settings(BaseSettings):
     posthog_api_key: str = Field(default="", alias="POSTHOG_API_KEY")
     posthog_host:    str = Field(default="https://us.i.posthog.com", alias="POSTHOG_HOST")
 
+    # Read-side PostHog access for the admin traffic dashboard — a separate
+    # credential from POSTHOG_API_KEY above (that one is write-only, safe to
+    # expose client-side). Querying data back out needs a Personal API Key
+    # (create one under PostHog → Settings → Personal API Keys, "Query read"
+    # scope is enough) plus the numeric project ID shown in that same
+    # settings page. Unset means the traffic endpoint reports "not
+    # configured" instead of erroring. POSTHOG_API_HOST is the app/query
+    # host, which differs from the ingest host above on PostHog Cloud
+    # (us.posthog.com vs us.i.posthog.com) — use eu.posthog.com if the
+    # project is on EU Cloud.
+    posthog_project_id:       str = Field(default="", alias="POSTHOG_PROJECT_ID")
+    posthog_personal_api_key: str = Field(default="", alias="POSTHOG_PERSONAL_API_KEY")
+    posthog_api_host:         str = Field(default="https://us.posthog.com", alias="POSTHOG_API_HOST")
+
     # Billing — same off-by-default pattern as the providers above. Unset
     # means routers/billing.py returns a clear "billing isn't configured"
     # error instead of calling out to Stripe with an empty key.

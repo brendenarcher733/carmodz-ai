@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { adminApi } from '../services/api'
 import * as analytics from '../services/analytics'
 import { Spinner } from '../components/ui/Spinner'
@@ -165,15 +166,20 @@ export default function Admin() {
 
       <div className="container-content py-6 md:py-12 relative z-10">
 
-        <div className="mb-8">
-          <p className="eyebrow mb-2">Internal</p>
-          <h1
-            className="font-display font-black text-white leading-none tracking-tight"
-            style={{ fontSize: 'clamp(2.5rem, 5vw, 3.8rem)' }}
-          >
-            Admin Dashboard
-          </h1>
-          <p className="text-body mt-2">Platform users and usage, at a glance.</p>
+        <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <p className="eyebrow mb-2">Internal</p>
+            <h1
+              className="font-display font-black text-white leading-none tracking-tight"
+              style={{ fontSize: 'clamp(2.5rem, 5vw, 3.8rem)' }}
+            >
+              Admin Dashboard
+            </h1>
+            <p className="text-body mt-2">Platform users and usage, at a glance.</p>
+          </div>
+          <Link to="/admin/analytics" className="font-mono text-xs text-muted hover:text-white uppercase tracking-wider transition-colors mt-2">
+            Traffic Analytics →
+          </Link>
         </div>
 
         {loading && !stats && (

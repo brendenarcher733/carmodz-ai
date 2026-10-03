@@ -4,7 +4,7 @@
 
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -12,6 +12,7 @@ from core.database import get_db
 from models.user import User
 from routers.auth import require_admin
 from services.admin_service import get_platform_stats, get_popular_vehicles, get_users_with_stats
+from services.posthog_query_service import get_traffic_summary
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"], dependencies=[Depends(require_admin)])
 
@@ -49,6 +50,30 @@ class PopularVehicle(BaseModel):
     count: int
 
 
+class TrafficDay(BaseModel):
+    day: str
+    pageviews: int
+    visitors: int
+
+
+class TrafficTotals(BaseModel):
+    pageviews: int
+    visitors: int
+
+
+class TopPage(BaseModel):
+    path: str
+    views: int
+
+
+class TrafficResponse(BaseModel):
+    configured: bool
+    days: int | None = None
+    totals: TrafficTotals | None = None
+    daily: list[TrafficDay] = []
+    top_pages: list[TopPage] = []
+
+
 @router.get("/stats", response_model=AdminStatsResponse)
 def admin_stats(db: Session = Depends(get_db)):
     return get_platform_stats(db)
@@ -68,3 +93,11 @@ def admin_users(
 ):
     users, total = get_users_with_stats(db, skip=skip, limit=limit, search=search)
     return {"users": users, "total": total}
+
+
+@router.get("/analytics/traffic", response_model=TrafficResponse)
+def admin_traffic(days: int = Query(default=30, ge=1, le=90)):
+    try:
+        return get_traffic_summary(days)
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
