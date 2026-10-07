@@ -93,6 +93,12 @@ api.interceptors.response.use(
   }
 )
 
+// Anonymous planner — runs the full AI/mock plan inline, nothing is saved.
+// Can take 25-60s on the AI path, so this call gets its own longer timeout.
+export const plansApi = {
+  preview: (data) => api.post('/api/plans/preview', data, { timeout: 120000 }),
+}
+
 export const buildsApi = {
   // create now returns near-instantly (status='pending') — recommendation
   // generation happens async on a worker. No more 90s timeout override;

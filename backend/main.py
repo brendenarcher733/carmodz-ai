@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from core.database import init_db
 from core.redis_pool import get_redis_pool
-from routers import builds, advisor, auth, admin, billing
+from routers import builds, advisor, auth, admin, billing, plans
 
 
 @asynccontextmanager
@@ -65,6 +65,7 @@ async def security_headers(request: Request, call_next):
 # Register routers
 app.include_router(auth.router)
 app.include_router(builds.router)
+app.include_router(plans.router)
 app.include_router(advisor.router)
 app.include_router(admin.router)
 app.include_router(billing.router)

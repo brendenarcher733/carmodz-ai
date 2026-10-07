@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { Button } from '../ui/Button'
 import { Logo } from './Logo'
 import { IconGarageBay, IconFuelPump } from '../icons/AutoIcons'
 import clsx from 'clsx'
@@ -132,15 +131,9 @@ export function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-3">
-            {user ? (
-              /* Logged-in state */
+            {user && (
               <div className="hidden md:flex items-center gap-3">
                 <UserMenu user={user} onLogout={handleLogout} />
-              </div>
-            ) : (
-              /* Logged-out state */
-              <div className="hidden md:flex items-center gap-2">
-                <Button to="/login" variant="primary" size="md">Sign In</Button>
               </div>
             )}
           </div>

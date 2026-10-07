@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { buildsApi } from '../services/api'
+import { buildsApi, plansApi } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 import * as analytics from '../services/analytics'
 import { Spinner } from '../components/ui/Spinner'
 import { Button } from '../components/ui/Button'
@@ -602,6 +603,7 @@ function VehicleSelector({ form, set }) {
 /* ─── Main Planner ─── */
 
 export default function Planner() {
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [step,    setStep]    = useState(0)
   const [loading, setLoading] = useState(false)
@@ -651,6 +653,11 @@ export default function Planner() {
         title:  form.title || `${form.year} ${form.make} ${form.model}`,
         year:   parseInt(form.year),
         budget: parseFloat(form.budget),
+      }
+      if (!user) {
+        const plan = await plansApi.preview(payload)
+        navigate('/plan/preview', { state: { plan, vehicle: { year: payload.year, make: payload.make, model: payload.model } } })
+        return
       }
       const build = await buildsApi.create(payload)
       navigate(`/builds/${build.id}`)

@@ -10,6 +10,7 @@ import { BottomNav }   from './components/layout/BottomNav'
 import { EmailVerificationBanner } from './components/EmailVerificationBanner'
 import Landing         from './pages/Landing'
 import Planner         from './pages/Planner'
+import PlanPreview     from './pages/PlanPreview'
 import Builds          from './pages/Builds'
 import BuildDetail     from './pages/BuildDetail'
 import Advisor         from './pages/Advisor'
@@ -59,7 +60,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 <BottomNav />
                 <Routes>
                   <Route path="/"           element={<Landing />}     />
-                  <Route path="/planner"    element={<ProtectedRoute><Planner /></ProtectedRoute>}     />
+                  <Route path="/planner"    element={<Planner />}     />
+                  <Route path="/plan/preview" element={<PlanPreview />} />
                   <Route path="/builds"     element={<ProtectedRoute><Builds /></ProtectedRoute>}      />
                   <Route path="/builds/:id" element={<ProtectedRoute><BuildDetail /></ProtectedRoute>} />
                   <Route path="/advisor"       element={<Advisor />}      />

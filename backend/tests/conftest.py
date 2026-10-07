@@ -46,6 +46,7 @@ from core.database import Base, engine, SessionLocal  # noqa: E402
 from models.user import User  # noqa: E402
 from core.security import hash_password  # noqa: E402
 from routers import auth as auth_router  # noqa: E402
+from routers import plans as plans_router  # noqa: E402
 
 # Every module-level RateLimiter instance in routers/auth.py — overridden to
 # a no-op for the default `client` fixture so ordinary auth/billing tests
@@ -61,6 +62,7 @@ _RATE_LIMITERS = [
     auth_router.reset_password_rate_limit,
     auth_router.resend_verification_rate_limit,
     auth_router.verify_email_rate_limit,
+    plans_router.preview_rate_limit,
 ]
 
 

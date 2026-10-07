@@ -15,12 +15,6 @@ const ICONS = {
   planner: <IconWrench width={22} height={22} strokeWidth={1.5} />,
   garage:  <IconGarageBay width={22} height={22} strokeWidth={1.5} />,
   advisor: <IconCompassGauge width={22} height={22} strokeWidth={1.5} />,
-  signIn: (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <path d="M9 4H5a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M14 15l4-4-4-4M18 11H8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  ),
 }
 
 function TabLink({ to, label, icon, active }) {
@@ -96,10 +90,7 @@ export function BottomNav() {
             <ProfileTab user={user} active={sheetOpen} onOpen={() => setSheetOpen(true)} />
           </>
         ) : (
-          <>
-            <TabLink to="/advisor" label="Advisor" icon={ICONS.advisor} active={pathname.startsWith('/advisor')} />
-            <TabLink to="/login"   label="Sign In"  icon={ICONS.signIn} active={pathname === '/login'} />
-          </>
+          <TabLink to="/advisor" label="Advisor" icon={ICONS.advisor} active={pathname.startsWith('/advisor')} />
         )}
       </nav>
 
