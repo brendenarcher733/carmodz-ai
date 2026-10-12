@@ -170,6 +170,8 @@ def _sanitize_exact_products(raw: dict) -> dict:
     # Must match ModRecommendation.exact_product's max_length (models/recommendation.py).
     MAX_LEN = 150
     for rec in raw.get("recommendations", []) or []:
+        if not isinstance(rec, dict):
+            continue  # malformed item — Pydantic will reject it with a clear type error
         value = rec.get("exact_product")
         if not isinstance(value, str) or len(value) <= MAX_LEN:
             continue

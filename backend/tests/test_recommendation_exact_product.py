@@ -119,3 +119,14 @@ def test_sanitize_ignores_missing_or_non_string_values():
     raw = {"recommendations": [{"name": "x"}, {"name": "y", "exact_product": None}]}
     # Should not raise.
     _sanitize_exact_products(raw)
+
+
+def test_sanitize_skips_malformed_non_dict_items():
+    # Observed live: an occasionally-malformed response puts a bare string
+    # in the recommendations list instead of an object. Pydantic should be
+    # the one to reject that with a clear error — the sanitizer must not
+    # itself crash on it first.
+    raw = {"recommendations": [{"name": "x", "exact_product": "ok"}, "not a dict"]}
+    cleaned = _sanitize_exact_products(raw)
+    assert cleaned["recommendations"][0]["exact_product"] == "ok"
+    assert cleaned["recommendations"][1] == "not a dict"
