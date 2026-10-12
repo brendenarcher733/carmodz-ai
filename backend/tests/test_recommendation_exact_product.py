@@ -40,7 +40,7 @@ def test_exact_product_is_preserved_when_given():
 
 def test_exact_product_enforces_max_length():
     with pytest.raises(ValidationError):
-        _mod(exact_product="x" * 201)
+        _mod(exact_product="x" * 151)
 
 
 def test_prompt_tells_the_model_when_to_leave_it_blank():

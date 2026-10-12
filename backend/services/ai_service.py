@@ -55,7 +55,7 @@ CHAT_MAX_RETRIES = 1
 # Two different timeouts, not one shared value — corrected after live testing
 # against the real API caught the original single 30s constant timing out a
 # large fraction of genuinely-successful build-recommendation calls. Chat
-# (max_tokens=600, plain text) is fast; recommendations (max_tokens=4000,
+# (max_tokens=600, plain text) is fast; recommendations (max_tokens=8000,
 # forced strict tool-call, 6-10 structured items) is a fundamentally
 # different workload whose OWN pre-existing code comment already documented
 # 25-45s as its *normal*, not worst-case, latency — a 30s ceiling sat inside
@@ -181,12 +181,17 @@ Rules:
 - Use real brands: K&N, Borla, Cobb, KW, Brembo, Mishimoto, etc.
 
 For `exact_product`: this is what turns a vague "shop for this" link into a direct
-link to the actual part, so it matters a lot — but only when it's genuinely correct.
+link to the actual part, so it matters a lot — but only when it's genuinely correct,
+and it must be ONLY the product identity, nothing else.
 - If you are confident a specific, real, currently-sold product fits this exact
   {build.year} {build.make} {build.model} (not just the general platform or a
   different year/trim), name it precisely: brand + model/part name, and the part
   number if you know it — e.g. "K&N 57-3516 69-Series Typhoon Cold Air Intake",
-  "Borla S-Type Cat-Back Exhaust 140697", "Cobb Accessport V3".
+  "Borla S-Type Cat-Back Exhaust 140697", "Cobb Accessport V3". Keep it under 100
+  characters — brand, product name, part number, nothing more.
+- Never add parentheticals, caveats, fitment-confirmation notes, trim/body-style
+  qualifiers, or any other commentary inside exact_product. If there's a real
+  fitment nuance worth flagging, put it in `warnings` instead, in plain language.
 - If you are not confident enough to name one real product that fits THIS vehicle
   — fitment varies too much by year/trim/engine, or you'd be guessing — leave
   `exact_product` as an empty string. Do not invent a plausible-sounding part
@@ -235,7 +240,7 @@ def _claude_build_recommendations(
 
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=4000,
+            max_tokens=8000,
             tools=[RECOMMENDATIONS_TOOL],
             tool_choice={"type": "tool", "name": "submit_mod_recommendations"},
             messages=[{"role": "user", "content": _build_recommendations_prompt(build)}],

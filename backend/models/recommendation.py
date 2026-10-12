@@ -77,7 +77,7 @@ class ModRecommendation(BaseModel):
     # "" when the model isn't confident a specific product genuinely fits
     # this vehicle; a wrong guess here is worse than no guess, since the
     # whole point is a buyer trusting the link enough to check out on it.
-    exact_product: str = Field(default="", max_length=200)
+    exact_product: str = Field(default="", max_length=150)
 
     @field_validator("price_max")
     @classmethod
