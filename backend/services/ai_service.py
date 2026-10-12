@@ -61,7 +61,7 @@ CHAT_MAX_RETRIES = 1
 # 25-45s as its *normal*, not worst-case, latency — a 30s ceiling sat inside
 # that normal range instead of above it.
 CHAT_REQUEST_TIMEOUT_SECONDS = 25
-RECOMMENDATIONS_REQUEST_TIMEOUT_SECONDS = 60
+RECOMMENDATIONS_REQUEST_TIMEOUT_SECONDS = 75
 
 
 # ── Build Recommendations — structured output ────────────────────────────────
@@ -153,6 +153,29 @@ def _validate_recommendation_set(parsed: ModRecommendationsResponse, budget: flo
         raise RecommendationValidationError(
             f"Total minimum cost ${total_min:,.0f} exceeds budget ${budget:,.0f} by more than 15%"
         )
+
+
+def _sanitize_exact_products(raw: dict) -> dict:
+    """The model doesn't reliably keep exact_product to a bare product name —
+    confirmed live, not hypothetical: it sometimes appends fitment caveats or
+    commentary despite the prompt explicitly telling it not to. Letting that
+    fail Pydantic validation would throw away an otherwise-good 6-10 item
+    response over one chatty field, burning a full ~30-60s call for nothing
+    — so this cleans the field instead of rejecting the whole set. Cuts at
+    the first parenthetical, where the commentary almost always starts, then
+    hard-truncates to the schema's max_length as a last resort. A value that
+    still can't be trusted after that is cleared, which is already a normal,
+    fully-supported case — see _build_recommendations_prompt's own "leave it
+    blank" instruction and ShopLinks.jsx's fallback-to-generic-search."""
+    # Must match ModRecommendation.exact_product's max_length (models/recommendation.py).
+    MAX_LEN = 150
+    for rec in raw.get("recommendations", []) or []:
+        value = rec.get("exact_product")
+        if not isinstance(value, str) or len(value) <= MAX_LEN:
+            continue
+        cleaned = value.split("(")[0].strip(" -–:")
+        rec["exact_product"] = cleaned if len(cleaned) <= MAX_LEN else cleaned[:MAX_LEN].rstrip()
+    return raw
 
 
 def _build_recommendations_prompt(build) -> str:
@@ -257,7 +280,7 @@ def _claude_build_recommendations(
         # tool_use.input is already a parsed dict — the Anthropic SDK does the
         # JSON parsing. No regex, no markdown-fence stripping, no manual
         # json.loads: structured output replaces all of that.
-        parsed = ModRecommendationsResponse.model_validate(tool_use.input)
+        parsed = ModRecommendationsResponse.model_validate(_sanitize_exact_products(tool_use.input))
         _validate_recommendation_set(parsed, build.budget)
 
         return [rec.model_dump() for rec in parsed.recommendations]
@@ -303,7 +326,7 @@ def _openai_build_recommendations(build) -> Optional[list[dict]]:
         )
         raw = json.loads(resp.choices[0].message.content)
 
-        parsed = ModRecommendationsResponse.model_validate(raw)
+        parsed = ModRecommendationsResponse.model_validate(_sanitize_exact_products(raw))
         _validate_recommendation_set(parsed, build.budget)
 
         return [rec.model_dump() for rec in parsed.recommendations]

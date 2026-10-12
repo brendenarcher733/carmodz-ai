@@ -76,3 +76,46 @@ def test_exact_product_round_trips_through_worker_and_build_service(db):
     by_name = {m.name: m.exact_product for m in plan.mods}
     assert by_name["Cold Air Intake"] == "K&N 57-3516 69-Series Typhoon Cold Air Intake"
     assert by_name["Rear Motor Mount"] == ""
+
+
+# ── _sanitize_exact_products ─────────────────────────────────────────────────
+# The model doesn't reliably keep exact_product short and clean (observed
+# live — it sometimes appends fitment caveats despite being told not to).
+# These cover the cleanup that runs before validation so one chatty field
+# can't fail the whole recommendation set.
+
+from services.ai_service import _sanitize_exact_products
+
+
+def test_sanitize_leaves_short_values_untouched():
+    raw = {"recommendations": [{"name": "x", "exact_product": "K&N 57-3516"}]}
+    assert _sanitize_exact_products(raw)["recommendations"][0]["exact_product"] == "K&N 57-3516"
+
+
+def test_sanitize_cuts_at_the_first_parenthetical():
+    # Real example observed live — the model appended enough fitment
+    # commentary to push a clean, legitimate product name over the limit.
+    raw = {"recommendations": [{
+        "name": "x",
+        "exact_product": (
+            "K&N 69-1013TS Typhoon Performance Intake Kit – 2017-2021 Honda Civic 1.5T "
+            "(verify Si fitment on K&N site before ordering, as some kits span trims "
+            "differently; the part listed fits the K20C4 turbocharged platform)"
+        ),
+    }]}
+    assert len(raw["recommendations"][0]["exact_product"]) > 150
+    cleaned = _sanitize_exact_products(raw)["recommendations"][0]["exact_product"]
+    assert cleaned == "K&N 69-1013TS Typhoon Performance Intake Kit – 2017-2021 Honda Civic 1.5T"
+    assert len(cleaned) <= 150
+
+
+def test_sanitize_hard_truncates_when_no_parenthetical_present():
+    raw = {"recommendations": [{"name": "x", "exact_product": "x" * 200}]}
+    cleaned = _sanitize_exact_products(raw)["recommendations"][0]["exact_product"]
+    assert len(cleaned) == 150
+
+
+def test_sanitize_ignores_missing_or_non_string_values():
+    raw = {"recommendations": [{"name": "x"}, {"name": "y", "exact_product": None}]}
+    # Should not raise.
+    _sanitize_exact_products(raw)
