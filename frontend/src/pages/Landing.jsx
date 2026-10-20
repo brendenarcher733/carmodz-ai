@@ -137,25 +137,28 @@ export default function Landing() {
     <div className="bg-obsidian">
 
       {/* ═══════════════════════════════════════════
-          HEADLINE — the same vehicle photo used on the build-detail hero,
-          screen-blended into the background so only its glowing highlights
-          show (its black areas vanish entirely under `screen`) — it reads
-          as part of the page's existing orange atmosphere, not a pasted-on
-          photo block. Text stays the actual focus.
+          HEADLINE — fills the whole first screen. The same vehicle photo
+          used on the build-detail hero sits behind it, screen-blended (the
+          asset's background was processed to true black, so under `screen`
+          it contributes nothing and no rectangular edge is visible) and
+          feathered out top and bottom with a mask so it reads as ambient
+          light built into the page rather than a photo dropped on top of it.
       ═══════════════════════════════════════════ */}
-      <section className="relative overflow-hidden">
-        <div className="page-glow absolute top-0 inset-x-0 h-[36rem] pointer-events-none" />
+      <section className="relative overflow-hidden min-h-screen flex items-center">
+        <div className="page-glow absolute inset-0 pointer-events-none" />
         <div
-          className="absolute top-0 inset-x-0 h-[36rem] pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage: 'url(/images/build-hero.jpg)',
             backgroundSize: 'cover',
-            backgroundPosition: 'center 55%',
+            backgroundPosition: 'center 42%',
             mixBlendMode: 'screen',
-            opacity: 0.6,
+            opacity: 0.9,
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 74%, transparent 100%)',
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 74%, transparent 100%)',
           }}
         />
-        <div className="container-content pt-32 md:pt-40 pb-24 md:pb-32 relative z-10 text-center">
+        <div className="container-content pt-32 md:pt-40 pb-24 md:pb-32 relative z-10 text-center w-full">
           <div className="animate-fade-up inline-flex items-center gap-2.5 bg-white/[0.05] border border-white/[0.1] text-body text-xs font-semibold tracking-[0.14em] uppercase px-4 py-2 rounded-full mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-accent" />
             AI-Powered Build Planning
