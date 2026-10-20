@@ -3,12 +3,16 @@ import { useParams, Link } from 'react-router-dom'
 import { useBuildPlan, useBuildStatus } from '../hooks/useBuilds'
 import { buildsApi } from '../services/api'
 import { Spinner } from '../components/ui/Spinner'
-import { Card } from '../components/ui/Card'
 import { Alert } from '../components/ui/Alert'
 import { Button } from '../components/ui/Button'
 import { ModCard } from '../components/ui/ModCard'
-import { VehicleSilhouette } from '../components/ui/VehicleSilhouette'
 import { IconCheckeredFlag, IconCompassGauge, IconGauge } from '../components/icons/AutoIcons'
+
+/* Wide cinematic hero photo behind the vehicle name — see the file this
+   path points to for exactly what's expected if it's missing. Deliberately
+   not the VehicleSilhouette SVG used elsewhere in the app: that's schematic
+   line art, not a photo, and doesn't belong standing in for one here. */
+const HERO_IMAGE_SRC = '/images/build-hero.jpg'
 
 const STAGE_META = {
   1: { label: 'Stage 1', color: '#22C55E', desc: 'Foundation — best return on investment'  },
@@ -183,142 +187,143 @@ export default function BuildDetail() {
 
   return (
     <div className="page-shell">
-      <div className="container-content pt-10 pb-16">
 
-        {/* ── Vehicle Hero — this panel is what gets screenshotted and
-             shared, so it gets the full treatment: the vehicle silhouette
-             (real body-style match via classifyVehicle), the blueprint-grid
-             texture, and technical-drawing corner brackets. ── */}
-        <div className="dyno-frame relative overflow-hidden rounded-3xl mb-8"
-          style={{ background: 'linear-gradient(135deg, rgba(255,107,0,0.06) 0%, rgba(19,21,25,1) 50%)' }}>
+      {/* ── Hero — full-bleed vehicle photo, the page's visual centerpiece.
+           A single functional overlay (bottom + left darkening, for text
+           legibility against whatever the photo contains) sits over it —
+           not a decorative gradient. If the image file isn't present yet,
+           the charcoal→obsidian base beneath it still reads as an
+           intentional dark surface rather than a broken box. ── */}
+      <div
+        className="relative w-full overflow-hidden bg-gradient-to-b from-charcoal to-obsidian"
+        style={{ height: 'clamp(420px, 56vw, 640px)' }}
+      >
+        <img
+          src={HERO_IMAGE_SRC}
+          alt={`${plan.year} ${plan.make} ${plan.model}`}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ objectPosition: 'center 56%' }}
+          onError={(e) => { e.currentTarget.style.display = 'none' }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(0deg, rgba(9,9,9,0.97) 0%, rgba(9,9,9,0.78) 26%, rgba(9,9,9,0.1) 58%, rgba(9,9,9,0.3) 100%),
+              linear-gradient(90deg, rgba(9,9,9,0.6) 0%, rgba(9,9,9,0.1) 45%, transparent 70%)
+            `,
+          }}
+        />
 
-          {/* Grid texture as its own layer — the parent already carries an
-              inline `background` gradient, and an inline style always beats
-              a class's background-image, so .bg-blueprint-grid can't live
-              on that same element. */}
-          <div className="absolute inset-0 bg-blueprint-grid pointer-events-none opacity-70" />
+        <div className="relative z-10 h-full flex flex-col justify-between container-content py-6">
+          <Link to="/builds" className="inline-flex items-center gap-1.5 text-white/70 text-xs font-mono uppercase tracking-wider hover:text-white transition-colors w-fit">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            My Garage
+          </Link>
 
-          <div className="dyno-frame-corner" />
-          <div className="dyno-frame-corner dyno-frame-corner--br" />
-
-          <div className="absolute top-0 right-0 bottom-0 w-1/2 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,107,0,0.09) 0%, transparent 70%)' }}>
-            <VehicleSilhouette
-              make={plan.make} model={plan.model} year={plan.year}
-              tone="feature"
-              className="absolute inset-0 w-full h-full text-accent/[0.35]"
-            />
-          </div>
-
-          <div className="relative z-10 px-8 py-10">
-            {/* Breadcrumb */}
-            <Link to="/builds" className="inline-flex items-center gap-1.5 text-muted text-xs font-mono uppercase tracking-wider hover:text-body transition-colors mb-6">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              My Garage
-            </Link>
-
-            {/* Vehicle name — the hero */}
-            <div className="mb-6">
-              <p className="eyebrow mb-2">Your Build</p>
-              <h1
-                className="font-display font-black text-white leading-[0.92] tracking-tight"
-                style={{ fontSize: 'clamp(2.8rem, 6vw, 5rem)' }}
-              >
-                {plan.year} {plan.make}
-                <br />
-                <span className="text-accent">{plan.model}</span>
-              </h1>
-              <p className="text-body text-base mt-3 capitalize">{plan.goal}</p>
-            </div>
-
-            {/* Performance metrics strip */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-white/[0.07]">
-              {hpMin > 0 && (
-                <div>
-                  <div className="font-display font-black text-accent leading-none mb-1"
-                    style={{ fontSize: '1.75rem' }}>
-                    +{hpMin}–{hpMax} HP
-                  </div>
-                  <div className="font-mono text-xs text-muted uppercase tracking-wider">Est. Performance Gain</div>
-                </div>
-              )}
-              <div>
-                <div className="font-display font-black text-white leading-none mb-1"
-                  style={{ fontSize: '1.75rem' }}>
-                  ${plan.total_min.toLocaleString()}–${plan.total_max.toLocaleString()}
-                </div>
-                <div className="font-mono text-xs text-muted uppercase tracking-wider">Build Investment</div>
-              </div>
-              <div>
-                <div className="font-display font-black text-white leading-none mb-1"
-                  style={{ fontSize: '1.75rem' }}>
-                  {plan.mods.length}
-                </div>
-                <div className="font-mono text-xs text-muted uppercase tracking-wider">Planned Upgrades</div>
-              </div>
-              <div>
-                <div className="font-display font-black text-white leading-none mb-1"
-                  style={{ fontSize: '1.75rem' }}>
-                  {stagesUsed.length} of 3
-                </div>
-                <div className="font-mono text-xs text-muted uppercase tracking-wider">Stages Active</div>
-              </div>
-            </div>
+          <div>
+            <p className="eyebrow mb-2">Your Build</p>
+            <h1
+              className="font-display font-black text-white leading-[0.92] tracking-tight"
+              style={{ fontSize: 'clamp(2.6rem, 6vw, 5rem)' }}
+            >
+              {plan.year} {plan.make}
+              <br />
+              <span className="text-accent">{plan.model}</span>
+            </h1>
+            <p className="text-body text-base mt-3 capitalize">{plan.goal}</p>
           </div>
         </div>
+      </div>
 
-        {/* ── Stage timeline + actions ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-          {/* Timeline */}
-          <Card padding="lg" className="md:col-span-2">
-            <p className="font-mono text-xs text-muted uppercase tracking-wider mb-6">Build Timeline</p>
-            <StageTimeline stageMods={stageMods} />
-          </Card>
+      {/* ── Stats strip — flush under the hero like a spec sheet, not a
+           floating dashboard card. ── */}
+      <div className="border-b border-white/[0.07] bg-charcoal">
+        <div className="container-content grid grid-cols-2 md:grid-cols-4 divide-x divide-white/[0.07]">
+          {hpMin > 0 && (
+            <div className="py-6 px-5 md:px-6">
+              <div className="font-display font-black text-accent leading-none mb-1" style={{ fontSize: '1.75rem' }}>
+                +{hpMin}–{hpMax} HP
+              </div>
+              <div className="font-mono text-xs text-muted uppercase tracking-wider">Est. Performance Gain</div>
+            </div>
+          )}
+          <div className="py-6 px-5 md:px-6">
+            <div className="font-display font-black text-white leading-none mb-1" style={{ fontSize: '1.75rem' }}>
+              ${plan.total_min.toLocaleString()}–${plan.total_max.toLocaleString()}
+            </div>
+            <div className="font-mono text-xs text-muted uppercase tracking-wider">Build Investment</div>
+          </div>
+          <div className="py-6 px-5 md:px-6">
+            <div className="font-display font-black text-white leading-none mb-1" style={{ fontSize: '1.75rem' }}>
+              {plan.mods.length}
+            </div>
+            <div className="font-mono text-xs text-muted uppercase tracking-wider">Planned Upgrades</div>
+          </div>
+          <div className="py-6 px-5 md:px-6">
+            <div className="font-display font-black text-white leading-none mb-1" style={{ fontSize: '1.75rem' }}>
+              {stagesUsed.length} of 3
+            </div>
+            <div className="font-mono text-xs text-muted uppercase tracking-wider">Stages Active</div>
+          </div>
+        </div>
+      </div>
 
-          {/* Quick actions */}
-          <Card padding="lg" className="flex flex-col gap-3">
-            <p className="font-mono text-xs text-muted uppercase tracking-wider mb-2">Quick Actions</p>
-            <Link
-              to="/advisor"
-              className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07] hover:border-ai/30 hover:bg-ai/[0.05] transition-all duration-200 group"
-            >
-              <div className="w-8 h-8 rounded-lg bg-ai/[0.1] border border-ai/20 flex items-center justify-center flex-shrink-0">
-                <IconCompassGauge width={14} height={14} strokeWidth={1.25} className="text-ai" />
-              </div>
-              <div>
-                <div className="font-display font-semibold text-white text-sm group-hover:text-ai transition-colors">Ask the Advisor</div>
-                <div className="text-muted text-xs">Get expert guidance</div>
-              </div>
-            </Link>
-            <Link
-              to="/planner"
-              className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07] hover:border-white/[0.14] transition-all duration-200"
-            >
-              <div className="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/[0.1] flex items-center justify-center flex-shrink-0">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-body">
-                  <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <div>
-                <div className="font-display font-semibold text-white text-sm">New Build</div>
-                <div className="text-muted text-xs">Plan another vehicle</div>
-              </div>
-            </Link>
-            {plan.budget_warning && (
-              <Alert variant="warning" className="mt-1">
-                <span className="text-xs">{plan.budget_warning}</span>
-              </Alert>
-            )}
-          </Card>
+      <div className="container-content pt-10 pb-16">
+
+        {/* ── Timeline + actions — one bordered panel, divided internally,
+             instead of two separate floating cards. ── */}
+        <div className="border border-white/[0.07] rounded-lg overflow-hidden mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/[0.07]">
+            <div className="md:col-span-2 p-6">
+              <p className="font-mono text-xs text-muted uppercase tracking-wider mb-6">Build Timeline</p>
+              <StageTimeline stageMods={stageMods} />
+            </div>
+
+            <div className="p-6 flex flex-col gap-3">
+              <p className="font-mono text-xs text-muted uppercase tracking-wider mb-2">Quick Actions</p>
+              <Link
+                to="/advisor"
+                className="flex items-center gap-3 p-3 rounded-md border border-white/[0.07] hover:border-ai/30 hover:bg-ai/[0.04] transition-all duration-200 group"
+              >
+                <div className="w-8 h-8 rounded-md bg-ai/[0.1] border border-ai/20 flex items-center justify-center flex-shrink-0">
+                  <IconCompassGauge width={14} height={14} strokeWidth={1.25} className="text-ai" />
+                </div>
+                <div>
+                  <div className="font-display font-semibold text-white text-sm group-hover:text-ai transition-colors">Ask the Advisor</div>
+                  <div className="text-muted text-xs">Get expert guidance</div>
+                </div>
+              </Link>
+              <Link
+                to="/planner"
+                className="flex items-center gap-3 p-3 rounded-md border border-white/[0.07] hover:border-white/[0.14] transition-all duration-200"
+              >
+                <div className="w-8 h-8 rounded-md bg-white/[0.05] border border-white/[0.1] flex items-center justify-center flex-shrink-0">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-body">
+                    <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <div className="font-display font-semibold text-white text-sm">New Build</div>
+                  <div className="text-muted text-xs">Plan another vehicle</div>
+                </div>
+              </Link>
+              {plan.budget_warning && (
+                <Alert variant="warning" className="mt-1">
+                  <span className="text-xs">{plan.budget_warning}</span>
+                </Alert>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* ── AI Advisor summary ── */}
         {plan.summary && (
-          <Card padding="lg" className="mb-10">
+          <div className="border border-white/[0.07] rounded-lg p-6 mb-10">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-ai/[0.1] border border-ai/25 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-md bg-ai/[0.1] border border-ai/25 flex items-center justify-center flex-shrink-0">
                 <IconGauge width={14} height={14} strokeWidth={1.25} className="text-ai" />
               </div>
               <div>
@@ -344,7 +349,7 @@ export default function BuildDetail() {
               </div>
             </div>
             <p className="text-body text-sm leading-relaxed">{plan.summary}</p>
-          </Card>
+          </div>
         )}
 
         {/* ── Upgrades by stage ── */}

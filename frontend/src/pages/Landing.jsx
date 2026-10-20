@@ -137,10 +137,24 @@ export default function Landing() {
     <div className="bg-obsidian">
 
       {/* ═══════════════════════════════════════════
-          HEADLINE — text only, no vehicle graphic of any kind.
+          HEADLINE — the same vehicle photo used on the build-detail hero,
+          screen-blended into the background so only its glowing highlights
+          show (its black areas vanish entirely under `screen`) — it reads
+          as part of the page's existing orange atmosphere, not a pasted-on
+          photo block. Text stays the actual focus.
       ═══════════════════════════════════════════ */}
       <section className="relative overflow-hidden">
         <div className="page-glow absolute top-0 inset-x-0 h-[36rem] pointer-events-none" />
+        <div
+          className="absolute top-0 inset-x-0 h-[36rem] pointer-events-none"
+          style={{
+            backgroundImage: 'url(/images/build-hero.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 55%',
+            mixBlendMode: 'screen',
+            opacity: 0.6,
+          }}
+        />
         <div className="container-content pt-32 md:pt-40 pb-24 md:pb-32 relative z-10 text-center">
           <div className="animate-fade-up inline-flex items-center gap-2.5 bg-white/[0.05] border border-white/[0.1] text-body text-xs font-semibold tracking-[0.14em] uppercase px-4 py-2 rounded-full mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-accent" />
