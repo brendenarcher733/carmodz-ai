@@ -19,11 +19,11 @@ function useReveal(threshold = 0.12) {
 
 /* ─── Data ─── */
 const FEATURES = [
-  { num: '01', title: 'Your Digital Garage',     desc: 'Every build lives in your personal garage. Track progress, budget, and upgrades across multiple vehicles — all in one place.' },
+  { num: '01', title: 'Your Digital Garage',     desc: 'Every build lives in your personal garage. Track progress, budget, and upgrades across multiple vehicles, all in one place.' },
   { num: '02', title: 'Platform Intelligence',   desc: 'Recommendations built around your exact platform. A WRX build is not a GTI build. We know the difference.' },
   { num: '03', title: 'Staged Build Roadmap',    desc: 'Stage 1 → 2 → 3. Start with the highest-impact, most affordable mods first. Scale up when you\'re ready.' },
   { num: '04', title: 'Honest Trade-offs',       desc: "We tell you when a mod isn't worth the money, needs other mods done first, or is better left to a professional." },
-  { num: '05', title: 'Performance Advisor',     desc: 'Ask anything — mod order, brand picks, budget breakdowns, compatibility. An expert tuner in your pocket.' },
+  { num: '05', title: 'Performance Advisor',     desc: 'Ask anything. Mod order, brand picks, budget breakdowns, compatibility. An expert tuner in your pocket.' },
   { num: '06', title: 'Real Investment Numbers', desc: 'Actual price ranges, not guesses. See exactly what your build costs before you spend a dollar.' },
 ]
 
@@ -137,42 +137,87 @@ export default function Landing() {
     <div className="bg-obsidian">
 
       {/* ═══════════════════════════════════════════
-          HEADLINE — fills the whole first screen. The same vehicle photo
-          used on the build-detail hero sits behind it, screen-blended (the
-          asset's background was processed to true black, so under `screen`
-          it contributes nothing and no rectangular edge is visible) and
-          feathered out top and bottom with a mask so it reads as ambient
-          light built into the page rather than a photo dropped on top of it.
+          HEADLINE — copy reads first against a dark, uncluttered left/upper
+          field; the silhouette is a supporting element anchored lower-right,
+          height-capped so it can't dominate the fold or cross into the
+          headline. A radial mask keeps its own top-left corner dark (so it
+          has no visible box edge cutting across the copy) and a diagonal
+          charcoal scrim sits above everything so the headline never needs
+          to compete with it. Mobile drops the absolute composition for a
+          plain stacked image below the copy — see the `md:hidden` block.
       ═══════════════════════════════════════════ */}
-      <section className="relative overflow-hidden min-h-screen flex items-center">
+      <section className="relative overflow-hidden">
         <div className="page-glow absolute inset-0 pointer-events-none" />
+
+        {/* Silhouette — desktop/tablet only, anchored lower-right, capped height */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="hidden md:block absolute bottom-0 right-0 pointer-events-none"
           style={{
+            width: 'min(58%, 780px)',
+            height: 'clamp(260px, 36vw, 440px)',
             backgroundImage: 'url(/images/build-hero.jpg)',
             backgroundSize: 'cover',
-            backgroundPosition: 'center 42%',
+            backgroundPosition: 'center 46%',
             mixBlendMode: 'screen',
-            opacity: 0.9,
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 74%, transparent 100%)',
-            maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 74%, transparent 100%)',
+            opacity: 0.5,
+            WebkitMaskImage: 'radial-gradient(circle at 76% 82%, black 0%, black 38%, transparent 76%)',
+            maskImage: 'radial-gradient(circle at 76% 82%, black 0%, black 38%, transparent 76%)',
           }}
         />
-        <div className="container-content pt-32 md:pt-40 pb-24 md:pb-32 relative z-10 text-center w-full">
-          <div className="animate-fade-up inline-flex items-center gap-2.5 bg-white/[0.05] border border-white/[0.1] text-body text-xs font-semibold tracking-[0.14em] uppercase px-4 py-2 rounded-full mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-            AI-Powered Build Planning
+
+        {/* Charcoal scrim — strongest over the left/upper-left copy column,
+            fading out toward the lower-right where the silhouette sits. */}
+        <div
+          className="hidden md:block absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(115deg, rgba(9,9,9,0.97) 0%, rgba(9,9,9,0.92) 28%, rgba(9,9,9,0.55) 52%, rgba(9,9,9,0.1) 75%, rgba(9,9,9,0.3) 100%)',
+          }}
+        />
+
+        <div className="container-content pt-32 md:pt-40 pb-20 md:pb-28 relative z-10">
+          <div className="max-w-xl">
+            <div className="animate-fade-up inline-flex items-center gap-2.5 bg-white/[0.05] border border-white/[0.1] text-body text-xs font-semibold tracking-[0.14em] uppercase px-4 py-2 rounded-full mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+              AI-Powered Build Planning
+            </div>
+            <h1
+              className="animate-fade-up anim-delay-1 font-display font-black text-white leading-[0.98] tracking-[-0.03em] mb-4"
+              style={{ fontSize: 'clamp(2rem, 4.4vw, 3.2rem)' }}
+            >
+              Build your dream car <span className="text-accent">the smart way.</span>
+            </h1>
+            <p className="animate-fade-up anim-delay-2 text-body text-base md:text-lg mb-8">
+              Tell us your car, budget, and goals. Get a personalized, staged mod roadmap
+              with real costs, install difficulty, and performance gains, in about 60 seconds.
+            </p>
+            <div className="animate-fade-up anim-delay-3 flex flex-wrap gap-4">
+              <Link to="/planner"
+                className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-200 shadow-glow">
+                Start My Build
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+              <Link to="/example-build"
+                className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/[0.12] text-white font-display font-semibold text-base px-8 py-4 rounded-xl hover:bg-white/[0.09] hover:border-white/[0.2] transition-all duration-200">
+                See Example Build
+              </Link>
+            </div>
           </div>
-          <h1
-            className="animate-fade-up anim-delay-1 font-display font-black text-white leading-[0.98] tracking-[-0.03em] mb-4"
-            style={{ fontSize: 'clamp(2rem, 4.4vw, 3.2rem)' }}
+
+          {/* Silhouette — mobile only, stacked below the copy, in flow */}
+          <div
+            className="md:hidden mt-10 h-56 relative"
+            style={{
+              backgroundImage: 'url(/images/build-hero.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center 46%',
+              mixBlendMode: 'screen',
+              opacity: 0.55,
+            }}
           >
-            Build your dream car <span className="text-accent">the smart way.</span>
-          </h1>
-          <p className="animate-fade-up anim-delay-2 text-body text-base md:text-lg max-w-xl mx-auto">
-            Tell us your car, budget, and goals. Get a personalized, staged mod roadmap
-            with real costs, install difficulty, and performance gains — in about 60 seconds.
-          </p>
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(9,9,9,0.9) 0%, transparent 55%)' }} />
+          </div>
         </div>
       </section>
 
@@ -223,7 +268,7 @@ export default function Landing() {
               </h2>
 
               <p className="text-body text-lg leading-relaxed max-w-lg mb-8">
-                CarMods AI creates a personalized mod roadmap for your car, budget, goals, and skill level —
+                CarMods AI creates a personalized mod roadmap for your car, budget, goals, and skill level,
                 including upgrade order, estimated costs, install difficulty, and performance impact.
               </p>
 
@@ -255,7 +300,7 @@ export default function Landing() {
               </div>
 
               <p className="text-muted text-sm">
-                Built for real car enthusiasts — from daily drivers to full performance builds.
+                Built for real car enthusiasts, from daily drivers to full performance builds.
               </p>
             </div>
 
