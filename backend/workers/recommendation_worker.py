@@ -30,6 +30,7 @@ import hashlib
 import json
 import logging
 import time
+import uuid
 from datetime import datetime, timedelta
 
 from arq import cron
@@ -48,7 +49,7 @@ from core.redis_pool import redis_settings_from_url
 from models.user import AiRequestLog
 from models import user, chat  # noqa: F401
 from models.build import Build
-from models.recommendation import ModRecommendation, Recommendation
+from models.recommendation import EvaluatedModRecommendation, Recommendation
 from services.ai_service import generate_build_recommendations
 from services.mock_ai import generate_recommendations as mock_recommendations
 
@@ -97,21 +98,29 @@ def _recommendation_cache_key(build: Build) -> str:
     return f"recgen:cache:{digest}"
 
 
-def _persist_recommendations(db, build: Build, mods: list[ModRecommendation]) -> None:
+def _persist_recommendations(db, build: Build, mods: list[EvaluatedModRecommendation]) -> None:
     for mod in mods:
         db.add(Recommendation(
             build_id=build.id,
             name=mod.name,
             category=mod.category,
-            description=mod.description,
             price_min=mod.price_min,
             price_max=mod.price_max,
             difficulty=mod.difficulty,
             stage=mod.stage,
             priority=mod.priority,
-            warnings=mod.warnings,
-            brand_tips=mod.brand_tips,
-            exact_product=mod.exact_product,
+            why=mod.why,
+            impact=mod.impact,
+            compatibility_note=mod.compatibility_note,
+            tradeoff=mod.tradeoff,
+            suggested_search_terms=mod.suggested_search_terms,
+            # getattr, not mod.fitment_status — a plain (pre-Phase-2)
+            # ModRecommendation has no fitment fields at all; this function
+            # accepts either and falls back to the same honest "unknown"
+            # default the DB column itself backfills to.
+            fitment_status=getattr(mod, "fitment_status", "unknown"),
+            fitment_reason=getattr(mod, "fitment_reason", None),
+            fitment_source=getattr(mod, "fitment_source", None),
         ))
 
 
@@ -146,17 +155,24 @@ async def generate_recommendations_task(ctx: dict, build_id: int) -> dict:
             # asyncio.to_thread offloads it so this worker's event loop can keep
             # servicing other concurrent jobs while this one waits on the network.
             start = time.perf_counter()
-            ai_mods = await asyncio.to_thread(generate_build_recommendations, build)
+            ai_mods = await asyncio.to_thread(
+                generate_build_recommendations,
+                build,
+                session_id=f"build-{build.id}",
+                user_id=build.user_id,
+                trace_id=str(uuid.uuid4()),
+                vehicle_verified=build.vehicle_verified,
+            )
             duration_ms = int((time.perf_counter() - start) * 1000)
             if ai_mods is not None:
                 await ctx["redis"].set(
                     cache_key, json.dumps(ai_mods), ex=RECOMMENDATION_CACHE_TTL_SECONDS
                 )
 
-        mods: list[ModRecommendation] | None = None
+        mods: list[EvaluatedModRecommendation] | None = None
         if ai_mods is not None:
             try:
-                mods = [ModRecommendation(**m) for m in ai_mods]
+                mods = [EvaluatedModRecommendation(**m) for m in ai_mods]
             except ValidationError:
                 logger.warning("Build %s: AI output failed final validation", build_id, exc_info=True)
                 mods = None
@@ -172,13 +188,17 @@ async def generate_recommendations_task(ctx: dict, build_id: int) -> dict:
                 duration_ms=duration_ms,
             ))
             db.commit()
-            analytics.capture(build.user_id, "ai_request_completed", {
-                "request_type": "recommendation",
-                "provider": settings.configured_ai_provider,
-                "success": mods is not None,
-                "duration_ms": duration_ms,
-                "cached": False,
-            })
+            analytics.capture(
+                "ai_request_completed",
+                {
+                    "request_type": "recommendation",
+                    "provider": settings.configured_ai_provider,
+                    "success": mods is not None,
+                    "duration_ms": duration_ms,
+                    "cached": False,
+                },
+                distinct_id=build.user_id,
+            )
 
         if mods is None:
             if job_try < MAX_TRIES:
@@ -186,7 +206,7 @@ async def generate_recommendations_task(ctx: dict, build_id: int) -> dict:
                 raise Retry(defer=RETRY_BACKOFF_SECONDS * job_try)
 
             logger.warning("Build %s: generation failed after %s attempts, falling back to mock", build_id, job_try)
-            mods = mock_recommendations(build)
+            mods = mock_recommendations(build, vehicle_verified=build.vehicle_verified)
             build.used_mock_fallback = True
 
         _persist_recommendations(db, build, mods)
@@ -228,7 +248,7 @@ async def reap_stuck_builds(ctx: dict) -> dict:
         )
         for build in stuck:
             logger.warning("Reaping build %s — stuck in 'generating' since %s", build.id, build.status_updated_at)
-            mods = mock_recommendations(build)
+            mods = mock_recommendations(build, vehicle_verified=build.vehicle_verified)
             _persist_recommendations(db, build, mods)
             build.status = "ready"
             build.used_mock_fallback = True
@@ -243,8 +263,20 @@ async def reap_stuck_builds(ctx: dict) -> dict:
         db.close()
 
 
+async def _startup_worker(ctx: dict) -> None:
+    """Initialize the shared analytics client for worker-side generations."""
+    analytics.initialize()
+
+
+async def _shutdown_worker(ctx: dict) -> None:
+    """Flush worker-side analytics, including AI Observability generations."""
+    analytics.shutdown()
+
+
 class WorkerSettings:
     functions = [generate_recommendations_task]
+    on_startup = _startup_worker
+    on_shutdown = _shutdown_worker
     cron_jobs = [cron(reap_stuck_builds, minute=set(range(0, 60, 2)), run_at_startup=False)]
     redis_settings = redis_settings_from_url(settings.redis_url)
     max_jobs = 10

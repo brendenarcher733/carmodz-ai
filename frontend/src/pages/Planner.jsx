@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { buildsApi, plansApi } from '../services/api'
+import { buildsApi, plansApi, vehiclesApi } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 import * as analytics from '../services/analytics'
 import { Spinner } from '../components/ui/Spinner'
@@ -8,265 +8,15 @@ import { Button } from '../components/ui/Button'
 import { Alert } from '../components/ui/Alert'
 import clsx from 'clsx'
 
-/* ─── Vehicle data ─── */
+/* ─── Vehicle data ───
+   Was a hardcoded MAKE_GROUPS/MODELS object (no year data at all, and not
+   shared with the backend) — now sourced live from the vehicle catalog API
+   (backend/routers/vehicles.py) so "is this a real make/model" and "what
+   years were verified" come from one authoritative place instead of being
+   duplicated and drifting. See VehicleSelector below. */
 
-const MAKE_GROUPS = [
-  {
-    label: 'Supercars & Exotics',
-    makes: ['Ferrari', 'Lamborghini', 'McLaren', 'Aston Martin', 'Bugatti', 'Koenigsegg', 'Pagani', 'Rimac'],
-  },
-  {
-    label: 'European Premium',
-    makes: ['Porsche', 'Jaguar', 'Bentley', 'Rolls-Royce', 'Maserati', 'Alfa Romeo', 'Lotus'],
-  },
-  {
-    label: 'German',
-    makes: ['BMW', 'Mercedes-Benz', 'Audi', 'Volkswagen'],
-  },
-  {
-    label: 'American',
-    makes: ['Ford', 'Chevrolet', 'Dodge', 'Cadillac', 'Jeep', 'Ram', 'Tesla'],
-  },
-  {
-    label: 'Japanese',
-    makes: ['Toyota', 'Honda', 'Nissan', 'Subaru', 'Mazda', 'Mitsubishi', 'Lexus', 'Acura', 'Infiniti'],
-  },
-  {
-    label: 'Korean & Other',
-    makes: ['Hyundai', 'Kia', 'Genesis', 'Land Rover', 'Volvo', 'MINI'],
-  },
-]
-
-const ALL_MAKES = MAKE_GROUPS.flatMap(g => g.makes)
-
-const MODELS = {
-  // ── Supercars & Exotics ──────────────────────────────────────────────────────
-  Ferrari: [
-    '488 GTB', '488 Pista', 'F8 Tributo', 'F8 Spider', 'SF90 Stradale', 'SF90 XX',
-    '296 GTB', '296 GTS', 'Roma', 'Roma Spider', 'Portofino M',
-    '812 Superfast', '812 GTS', 'GTC4Lusso',
-    '430 Scuderia', '458 Italia', '458 Speciale', '360 Modena', '360 Challenge Stradale',
-    '599 GTO', 'F430', 'Enzo', 'LaFerrari',
-  ],
-  Lamborghini: [
-    'Huracán EVO', 'Huracán EVO Spyder', 'Huracán STO', 'Huracán Tecnica',
-    'Urus', 'Urus Performante', 'Urus S',
-    'Aventador S', 'Aventador SVJ', 'Aventador Ultimae', 'Revuelto',
-    'Gallardo LP570-4 Superleggera', 'Murciélago LP670-4 SuperVeloce', 'Sesto Elemento',
-  ],
-  McLaren: [
-    '720S', '720S Spider', '750S', '750S Spider',
-    '765LT', '765LT Spider', '570S', '570GT', '600LT',
-    'Artura', 'Artura Spider', 'GT',
-    'Senna', 'Speedtail', '675LT', '650S', 'P1',
-  ],
-  'Aston Martin': [
-    'DB11', 'DB11 AMR', 'DB11 Volante',
-    'DBX', 'DBX707',
-    'Vantage', 'Vantage Roadster', 'Vantage F1 Edition',
-    'DBS Superleggera', 'DBS 770 Ultimate',
-    'Valkyrie', 'Valour', 'Vanquish S', 'DB9 GT', 'V8 Vantage GT4',
-  ],
-  Bugatti: [
-    'Chiron', 'Chiron Sport', 'Chiron Super Sport 300+', 'Chiron Pur Sport',
-    'Divo', 'Bolide', 'Tourbillon',
-    'Veyron 16.4', 'Veyron Super Sport',
-  ],
-  Koenigsegg: [
-    'Jesko', 'Jesko Absolut', 'Regera', 'CC850',
-    'Agera RS', 'One:1', 'Gemera', 'CCX',
-  ],
-  Pagani: [
-    'Huayra', 'Huayra R', 'Huayra BC', 'Huayra Roadster BC',
-    'Utopia', 'Zonda Cinque', 'Zonda R',
-  ],
-  Rimac: [
-    'Nevera', 'Nevera R', 'Concept_One',
-  ],
-
-  // ── European Premium ─────────────────────────────────────────────────────────
-  Porsche: [
-    '911 Carrera', '911 Carrera 4S', '911 GT3', '911 GT3 RS', '911 GT3 Touring', '911 Turbo S',
-    '718 Cayman GT4 RS', '718 Boxster Spyder', '718 Cayman', '718 GTS 4.0',
-    'Cayenne Turbo GT', 'Panamera Turbo S', 'Macan GTS',
-  ],
-  Jaguar: [
-    'F-Type', 'F-Type R', 'F-Type P450', 'F-Type SVR',
-    'F-Pace SVR', 'F-Pace P400e', 'E-Pace',
-    'XE SV Project 8', 'XKR-S', 'XK', 'XFR-S',
-  ],
-  Bentley: [
-    'Continental GT Speed', 'Continental GT V8', 'Continental GT Mulliner',
-    'Continental GTC Speed', 'Flying Spur Speed', 'Flying Spur Mulliner',
-    'Bentayga Speed', 'Bentayga EWB', 'Mulliner Batur',
-    'Continental GT3-R', 'Supersports',
-  ],
-  'Rolls-Royce': [
-    'Ghost', 'Ghost Extended', 'Spectre', 'Cullinan', 'Cullinan Series II',
-    'Phantom', 'Phantom VIII', 'Wraith', 'Dawn', 'Black Badge Wraith',
-  ],
-  Maserati: [
-    'GranTurismo', 'GranTurismo Folgore', 'GranTurismo Trofeo',
-    'MC20', 'MC20 Cielo',
-    'Grecale Trofeo', 'Ghibli Trofeo', 'Levante Trofeo', 'Quattroporte Trofeo',
-    '4200 GT', 'GranSport',
-  ],
-  'Alfa Romeo': [
-    'Giulia Quadrifoglio', 'Giulia GTA', 'Giulia Sprint',
-    'Stelvio Quadrifoglio', 'Stelvio Veloce',
-    '4C Spider', '33 Stradale', 'GTV', '156 GTA',
-  ],
-  Lotus: [
-    'Emira V6 First Edition', 'Emira i4 First Edition',
-    'Evija', 'Emeya',
-    'Exige Sport 410', 'Exige Cup 430', 'Elise Cup 250', 'Elise Sport 220',
-    'Evora GT', '3-Eleven', 'Esprit V8',
-  ],
-
-  // ── German ───────────────────────────────────────────────────────────────────
-  BMW: [
-    'M2', 'M2 CS', 'M3', 'M3 CS', 'M3 Competition', 'M3 Touring',
-    'M4', 'M4 CS', 'M4 GTS', 'M4 Competition Convertible',
-    'M5', 'M5 CS', 'M5 Competition', 'M8 Competition',
-    'M1000RR (Concept)', '1M Coupe', '2 Series Gran Coupe',
-    'X5 M Competition', 'X6 M Competition',
-  ],
-  'Mercedes-Benz': [
-    'AMG GT Black Series', 'AMG GT R Pro', 'AMG GT S', 'AMG GT 63 S',
-    'AMG C63 S', 'AMG C63 SE Performance', 'AMG A45 S', 'AMG CLA45 S',
-    'AMG E63 S', 'AMG S63', 'AMG GLE63 S', 'AMG G63',
-    'AMG SL 55', 'AMG SL 63', 'AMG SLS', 'AMG One',
-    'C-Class', 'E-Class', 'S-Class', 'G-Class',
-  ],
-  Audi: [
-    'RS3', 'RS3 Sportback', 'S3', 'TT RS', 'TT',
-    'RS4 Avant', 'RS5', 'RS5 Sportback', 'S4', 'S5',
-    'RS6 Avant', 'RS7 Sportback', 'RS Q8', 'SQ8',
-    'R8 V10 Performance', 'R8 GT', 'e-tron GT RS',
-    'A4', 'A6', 'Q5', 'Q7', 'Q8',
-  ],
-  Volkswagen: [
-    'Golf GTI', 'Golf R', 'Golf R 20 Years', 'Golf GTD',
-    'Jetta GLI', 'Arteon R', 'Touareg R', 'T-Roc R',
-    'Polo GTI', 'ID.4 GTX', 'Tiguan R',
-  ],
-
-  // ── American ─────────────────────────────────────────────────────────────────
-  Ford: [
-    'Mustang GT', 'Mustang GT500', 'Mustang Dark Horse', 'Mustang Mach 1',
-    'Mustang EcoBoost HP', 'GT350', 'GT350R', 'Mustang Bullitt',
-    'F-150 Raptor', 'F-150 Raptor R', 'F-150 Lightning Pro',
-    'Bronco Raptor', 'Bronco Wildtrak', 'Focus RS', 'Fiesta ST',
-  ],
-  Chevrolet: [
-    'Corvette Stingray', 'Corvette Z06', 'Corvette ZR1', 'Corvette E-Ray',
-    'Camaro SS', 'Camaro ZL1', 'Camaro 1LE', 'Camaro ZL1 1LE',
-    'Colorado ZR2', 'Silverado Trail Boss', 'Silverado 1500 LTZ',
-    'Tahoe RST', 'Blazer RS',
-  ],
-  Dodge: [
-    'Challenger SRT Hellcat', 'Challenger SRT Hellcat Redeye', 'Challenger SRT Demon 170',
-    'Challenger SRT Super Stock', 'Charger SRT Hellcat', 'Charger SRT Hellcat Redeye',
-    'Viper ACR', 'Viper GTC', 'Durango SRT 392',
-  ],
-  Cadillac: [
-    'CT5-V Blackwing', 'CT4-V Blackwing', 'CT5-V', 'CT4-V',
-    'Escalade V', 'Escalade', 'XT6',
-    'CTS-V Wagon', 'ATS-V', 'XLR-V',
-  ],
-  Jeep: [
-    'Wrangler Rubicon 392', 'Wrangler Rubicon', 'Wrangler Sahara 4xe',
-    'Grand Cherokee Trackhawk', 'Grand Cherokee SRT', 'Grand Cherokee 4xe',
-    'Gladiator Mojave', 'Gladiator Rubicon',
-  ],
-  Ram: [
-    'RAM 1500 TRX', 'RAM 1500 Rebel', 'RAM 2500 Power Wagon',
-    'RAM 3500 Limited Longhorn', 'TRX Launch Edition',
-  ],
-  Tesla: [
-    'Model S Plaid', 'Model S Long Range', 'Model 3 Performance',
-    'Model X Plaid', 'Model Y Performance', 'Model Y Long Range',
-    'Roadster', 'Cybertruck Cyberbeast',
-  ],
-
-  // ── Japanese ─────────────────────────────────────────────────────────────────
-  Toyota: [
-    'GR Supra A91 MT', 'GR Supra 3.0', 'GR86', 'GR Corolla Circuit Edition',
-    'GR Corolla', 'Camry TRD', 'Corolla GR Sport', '86',
-    '4Runner TRD Pro', 'Tacoma TRD Pro', 'Tundra TRD Pro', 'Sequoia TRD Pro',
-    'Land Cruiser 300 GR Sport',
-  ],
-  Honda: [
-    'Civic Type R', 'Civic Si', 'Civic Sport', 'Integra Type S',
-    'Accord Sport', 'NSX Type S', 'S2000 CR', 'S2000 Club Racer',
-    'CR-Z', 'Fit RS', 'Fit GK5 RS (JDM)', 'HR-V Sport',
-  ],
-  Nissan: [
-    'GT-R Nismo', 'GT-R Track Edition', 'GT-R Premium',
-    '370Z Nismo', '370Z', '350Z Track', '240SX',
-    'Ariya e-4orce', 'Frontier PRO-4X', 'Armada', 'Sentra SR Turbo',
-  ],
-  Subaru: [
-    'WRX STI S209', 'WRX STI Type RA', 'WRX STI', 'WRX',
-    'BRZ tS', 'BRZ Limited', 'Forester XT', 'Impreza WRX',
-    'Outback XT', 'Crosstrek Sport', 'Levorg STI Sport',
-  ],
-  Mazda: [
-    'MX-5 RF', 'MX-5 Club', 'MX-5 Grand Touring RS',
-    'RX-7 FD3S', 'RX-7 FC3S', 'RX-8 R3',
-    'Mazdaspeed3', 'Mazdaspeed6', 'CX-5 Turbo', 'Mazda3 Turbo',
-  ],
-  Mitsubishi: [
-    'Lancer Evolution X MR', 'Lancer Evolution X GSR',
-    'Lancer Evo IX MR', 'Lancer Evo VI TME',
-    'Eclipse GSX', '3000GT VR-4', '3000GT SL',
-    'Galant VR-4', 'Starion ESi-R',
-  ],
-  Lexus: [
-    'LFA', 'LC 500 Inspiration', 'LC 500',
-    'RC F Track Edition', 'RC F', 'IS 500 F Sport Performance', 'IS 350 F Sport',
-    'GS F', 'LS 500h', 'LX 600 F Sport', 'GX 550 Premium Plus',
-  ],
-  Acura: [
-    'NSX Type S', 'NSX', 'Integra Type S', 'TLX Type S A-Spec',
-    'MDX Type S Advance', 'RDX A-Spec Advance', 'RSX Type-S', 'TSX',
-  ],
-  Infiniti: [
-    'Q50 Red Sport 400', 'Q50 RS400', 'Q60 Project Black S', 'Q60 Red Sport 400',
-    'G37 S Coupe', 'G35 Coupe 6MT', 'FX50 S', 'QX80',
-  ],
-
-  // ── Korean & Other ───────────────────────────────────────────────────────────
-  Hyundai: [
-    'Elantra N', 'Elantra N Line', 'Veloster N Performance Package',
-    'Sonata N-Line', 'Tucson N', 'Ioniq 5 N', 'Ioniq 6 N',
-    'i30 N Project C', 'i20 N',
-  ],
-  Kia: [
-    'Stinger GT2 V6', 'Stinger 400 GT', 'K5 GT', 'EV6 GT',
-    'Forte GT', 'ProCeed GT', 'Ceed GT',
-  ],
-  Genesis: [
-    'G70 3.3T Sport', 'G70.4e', 'G80 Sport 3.5T', 'G90 Sport',
-    'GV70 Sport 3.5T', 'GV80 Coupe 3.5T',
-  ],
-  'Land Rover': [
-    'Range Rover Sport SVR', 'Range Rover Sport SV', 'Range Rover SV Autobiography',
-    'Defender 110 V8', 'Defender 90 V8 Carpathian', 'Discovery SVX', 'Discovery 4',
-    'Freelander 2 SD4',
-  ],
-  Volvo: [
-    'S60 Polestar Engineered', 'V60 Polestar Engineered', 'XC60 T8 R-Design',
-    'XC90 T8 Excellence', 'C40 Recharge', 'EX90 Twin Motor Performance',
-  ],
-  MINI: [
-    'Cooper S JCW GP', 'Cooper S Works', 'John Cooper Works',
-    'Countryman JCW ALL4', 'Clubman JCW ALL4', 'Cooper SE',
-    'Paceman S ALL4', 'Coupe JCW',
-  ],
-}
-
-// Quick year picks — current year down 6, plus a wider manual option
+// Fallback quick-year picks when no catalog model is selected yet (free-text
+// "my vehicle isn't listed" path) — current year down 6, same width as before.
 const CURRENT_YEAR = new Date().getFullYear()
 const QUICK_YEARS  = Array.from({ length: 7 }, (_, i) => CURRENT_YEAR - i)
 
@@ -387,26 +137,168 @@ function StepBar({ current }) {
   )
 }
 
-/* ─── Step 0: Vehicle Platform Selector ─── */
+/* ─── Step 0: Vehicle Platform Selector ───
+   Makes/models come from the vehicle catalog API — this component never
+   invents or silently accepts a make/model/year the backend hasn't either
+   verified or at least is willing to treat as "unverified, but allowed"
+   (see backend/services/vehicle_service.py). The one deliberate escape
+   hatch is "My vehicle isn't listed" below, which is an explicit opt-in to
+   free text, not an automatic fallback. */
 
 function VehicleSelector({ form, set }) {
-  const [yearMode, setYearMode] = useState('quick')
-  const [search, setSearch]     = useState('')
+  const [yearMode, setYearMode]   = useState('quick')
+  const [search, setSearch]       = useState('')
+  const [unlisted, setUnlisted]   = useState(false)
 
-  const filteredGroups = useMemo(() => {
-    if (!search.trim()) return MAKE_GROUPS
+  const [makes, setMakes]               = useState([])
+  const [makesLoading, setMakesLoading] = useState(true)
+  const [makesError, setMakesError]     = useState(null)
+
+  const [models, setModels]               = useState([])
+  const [modelsLoading, setModelsLoading] = useState(false)
+  const [modelsError, setModelsError]     = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    setMakesLoading(true)
+    setMakesError(null)
+    vehiclesApi.getMakes()
+      .then(data => { if (!cancelled) setMakes(data) })
+      .catch(() => { if (!cancelled) setMakesError("Couldn't load the vehicle list right now.") })
+      .finally(() => { if (!cancelled) setMakesLoading(false) })
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    if (!form.make || unlisted) { setModels([]); return }
+    let cancelled = false
+    setModelsLoading(true)
+    setModelsError(null)
+    vehiclesApi.getModels(form.make)
+      .then(data => { if (!cancelled) setModels(data) })
+      .catch(() => { if (!cancelled) { setModels([]); setModelsError("Couldn't load models for this make right now.") } })
+      .finally(() => { if (!cancelled) setModelsLoading(false) })
+    return () => { cancelled = true }
+  }, [form.make, unlisted])
+
+  const filteredMakes = useMemo(() => {
+    if (!search.trim()) return makes
     const q = search.toLowerCase()
-    return MAKE_GROUPS
-      .map(g => ({ ...g, makes: g.makes.filter(m => m.toLowerCase().includes(q)) }))
-      .filter(g => g.makes.length > 0)
-  }, [search])
+    return makes.filter(m => m.name.toLowerCase().includes(q))
+  }, [makes, search])
 
-  const selectedModels = form.make ? (MODELS[form.make] || []) : []
+  const selectedModel = models.find(m => m.name === form.model) || null
 
-  const selectMake = (make) => {
-    set('make', make)
+  // Every individually-valid year across the selected model's active
+  // production ranges — NOT a min/max span. Some real nameplates have a
+  // production gap or multiple generations (Dodge Viper, Acura/Honda NSX,
+  // classic Supra vs. GR Supra), so a year sitting between the earliest
+  // start and the latest end isn't necessarily a year that was ever
+  // produced. See backend/models/vehicle.py::VehicleProductionRange.
+  const validYears = useMemo(() => {
+    if (!selectedModel) return null
+    const years = new Set()
+    selectedModel.production_ranges.forEach(r => {
+      const end = Math.min(r.production_year_end ?? (CURRENT_YEAR + 1), CURRENT_YEAR + 1)
+      for (let y = r.production_year_start; y <= end; y++) years.add(y)
+    })
+    return [...years].sort((a, b) => b - a) // newest first
+  }, [selectedModel])
+
+  // Quick-pick shows the newest 7 valid years; an older generation's years
+  // (e.g. a gapped model's earlier range) are still reachable via "Other…"
+  // and are still validated against the full set, just not quick-picked.
+  const yearChoices = validYears ? validYears.slice(0, 7) : QUICK_YEARS
+  const isYearValid = (y) => !validYears || validYears.includes(Number(y))
+
+  const yearInputBounds = useMemo(() => {
+    if (!selectedModel) return { min: 1950, max: CURRENT_YEAR + 1 }
+    const starts = selectedModel.production_ranges.map(r => r.production_year_start)
+    const ends = selectedModel.production_ranges.map(r => r.production_year_end ?? CURRENT_YEAR + 1)
+    return { min: Math.min(...starts), max: Math.max(...ends) }
+  }, [selectedModel])
+
+  const selectMake = (name) => {
+    set('make', name)
     set('model', '')
+    set('year', '')
     setSearch('')
+  }
+
+  const selectModel = (model) => {
+    set('model', model.name)
+    set('year', '')
+  }
+
+  const enterUnlisted = () => {
+    setUnlisted(true)
+    set('make', '')
+    set('model', '')
+    set('year', '')
+    setSearch('')
+  }
+
+  const exitUnlisted = () => {
+    setUnlisted(false)
+    set('make', '')
+    set('model', '')
+    set('year', '')
+  }
+
+  if (unlisted) {
+    return (
+      <div className="animate-fade-in">
+        <h2 className="font-display font-black text-white text-2xl tracking-tight mb-2">
+          Tell us about your vehicle.
+        </h2>
+        <p className="text-body text-sm mb-8">
+          Not in our catalog yet — we'll still build a plan, just without a verified-fitment guarantee.
+        </p>
+
+        <div className="space-y-4 mb-6">
+          <div>
+            <label className="field-label mb-2">Make</label>
+            <input
+              className="field-input"
+              placeholder="e.g. Yugo"
+              value={form.make}
+              onChange={e => set('make', e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="field-label mb-2">Model</label>
+            <input
+              className="field-input"
+              placeholder="e.g. GV"
+              value={form.model}
+              onChange={e => set('model', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="field-label mb-2">Year</label>
+            <input
+              className="field-input max-w-[140px]"
+              type="number"
+              inputMode="numeric"
+              placeholder="e.g. 1986"
+              min="1950"
+              max={CURRENT_YEAR + 1}
+              value={form.year}
+              onChange={e => set('year', e.target.value)}
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={exitUnlisted}
+          className="focus-ring rounded-md text-muted text-sm hover:text-body transition-colors"
+        >
+          ← Back to the vehicle list
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -414,7 +306,7 @@ function VehicleSelector({ form, set }) {
       <h2 className="font-display font-black text-white text-2xl tracking-tight mb-2">
         Pick your platform.
       </h2>
-      <p className="text-body text-sm mb-8">40+ manufacturers — supercars, JDM, muscle, and everything in between.</p>
+      <p className="text-body text-sm mb-8">Supercars, JDM, muscle, and everything in between.</p>
 
       {/* ── Search ── */}
       <div className="relative mb-6">
@@ -425,15 +317,17 @@ function VehicleSelector({ form, set }) {
         </svg>
         <input
           className="field-input pl-9 text-base md:text-sm"
-          placeholder="Search makes — Ferrari, Lamborghini, Supra…"
+          placeholder="Search makes — Ferrari, Lamborghini, Honda…"
           value={search}
           onChange={e => setSearch(e.target.value)}
+          disabled={makesLoading}
         />
         {search && (
           <button
             type="button"
             onClick={() => setSearch('')}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-body"
+            aria-label="Clear search"
+            className="focus-ring rounded-md absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-body"
           >
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
               <path d="M2 2l9 9M11 2L2 11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
@@ -442,89 +336,87 @@ function VehicleSelector({ form, set }) {
         )}
       </div>
 
-      {/* ── Make groups ── */}
-      <div className="mb-8 space-y-5">
-        {filteredGroups.map(group => (
-          <div key={group.label}>
-            <p className="font-mono text-[10px] text-muted uppercase tracking-[0.14em] mb-2 px-0.5">
-              {group.label}
-            </p>
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-              {group.makes.map(make => (
-                <button
-                  key={make}
-                  type="button"
-                  onClick={() => selectMake(make)}
-                  className={clsx(
-                    'px-3 py-2.5 rounded-xl border text-sm font-display font-semibold transition-all duration-200 text-left leading-tight',
-                    form.make === make
-                      ? 'bg-accent/10 border-accent/40 text-accent'
-                      : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.18] hover:text-white',
-                  )}
-                >
-                  {make}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-
-        {/* Custom make fallback */}
-        {filteredGroups.length === 0 && (
-          <div>
-            <p className="text-muted text-sm mb-3">No match — enter manually:</p>
-            <input
-              className="field-input text-base md:text-sm"
-              placeholder="Type make name…"
-              value={search}
-              onChange={e => { setSearch(e.target.value); selectMake(e.target.value) }}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* ── Model grid ── */}
-      {form.make && selectedModels.length > 0 && (
-        <div className="mb-8 animate-fade-in">
-          <label className="field-label mb-3">Model <span className="text-accent">·</span> {form.make}</label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
-            {selectedModels.map(model => (
-              <button
-                key={model}
-                type="button"
-                onClick={() => set('model', model)}
-                className={clsx(
-                  'px-4 py-2.5 rounded-xl border text-sm font-medium transition-all duration-200 text-left leading-snug',
-                  form.model === model
-                    ? 'bg-accent/10 border-accent/40 text-white'
-                    : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.14] hover:text-white',
-                )}
-              >
-                {model}
-              </button>
-            ))}
-          </div>
-          <div className="mt-2">
-            <input
-              className="field-input text-base md:text-sm"
-              placeholder={`Other ${form.make} model…`}
-              value={selectedModels.includes(form.model) ? '' : form.model}
-              onChange={e => set('model', e.target.value)}
-            />
-          </div>
+      {/* ── Loading / error / empty / makes grid ── */}
+      {makesLoading && (
+        <div className="flex items-center gap-3 text-muted text-sm mb-8 py-6">
+          <Spinner size="sm" />
+          Loading vehicle catalog…
         </div>
       )}
 
-      {/* Make typed manually (no model list) */}
-      {form.make && !MODELS[form.make] && (
+      {!makesLoading && makesError && (
         <div className="mb-8">
-          <label className="field-label mb-3">Model</label>
-          <input
-            className="field-input"
-            placeholder={`${form.make} model…`}
-            value={form.model}
-            onChange={e => set('model', e.target.value)}
-          />
+          <Alert variant="error">{makesError}</Alert>
+        </div>
+      )}
+
+      {!makesLoading && !makesError && (
+        <div className="mb-8">
+          <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+            {filteredMakes.map(make => (
+              <button
+                key={make.id}
+                type="button"
+                onClick={() => selectMake(make.name)}
+                className={clsx(
+                  'focus-ring px-3 py-2.5 rounded-xl border text-sm font-display font-semibold transition-all duration-200 text-left leading-tight',
+                  form.make === make.name
+                    ? 'bg-accent/10 border-accent/40 text-accent'
+                    : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.18] hover:text-white',
+                )}
+              >
+                {make.name}
+              </button>
+            ))}
+          </div>
+          {filteredMakes.length === 0 && (
+            <p className="text-muted text-sm mt-3">No makes match "{search}".</p>
+          )}
+        </div>
+      )}
+
+      {/* ── Model grid ── */}
+      {form.make && (
+        <div className="mb-8 animate-fade-in">
+          <label className="field-label mb-3">Model <span className="text-accent">·</span> {form.make}</label>
+
+          {modelsLoading && (
+            <div className="flex items-center gap-3 text-muted text-sm py-4">
+              <Spinner size="sm" />
+              Loading models…
+            </div>
+          )}
+
+          {!modelsLoading && models.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
+              {models.map(model => (
+                <button
+                  key={model.id}
+                  type="button"
+                  onClick={() => selectModel(model)}
+                  className={clsx(
+                    'focus-ring px-4 py-2.5 rounded-xl border text-sm font-medium transition-all duration-200 text-left leading-snug',
+                    form.model === model.name
+                      ? 'bg-accent/10 border-accent/40 text-white'
+                      : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.14] hover:text-white',
+                  )}
+                >
+                  {model.name}
+                  <span className="block font-mono text-[10px] text-muted mt-0.5">
+                    {model.production_ranges
+                      .map(r => `${r.production_year_start}–${r.production_year_end ?? 'present'}`)
+                      .join(', ')}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {!modelsLoading && models.length === 0 && (
+            <p className="text-muted text-sm">
+              {modelsError || `No verified ${form.make} models yet — you can still continue with "My vehicle isn't listed" below.`}
+            </p>
+          )}
         </div>
       )}
 
@@ -534,13 +426,13 @@ function VehicleSelector({ form, set }) {
           <label className="field-label mb-3">Year</label>
           {yearMode === 'quick' ? (
             <div className="flex flex-wrap gap-2">
-              {QUICK_YEARS.map(y => (
+              {yearChoices.map(y => (
                 <button
                   key={y}
                   type="button"
                   onClick={() => { set('year', String(y)); setYearMode('quick') }}
                   className={clsx(
-                    'px-4 py-2.5 rounded-xl border text-sm font-mono font-semibold transition-all duration-200',
+                    'focus-ring px-4 py-2.5 rounded-xl border text-sm font-mono font-semibold transition-all duration-200',
                     form.year === String(y)
                       ? 'bg-accent/10 border-accent/40 text-accent'
                       : 'bg-surface border-white/[0.07] text-body hover:border-white/[0.14] hover:text-white',
@@ -552,7 +444,7 @@ function VehicleSelector({ form, set }) {
               <button
                 type="button"
                 onClick={() => setYearMode('manual')}
-                className="px-4 py-2.5 rounded-xl border border-dashed border-white/[0.1] text-sm font-mono text-muted hover:border-white/[0.2] hover:text-body transition-all duration-200"
+                className="focus-ring px-4 py-2.5 rounded-xl border border-dashed border-white/[0.1] text-sm font-mono text-muted hover:border-white/[0.2] hover:text-body transition-all duration-200"
               >
                 Other…
               </button>
@@ -564,16 +456,33 @@ function VehicleSelector({ form, set }) {
                 type="number"
                 inputMode="numeric"
                 placeholder="e.g. 2018"
-                min="1950"
-                max={CURRENT_YEAR + 1}
+                min={yearInputBounds.min}
+                max={yearInputBounds.max}
                 value={form.year}
                 onChange={e => set('year', e.target.value)}
                 autoFocus
               />
-              <button type="button" onClick={() => setYearMode('quick')} className="text-muted text-sm hover:text-body transition-colors">
+              <button type="button" onClick={() => setYearMode('quick')} className="focus-ring rounded-md text-muted text-sm hover:text-body transition-colors">
                 ← Quick pick
               </button>
             </div>
+          )}
+          {/* min/max on the input above only keeps the spinner arrows in a
+              sane range — it does NOT mean every year in between is valid
+              (a gapped model like the Viper has real non-production years
+              inside that span), so a typed year is checked against the
+              actual discrete valid-years set here instead. */}
+          {selectedModel && form.year && !isYearValid(form.year) && (
+            <p className="font-mono text-xs text-amber-400 mt-2">
+              {selectedModel.name} wasn't produced in {form.year} — see verified years below.
+            </p>
+          )}
+          {selectedModel && (
+            <p className="font-mono text-xs text-muted mt-2">
+              Verified production years: {selectedModel.production_ranges
+                .map(r => `${r.production_year_start}–${r.production_year_end ?? 'present'}`)
+                .join(', ')}
+            </p>
           )}
         </div>
       )}
@@ -581,20 +490,32 @@ function VehicleSelector({ form, set }) {
       {/* ── Confirmation chip ── */}
       {form.year && form.make && form.model && (
         <div className="mt-6 animate-fade-in">
-          <div className="inline-flex items-center gap-3 bg-white/[0.05] border border-white/[0.12] rounded-2xl px-5 py-3">
-            <div className="w-2 h-2 rounded-full bg-accent" />
-            <span className="font-display font-bold text-white">
+          <div className="flex flex-wrap items-center gap-3 bg-white/[0.05] border border-white/[0.12] rounded-2xl px-5 py-3 max-w-full">
+            <div className="w-2 h-2 rounded-full bg-accent flex-shrink-0" />
+            <span className="font-display font-bold text-white break-words">
               {form.year} {form.make} {form.model}
             </span>
             <button
               type="button"
               onClick={() => { set('year', ''); set('make', ''); set('model', '') }}
-              className="text-muted hover:text-body transition-colors ml-1 font-mono text-xs"
+              aria-label="Change selected vehicle"
+              className="focus-ring rounded-md text-muted hover:text-body transition-colors ml-1 font-mono text-xs"
             >
               change
             </button>
           </div>
         </div>
+      )}
+
+      {/* ── Controlled escape hatch — explicit opt-in, not a silent fallback ── */}
+      {!makesLoading && (
+        <button
+          type="button"
+          onClick={enterUnlisted}
+          className="focus-ring rounded-md mt-6 text-muted text-sm hover:text-body transition-colors underline underline-offset-2 decoration-white/20"
+        >
+          My vehicle isn't listed
+        </button>
       )}
     </div>
   )

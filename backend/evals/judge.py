@@ -21,10 +21,12 @@
 
 import copy
 import logging
+import uuid
 from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from core import analytics
 from core.config import settings
 from evals.schemas import CheckResult, EvalCase
 
@@ -74,7 +76,7 @@ JUDGE_TOOL = {
 
 def _judge_prompt(case: EvalCase, recs: list[dict]) -> str:
     vehicle = f"{case.build.year} {case.build.make} {case.build.model}"
-    lines = [f"- {r['name']} ({r['category']}): {r['description'][:160]}" for r in recs]
+    lines = [f"- {r['name']} ({r['category']}): {r.get('why', '')[:160]}" for r in recs]
     parts_list = "\n".join(lines)
 
     return f"""You are a skeptical automotive parts expert reviewing AI-generated
@@ -101,22 +103,39 @@ def judge_plausibility(
     case: EvalCase,
     recs: list[dict],
     client=None,
+    *,
+    session_id: str | None = None,
+    trace_id: str | None = None,
 ) -> tuple[Optional[PlausibilityVerdict], dict]:
     """Returns (verdict, usage_dict). verdict is None if the judge call itself failed —
     that failure is reported distinctly from "the judge found a problem"."""
     usage: dict = {}
     try:
+        wrapped_client = False
         if client is None:
-            import anthropic
-            client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+            posthog_client = analytics.client()
+            if posthog_client is None:
+                import anthropic
+                client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+            else:
+                from posthog.ai.anthropic import Anthropic
+                client = Anthropic(api_key=settings.anthropic_api_key, posthog_client=posthog_client)
+                wrapped_client = True
 
-        response = client.messages.create(
-            model=JUDGE_MODEL,
-            max_tokens=1000,
-            tools=[JUDGE_TOOL],
-            tool_choice={"type": "tool", "name": "submit_plausibility_verdict"},
-            messages=[{"role": "user", "content": _judge_prompt(case, recs)}],
-        )
+        request_args = {
+            "model": JUDGE_MODEL,
+            "max_tokens": 1000,
+            "tools": [JUDGE_TOOL],
+            "tool_choice": {"type": "tool", "name": "submit_plausibility_verdict"},
+            "messages": [{"role": "user", "content": _judge_prompt(case, recs)}],
+        }
+        if wrapped_client:
+            request_args.update({
+                "posthog_trace_id": trace_id or str(uuid.uuid4()),
+                "posthog_properties": {"$ai_session_id": session_id or f"eval-{case.id}"},
+                "posthog_privacy_mode": False,
+            })
+        response = client.messages.create(**request_args)
 
         if getattr(response, "usage", None) is not None:
             usage = {"input_tokens": response.usage.input_tokens, "output_tokens": response.usage.output_tokens}
@@ -137,8 +156,21 @@ def judge_plausibility(
         return None, usage
 
 
-def check_llm_judge_plausibility(case: EvalCase, recs: list[dict], client=None) -> tuple[CheckResult, dict]:
-    verdict, usage = judge_plausibility(case, recs, client=client)
+def check_llm_judge_plausibility(
+    case: EvalCase,
+    recs: list[dict],
+    client=None,
+    *,
+    session_id: str | None = None,
+    trace_id: str | None = None,
+) -> tuple[CheckResult, dict]:
+    verdict, usage = judge_plausibility(
+        case,
+        recs,
+        client=client,
+        session_id=session_id,
+        trace_id=trace_id,
+    )
 
     if verdict is None:
         return CheckResult(

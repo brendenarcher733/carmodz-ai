@@ -4,7 +4,8 @@
 # The interface (generate_recommendations, chat_response) stays identical.
 
 from models.build import BuildCreate
-from models.recommendation import ModRecommendation, ModPlan
+from models.recommendation import EvaluatedModRecommendation, ModPlan
+from services.fitment_service import evaluate_fitment
 import random
 
 # ── Mod Knowledge Base ─────────────────────────────────────────────────────────
@@ -88,7 +89,10 @@ MOD_LIBRARY = {
             "difficulty": "medium", "stage": 1, "priority": 1,
             "goals": ["handling", "track", "street performance"],
             "brand_tips": ["KW", "BC Racing", "Fortune Auto", "Öhlins", "Tein"],
-            "warnings": ["Very cheap coilovers can degrade quickly", "Alignment required after install ($100–180)"]
+            "warnings": ["Very cheap coilovers can degrade quickly", "Alignment required after install ($100–180)"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal chassis/suspension upgrade — not dependent on engine or powertrain type.",
+            "fitment_source": "mod category (suspension)",
         },
         {
             "name": "Sway Bar Upgrade",
@@ -97,7 +101,10 @@ MOD_LIBRARY = {
             "difficulty": "medium", "stage": 1, "priority": 2,
             "goals": ["handling", "track"],
             "brand_tips": ["Whiteline", "Eibach", "Hotchkis"],
-            "warnings": []
+            "warnings": [],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal chassis/suspension upgrade — not dependent on engine or powertrain type.",
+            "fitment_source": "mod category (suspension)",
         },
         {
             "name": "Performance Brake Pads",
@@ -106,7 +113,10 @@ MOD_LIBRARY = {
             "difficulty": "easy", "stage": 1, "priority": 1,
             "goals": ["track", "safety", "handling"],
             "brand_tips": ["StopTech", "Hawk", "EBC Brakes", "Ferodo"],
-            "warnings": ["Performance pads can be noisy for street use", "Upgrade brake fluid to DOT 4 or 5.1 simultaneously"]
+            "warnings": ["Performance pads can be noisy for street use", "Upgrade brake fluid to DOT 4 or 5.1 simultaneously"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal braking upgrade — every vehicle, including EVs, has a physical brake system.",
+            "fitment_source": "mod category (brakes)",
         },
         {
             "name": "Big Brake Kit",
@@ -115,7 +125,10 @@ MOD_LIBRARY = {
             "difficulty": "hard", "stage": 3, "priority": 3,
             "goals": ["track", "max performance"],
             "brand_tips": ["StopTech", "Brembo", "AP Racing", "Wilwood"],
-            "warnings": ["Verify wheel clearance before ordering", "Budget for rotors + pads + fluid", "Professional install strongly recommended"]
+            "warnings": ["Verify wheel clearance before ordering", "Budget for rotors + pads + fluid", "Professional install strongly recommended"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal braking upgrade — every vehicle, including EVs, has a physical brake system.",
+            "fitment_source": "mod category (brakes)",
         },
         {
             "name": "Lowering Springs",
@@ -124,7 +137,10 @@ MOD_LIBRARY = {
             "difficulty": "medium", "stage": 1, "priority": 3,
             "goals": ["budget handling", "cosmetic", "street"],
             "brand_tips": ["Eibach Pro-Kit", "H&R", "Tein S-Tech"],
-            "warnings": ["Alignment required after install", "Not adjustable — verify drop height before buying", "Can cause suspension binding on some platforms"]
+            "warnings": ["Alignment required after install", "Not adjustable — verify drop height before buying", "Can cause suspension binding on some platforms"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal chassis/suspension upgrade — not dependent on engine or powertrain type.",
+            "fitment_source": "mod category (suspension)",
         },
         {
             "name": "Strut Tower Brace",
@@ -133,7 +149,10 @@ MOD_LIBRARY = {
             "difficulty": "easy", "stage": 1, "priority": 4,
             "goals": ["handling", "track", "budget"],
             "brand_tips": ["Cusco", "Megan Racing", "AEM"],
-            "warnings": []
+            "warnings": [],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal chassis brace — not dependent on engine or powertrain type.",
+            "fitment_source": "mod category (chassis)",
         },
     ],
     "cosmetic": [
@@ -144,7 +163,10 @@ MOD_LIBRARY = {
             "difficulty": "easy", "stage": 1, "priority": 1,
             "goals": ["cosmetic", "stance", "show"],
             "brand_tips": ["Work Wheels", "Enkei", "Volk Racing", "Rays", "BBS", "Konig"],
-            "warnings": ["Check offset and fitment carefully", "Stick within 3% of OEM tire diameter for accurate speedo"]
+            "warnings": ["Check offset and fitment carefully", "Stick within 3% of OEM tire diameter for accurate speedo"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal cosmetic/wheel upgrade — not dependent on engine or powertrain type.",
+            "fitment_source": "mod category (wheels)",
         },
         {
             "name": "Window Tint",
@@ -153,7 +175,10 @@ MOD_LIBRARY = {
             "difficulty": "easy", "stage": 1, "priority": 2,
             "goals": ["cosmetic", "daily driver", "budget"],
             "brand_tips": ["Llumar", "3M", "SunTek", "XPEL"],
-            "warnings": ["Check state tint laws before choosing VLT percentage"]
+            "warnings": ["Check state tint laws before choosing VLT percentage"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal cosmetic upgrade — fits any vehicle's glass regardless of powertrain.",
+            "fitment_source": "mod category (cosmetic)",
         },
         {
             "name": "Splitter / Front Lip",
@@ -162,7 +187,10 @@ MOD_LIBRARY = {
             "difficulty": "easy", "stage": 1, "priority": 3,
             "goals": ["cosmetic", "stance", "street performance"],
             "brand_tips": ["Verus Engineering", "APR Performance", "Seibon"],
-            "warnings": ["Aggressive splitters scrape easily on daily drivers", "Carbon fiber versions need protection film"]
+            "warnings": ["Aggressive splitters scrape easily on daily drivers", "Carbon fiber versions need protection film"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal exterior aero add-on — not dependent on engine or powertrain type.",
+            "fitment_source": "mod category (exterior)",
         },
         {
             "name": "Vinyl Wrap",
@@ -171,7 +199,10 @@ MOD_LIBRARY = {
             "difficulty": "hard", "stage": 2, "priority": 4,
             "goals": ["cosmetic", "show", "unique build"],
             "brand_tips": ["3M", "Avery Dennison", "KPMF"],
-            "warnings": ["DIY wraps look DIY unless you're very skilled", "Professional install recommended for full car"]
+            "warnings": ["DIY wraps look DIY unless you're very skilled", "Professional install recommended for full car"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal cosmetic upgrade — applies to any vehicle's paint regardless of powertrain.",
+            "fitment_source": "mod category (exterior)",
         },
         {
             "name": "Exterior LED Lighting Upgrade",
@@ -180,7 +211,10 @@ MOD_LIBRARY = {
             "difficulty": "easy", "stage": 1, "priority": 5,
             "goals": ["cosmetic", "budget", "show"],
             "brand_tips": ["Morimoto", "Diode Dynamics", "Oracle"],
-            "warnings": ["Check local laws on underglow", "Avoid cheap eBay LEDs — they fail quickly"]
+            "warnings": ["Check local laws on underglow", "Avoid cheap eBay LEDs — they fail quickly"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal lighting upgrade — not dependent on engine or powertrain type.",
+            "fitment_source": "mod category (exterior)",
         },
     ],
     "sound": [
@@ -218,7 +252,10 @@ MOD_LIBRARY = {
             "difficulty": "medium", "stage": 1, "priority": 4,
             "goals": ["sound", "comfort", "daily driver"],
             "brand_tips": ["Alpine", "JL Audio", "Focal", "Kenwood"],
-            "warnings": ["Professional install recommended for complex setups", "Add deadening foam to reduce road noise first"]
+            "warnings": ["Professional install recommended for complex setups", "Add deadening foam to reduce road noise first"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal audio upgrade — not dependent on engine or powertrain type.",
+            "fitment_source": "mod category (audio)",
         },
     ],
     "reliability": [
@@ -276,7 +313,10 @@ MOD_LIBRARY = {
             "difficulty": "medium", "stage": 1, "priority": 3,
             "goals": ["interior", "track", "aesthetic"],
             "brand_tips": ["Momo", "Nardi", "OMP", "Sparco", "NRG"],
-            "warnings": ["Airbag-equipped cars require hub adapter", "Removing airbag is illegal in some states"]
+            "warnings": ["Airbag-equipped cars require hub adapter", "Removing airbag is illegal in some states"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal interior upgrade — not dependent on engine or powertrain type.",
+            "fitment_source": "mod category (interior)",
         },
         {
             "name": "Bucket Seats",
@@ -285,7 +325,10 @@ MOD_LIBRARY = {
             "difficulty": "medium", "stage": 2, "priority": 3,
             "goals": ["interior", "track", "aesthetic"],
             "brand_tips": ["Bride", "Recaro", "Sparco", "OMP", "Corbeau"],
-            "warnings": ["Requires seat rails specific to your car", "Fixed-back seats not comfortable for long daily commutes"]
+            "warnings": ["Requires seat rails specific to your car", "Fixed-back seats not comfortable for long daily commutes"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal interior upgrade — not dependent on engine or powertrain type.",
+            "fitment_source": "mod category (interior)",
         },
         {
             "name": "Roll Bar / Harness Bar",
@@ -294,7 +337,10 @@ MOD_LIBRARY = {
             "difficulty": "medium", "stage": 2, "priority": 1,
             "goals": ["track", "safety", "interior"],
             "brand_tips": ["Sparco", "NRG", "Cusco"],
-            "warnings": ["Do NOT run harness without a proper roll bar or cage", "Professional weld-in options are safer than bolt-in for track use"]
+            "warnings": ["Do NOT run harness without a proper roll bar or cage", "Professional weld-in options are safer than bolt-in for track use"],
+            "fitment_status": "verified",
+            "fitment_reason": "Universal interior safety upgrade — not dependent on engine or powertrain type.",
+            "fitment_source": "mod category (interior)",
         },
     ]
 }
@@ -372,10 +418,39 @@ def _score_mod(mod: dict, build: BuildCreate) -> float:
     return score
 
 
-def generate_recommendations(build: BuildCreate) -> list[ModRecommendation]:
+def _truncate_at_word(text: str, max_len: int) -> str:
+    if len(text) <= max_len:
+        return text
+    return text[:max_len].rsplit(" ", 1)[0].rstrip(".,;:") + "."
+
+
+def _derive_why_impact(description: str) -> tuple[str, str]:
+    """MOD_LIBRARY's `description` is a human-curated paragraph; the AI-facing
+    ModRecommendation contract now wants two short sentences instead (see
+    services/ai_service.py for why). Rather than hand-rewrite every library
+    entry into the new shape, split the existing description's first two
+    sentences into why/impact at the mock layer."""
+    sentences = [s.strip() for s in description.replace("—", "-").split(". ") if s.strip()]
+    why = sentences[0] if sentences else description
+    if not why.endswith("."):
+        why += "."
+    impact = sentences[1].rstrip(".") + "." if len(sentences) > 1 else ""
+    return _truncate_at_word(why, 220), _truncate_at_word(impact, 160)
+
+
+def _derive_search_terms(name: str, brand_tips: list[str]) -> list[str]:
+    return [f"{brand} {name}" for brand in brand_tips[:3]]
+
+
+def generate_recommendations(build: BuildCreate, vehicle_verified: bool = False) -> list[EvaluatedModRecommendation]:
     """
     Generate a prioritized, budget-aware mod list for the given build.
     Pure Python logic — drop in OpenAI call here for AI-generated plans.
+
+    vehicle_verified: whether services/vehicle_service.check_vehicle matched
+    this build's year/make/model against the catalog. Defaults to False
+    (the safe default — see services/fitment_service.py: no incompatibility
+    check ever runs for a vehicle we're not confident about).
     """
     candidates = []
 
@@ -408,27 +483,55 @@ def generate_recommendations(build: BuildCreate) -> list[ModRecommendation]:
     if not selected:
         selected = sorted(candidates[:6], key=lambda m: m["price_min"])[:3]
 
-    # Assign final priority and build into response objects
+    # Assign final priority and build into response objects — skipping any
+    # mod explicitly determined incompatible with this vehicle (Phase 2, see
+    # services/fitment_service.py). Priority is renumbered sequentially over
+    # the survivors so it stays gap-free, same as before this phase.
     result = []
-    for i, mod in enumerate(selected, start=1):
-        result.append(ModRecommendation(
+    priority = 0
+    for mod in selected:
+        fitment = evaluate_fitment(
+            name=mod["name"], category=mod["category"],
+            make=build.make, model=build.model, vehicle_verified=vehicle_verified,
+        )
+        if fitment.status == "incompatible":
+            continue
+
+        priority += 1
+        why, impact = _derive_why_impact(mod["description"])
+        warnings = mod.get("warnings", [])
+        result.append(EvaluatedModRecommendation(
             name=mod["name"],
             category=mod["category"],
-            description=mod["description"],
             price_min=mod["price_min"],
             price_max=mod["price_max"],
             difficulty=mod["difficulty"],
             stage=mod["stage"],
-            priority=i,
-            warnings=mod.get("warnings", []),
-            brand_tips=mod.get("brand_tips", []),
+            priority=priority,
+            why=why,
+            impact=impact,
+            compatibility_note=warnings[0] if warnings else "",
+            tradeoff=warnings[1] if len(warnings) > 1 else "",
+            suggested_search_terms=_derive_search_terms(mod["name"], mod.get("brand_tips", [])),
+            # Static, curated fitment (requirement 2) — the dynamic check
+            # above can only ever drop a mod as incompatible, never upgrade
+            # one of these to "verified" on its own (see fitment_service.py).
+            fitment_status=mod.get("fitment_status", "unknown"),
+            fitment_reason=mod.get("fitment_reason"),
+            fitment_source=mod.get("fitment_source"),
         ))
 
     return result
 
 
-def build_mod_plan(build_id: int, build: BuildCreate, mods: list[ModRecommendation]) -> ModPlan:
-    """Assemble the full plan with budget math and stage breakdown."""
+def build_mod_plan(
+    build_id: int, build: BuildCreate, mods: list[EvaluatedModRecommendation], *, vehicle_verified: bool = False
+) -> ModPlan:
+    """Assemble the full plan with budget math and stage breakdown.
+
+    vehicle_verified is passed through untouched from whichever caller
+    already ran services/vehicle_service.check_vehicle — this function has
+    no DB access and makes no catalog decisions of its own."""
     total_min = sum(m.price_min for m in mods)
     total_max = sum(m.price_max for m in mods)
     budget_remaining = build.budget - ((total_min + total_max) / 2)
@@ -469,6 +572,7 @@ def build_mod_plan(build_id: int, build: BuildCreate, mods: list[ModRecommendati
         budget_warning=warning,
         summary=summary,
         stage_breakdown={k: v for k, v in stages.items() if v},
+        vehicle_verified=vehicle_verified,
     )
 
 

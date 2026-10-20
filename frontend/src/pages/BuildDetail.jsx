@@ -20,7 +20,7 @@ const STAGE_META = {
 function estimateGains(mods) {
   let min = 0, max = 0
   mods.filter(m => m.category === 'performance').forEach(mod => {
-    const txt = (mod.name + ' ' + mod.description).toLowerCase()
+    const txt = (mod.name + ' ' + (mod.why || '') + ' ' + (mod.impact || '')).toLowerCase()
     if (txt.includes('tune') || txt.includes('ecu') || txt.includes('remap'))          { min += 20; max += 55 }
     else if (txt.includes('turbo') || txt.includes('supercharg'))                       { min += 50; max += 150 }
     else if (txt.includes('intercooler'))                                                { min += 15; max += 40 }

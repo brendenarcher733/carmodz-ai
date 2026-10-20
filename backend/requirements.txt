@@ -12,5 +12,8 @@ redis==5.3.1
 psycopg2-binary==2.9.9
 alembic==1.13.2
 posthog==7.29.0
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-otlp
 stripe==11.4.1
 httpx==0.28.1

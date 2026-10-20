@@ -6,6 +6,7 @@ Manages chat session history and delegates to the AI service.
 import asyncio
 import logging
 import time
+import uuid
 
 from sqlalchemy.orm import Session
 from core import analytics
@@ -34,12 +35,16 @@ def _log_ai_request(db: Session, user_id: int | None, request_type: str, duratio
         duration_ms=duration_ms,
     ))
     db.commit()
-    analytics.capture(user_id or "anonymous", "ai_request_completed", {
-        "request_type": request_type,
-        "provider": settings.configured_ai_provider,
-        "success": True,
-        "duration_ms": duration_ms,
-    })
+    analytics.capture(
+        "ai_request_completed",
+        {
+            "request_type": request_type,
+            "provider": settings.configured_ai_provider,
+            "success": True,
+            "duration_ms": duration_ms,
+        },
+        distinct_id=user_id,
+    )
 
 
 def get_session_history(db: Session, session_id: str) -> list[dict]:
@@ -105,6 +110,9 @@ def handle_chat(db: Session, data: ChatMessageIn, user_id: int | None = None) ->
         message=data.message,
         session_history=history,
         vehicle=data.vehicle,
+        session_id=data.session_id,
+        user_id=user_id,
+        trace_id=str(uuid.uuid4()),
     )
     duration_ms = int((time.perf_counter() - start) * 1000)
 
@@ -152,10 +160,18 @@ async def handle_chat_stream(db: Session, data: ChatMessageIn, user_id: int | No
     )
 
     full_text = ""
+    trace_id = str(uuid.uuid4())
     start = time.perf_counter()
     if settings.anthropic_api_key:
         try:
-            async for chunk in stream_claude_chat(data.message, history, data.vehicle):
+            async for chunk in stream_claude_chat(
+                data.message,
+                history,
+                data.vehicle,
+                data.session_id,
+                user_id,
+                trace_id,
+            ):
                 full_text += chunk
                 yield chunk
         except Exception:
@@ -167,10 +183,26 @@ async def handle_chat_stream(db: Session, data: ChatMessageIn, user_id: int | No
             # what the user already saw, so we accept the partial response
             # rather than risk a confusing double-answer.
             if not full_text:
-                full_text = await asyncio.to_thread(generate_chat_response, data.message, history, data.vehicle)
+                full_text = await asyncio.to_thread(
+                    generate_chat_response,
+                    data.message,
+                    history,
+                    data.vehicle,
+                    session_id=data.session_id,
+                    user_id=user_id,
+                    trace_id=trace_id,
+                )
                 yield full_text
     else:
-        full_text = await asyncio.to_thread(generate_chat_response, data.message, history, data.vehicle)
+        full_text = await asyncio.to_thread(
+            generate_chat_response,
+            data.message,
+            history,
+            data.vehicle,
+            session_id=data.session_id,
+            user_id=user_id,
+            trace_id=trace_id,
+        )
         yield full_text
     # Total time to last token, not time-to-first-token — streaming improves
     # *perceived* latency (see the docstring above) but this metric tracks

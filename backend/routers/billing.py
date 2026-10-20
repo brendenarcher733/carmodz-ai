@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from core import analytics
 from core.config import settings
 from core.database import get_db
 from models.user import User
@@ -69,6 +70,7 @@ def create_checkout_session(current_user: User = Depends(get_current_user)):
     except stripe.error.StripeError as e:
         logger.exception("Stripe checkout session creation failed")
         raise HTTPException(status_code=502, detail="Could not start checkout — please try again.") from e
+    analytics.capture("checkout_started")
     return {"url": session.url}
 
 
@@ -86,6 +88,7 @@ def create_portal_session(current_user: User = Depends(get_current_user)):
     except stripe.error.StripeError as e:
         logger.exception("Stripe billing portal session creation failed")
         raise HTTPException(status_code=502, detail="Could not open the billing portal — please try again.") from e
+    analytics.capture("billing_portal_opened")
     return {"url": session.url}
 
 
@@ -122,6 +125,7 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         user.stripe_customer_id = data.get("customer")
         user.stripe_subscription_id = data.get("subscription")
         db.commit()
+        analytics.capture("subscription_activated", distinct_id=user.id)
 
     elif event_type == "customer.subscription.updated":
         customer_id = data.get("customer")
@@ -132,6 +136,14 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         user.plan = "pro" if data.get("status") in ("active", "trialing") else "free"
         user.subscription_cancel_at = _epoch_to_datetime(data.get("cancel_at"))
         db.commit()
+        analytics.capture(
+            "subscription_status_changed",
+            {
+                "is_active": user.plan == "pro",
+                "is_scheduled_for_cancellation": user.subscription_cancel_at is not None,
+            },
+            distinct_id=user.id,
+        )
 
     elif event_type == "customer.subscription.deleted":
         customer_id = data.get("customer")
@@ -143,5 +155,6 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         user.stripe_subscription_id = None
         user.subscription_cancel_at = None
         db.commit()
+        analytics.capture("subscription_cancelled", distinct_id=user.id)
 
     return {"status": "ok"}

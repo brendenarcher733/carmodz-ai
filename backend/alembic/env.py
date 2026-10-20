@@ -10,7 +10,7 @@ from alembic import context
 # DATABASE_URL inside alembic.ini.
 from core.config import settings
 from core.database import Base
-from models import build, recommendation, chat, user  # noqa: F401  (registers tables on Base.metadata)
+from models import build, recommendation, chat, user, vehicle  # noqa: F401  (registers tables on Base.metadata)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

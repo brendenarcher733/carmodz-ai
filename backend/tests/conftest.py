@@ -28,7 +28,10 @@ import time
 _tmp_dir = tempfile.mkdtemp(prefix="carmods_test_db_")
 os.environ["DATABASE_URL"] = f"sqlite:///{_tmp_dir}/test.db"
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379")
-os.environ["ENVIRONMENT"] = "development"  # never "production" — see get_settings()'s guard
+os.environ["ENVIRONMENT"] = "test"  # never "production" — see get_settings()'s guard; makes
+                                     # settings.is_testing True, which is what keeps
+                                     # core/analytics.py and core/posthog_logs.py from making
+                                     # any real PostHog call or requiring POSTHOG_API_KEY here
 os.environ["AI_PROVIDER"] = "mock"
 os.environ["EMAIL_PROVIDER"] = "mock"
 # Deliberately NOT setting STRIPE_* here — tests default to "billing
@@ -47,6 +50,7 @@ from models.user import User  # noqa: E402
 from core.security import hash_password  # noqa: E402
 from routers import auth as auth_router  # noqa: E402
 from routers import plans as plans_router  # noqa: E402
+from routers import guides as guides_router  # noqa: E402
 
 # Every module-level RateLimiter instance in routers/auth.py — overridden to
 # a no-op for the default `client` fixture so ordinary auth/billing tests
@@ -63,6 +67,7 @@ _RATE_LIMITERS = [
     auth_router.resend_verification_rate_limit,
     auth_router.verify_email_rate_limit,
     plans_router.preview_rate_limit,
+    guides_router.guide_rate_limit,
 ]
 
 
@@ -73,6 +78,28 @@ def _fresh_tables():
     savepoint/rollback-per-test pattern would fight those commits)."""
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+
+
+@pytest.fixture(autouse=True)
+def _fresh_vehicle_catalog_cache():
+    """The vehicle catalog cache (routers/vehicles.py, Redis key prefix
+    "vehicle_catalog:v1:", see services/vehicle_service.py) lives in real
+    Redis, which — unlike the SQL test DB reset by _fresh_tables above — is
+    NOT reset between tests. Without this, a test could get a cache hit for
+    data a completely unrelated earlier test (or an earlier pytest process
+    entirely) left behind, serving a stale make/model list instead of
+    reflecting its own freshly-reset DB. Deliberately a no-op, not a test
+    failure, if Redis isn't reachable — the same "cache problems never fail
+    the request" principle the cache itself follows."""
+    try:
+        import redis as redis_sync
+        client = redis_sync.from_url(settings.redis_url, socket_connect_timeout=1, socket_timeout=1)
+        keys = list(client.scan_iter(match="vehicle_catalog:v1:*"))
+        if keys:
+            client.delete(*keys)
+        client.close()
+    except Exception:
+        pass
     yield
 
 

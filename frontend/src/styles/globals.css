@@ -342,6 +342,31 @@
     min-width: 44px;
   }
 
+  /* Visible keyboard-focus ring for plain buttons/links that aren't a form
+     input (those already get one via .field-input/.field-textarea above).
+     The browser's own default outline is functional but clashes visually
+     with this app's dark, orange/cyan palette — these two give every other
+     interactive element a focus style that matches it instead. :focus-visible
+     only (no ring on a mouse/touch click, same as native browser behavior).
+     Two variants, matching the app's two accent tokens: `.focus-ring` for
+     ordinary build/commerce/navigation actions, `.focus-ring-ai` only for
+     controls that trigger or sit inside genuinely AI-generated content —
+     same accent/ai split documented in tailwind.config.js. Never apply both
+     to the same element. */
+  .focus-ring {
+    outline: none;
+  }
+  .focus-ring:focus-visible {
+    @apply ring-2 ring-accent/50 ring-offset-2 ring-offset-surface;
+  }
+
+  .focus-ring-ai {
+    outline: none;
+  }
+  .focus-ring-ai:focus-visible {
+    @apply ring-2 ring-ai/50 ring-offset-2 ring-offset-surface;
+  }
+
   /* Animation delays */
   .anim-delay-1 { animation-delay: 60ms; }
   .anim-delay-2 { animation-delay: 130ms; }

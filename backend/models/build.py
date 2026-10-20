@@ -27,6 +27,15 @@ class Build(Base):
     is_daily      = Column(Integer, default=1)           # 1=daily, 0=project car
     is_favourite  = Column(Boolean, default=False)
     notes         = Column(Text, default="")
+
+    # Set by services/build_service.create_build via services/vehicle_service
+    # at creation time — True only if this exact year/make/model matched a
+    # VehicleModel's verified production range. False covers BOTH "not yet in
+    # the catalog" and (for rows created before this column existed) "never
+    # checked" — see the migration's server_default. Never set True without
+    # an actual catalog match; see AI_service's prompt-disclaimer wiring for
+    # why this can't be silently assumed true.
+    vehicle_verified = Column(Boolean, nullable=False, default=False)
     created_at    = Column(DateTime, default=datetime.utcnow)
     updated_at    = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -95,6 +104,10 @@ class BuildResponse(BaseModel):
     notes:        str
     created_at:   datetime
     updated_at:   datetime
+
+    # True only if this year/make/model matched the vehicle catalog at
+    # creation time — see models/build.py's Build.vehicle_verified.
+    vehicle_verified: bool = False
 
     # Job tracking — lets the frontend know whether recommendations are ready
     # to fetch yet, and whether they came from the real AI or the mock

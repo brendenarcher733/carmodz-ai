@@ -151,6 +151,17 @@ class Settings(BaseSettings):
     def is_production(self) -> bool:
         return self.environment.lower() == "production"
 
+    @property
+    def is_testing(self) -> bool:
+        """ENVIRONMENT=test — set by tests/conftest.py before anything else
+        imports this module. Exists so core/analytics.py and
+        core/posthog_logs.py can force a clean no-op under pytest without
+        depending on a real POSTHOG_API_KEY being present *or* absent (either
+        way, under test, PostHog must never actually be contacted) — see
+        those modules for where this is used. Does not affect is_production
+        or any other environment-branched behavior in this app."""
+        return self.environment.lower() == "test"
+
     class Config:
         env_file = ".env"
         populate_by_name = True

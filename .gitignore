@@ -24,3 +24,6 @@ dump.rdb
 # Eval run output — cassettes/ ARE committed (they're fixtures), reports/ is not
 backend/evals/reports/*.json
 backend/evals/blind_compare_reports/
+
+# Local Claude Code tool state — not application source
+.claude/

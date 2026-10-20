@@ -6,9 +6,10 @@ import logging
 from sqlalchemy.orm import Session
 from models.build import Build, BuildCreate
 from models.user import User
-from models.recommendation import Recommendation, ModRecommendation
+from models.recommendation import Recommendation, EvaluatedModRecommendation
 from services.mock_ai import build_mod_plan
 from services.billing_service import enforce_build_limit
+from services.vehicle_service import VehicleCheckStatus, check_vehicle
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
@@ -18,8 +19,19 @@ def create_build(db: Session, data: BuildCreate, user: User) -> Build:
     """Creates the build row only. Recommendation generation is no longer
     inline here — it used to block this call for 25-45s on a Claude
     round-trip. The router enqueues the async job (workers/recommendation_worker.py)
-    right after this returns and stores the resulting job_id on the build."""
+    right after this returns and stores the resulting job_id on the build.
+
+    Vehicle catalog check runs here, before the row is written: a
+    known-invalid year/make/model (e.g. a model year outside its verified
+    production range) is rejected outright, matching the anonymous preview
+    path (routers/plans.py). An unknown vehicle is NOT rejected — it's
+    created with vehicle_verified=False, see models/build.py."""
     enforce_build_limit(db, user)
+
+    check = check_vehicle(db, data.make, data.model, data.year)
+    if check.status is VehicleCheckStatus.INVALID_YEAR:
+        raise HTTPException(status_code=422, detail=f"{data.make} {data.model}: {check.message}")
+
     build = Build(
         user_id=user.id,
         title=data.title,
@@ -33,6 +45,7 @@ def create_build(db: Session, data: BuildCreate, user: User) -> Build:
         is_daily=int(data.is_daily),
         notes=data.notes,
         status="pending",
+        vehicle_verified=check.status is VehicleCheckStatus.VERIFIED,
     )
     db.add(build)
     db.commit()
@@ -146,12 +159,14 @@ def get_build_plan(db: Session, build_id: int, user_id: int):
 
     recs = db.query(Recommendation).filter(Recommendation.build_id == build_id).all()
     mods = [
-        ModRecommendation(
-            name=r.name, category=r.category, description=r.description,
+        EvaluatedModRecommendation(
+            name=r.name, category=r.category,
             price_min=r.price_min, price_max=r.price_max,
             difficulty=r.difficulty, stage=r.stage, priority=r.priority,
-            warnings=r.warnings or [], brand_tips=r.brand_tips or [],
-            exact_product=r.exact_product or "",
+            why=r.why, impact=r.impact or "", compatibility_note=r.compatibility_note or "",
+            tradeoff=r.tradeoff or "", suggested_search_terms=r.suggested_search_terms or [],
+            fitment_status=r.fitment_status or "unknown",
+            fitment_reason=r.fitment_reason, fitment_source=r.fitment_source,
         )
         for r in recs
     ]
@@ -162,6 +177,6 @@ def get_build_plan(db: Session, build_id: int, user_id: int):
         categories=build.categories or [], is_daily=bool(build.is_daily), notes=build.notes or "",
     )
 
-    plan = build_mod_plan(build_id, build_data, mods)
+    plan = build_mod_plan(build_id, build_data, mods, vehicle_verified=build.vehicle_verified)
     plan.used_mock_fallback = build.used_mock_fallback
     return plan

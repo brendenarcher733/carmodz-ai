@@ -287,7 +287,16 @@ def login(data: UserLogin, request: Request, response: Response, db: Session = D
     user.last_login_at = datetime.utcnow()
     db.commit()
 
-    analytics.capture(user.id, "user_logged_in", {"is_returning": is_returning})
+    # This request began anonymous, so establish the newly authenticated
+    # user's context here. Person properties belong on the person, never the
+    # login event; exception autocapture inside the block inherits this ID.
+    with analytics.request_context(user.id):
+        analytics.identify(user.id, {
+            "email": user.email,
+            "name": user.name,
+            "plan": user.plan,
+        })
+        analytics.capture("user_logged_in", {"is_returning": is_returning})
 
     return _issue_session(db, user, request, response)
 
@@ -365,6 +374,7 @@ def verify_email(data: VerifyEmailRequest, db: Session = Depends(get_db)):
     user = _consume_action_token(db, data.token, "verify_email")
     user.email_verified = True
     db.commit()
+    analytics.capture("email_verified", distinct_id=user.id)
     return {"detail": "Email verified"}
 
 
@@ -374,6 +384,7 @@ def resend_verification(current_user: User = Depends(get_current_user), db: Sess
         return {"detail": "Email already verified"}
     token = _create_action_token(db, current_user, "verify_email", EMAIL_VERIFICATION_TTL_HOURS)
     _send_verification_email(current_user, token)
+    analytics.capture("verification_email_resent")
     return {"detail": "Verification email sent"}
 
 
@@ -400,4 +411,5 @@ def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
         RefreshToken.user_id == user.id, RefreshToken.revoked_at.is_(None)
     ).update({"revoked_at": datetime.utcnow()})
     db.commit()
+    analytics.capture("password_reset", distinct_id=user.id)
     return {"detail": "Password reset. Please log in with your new password."}

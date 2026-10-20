@@ -199,6 +199,20 @@ export const authApi = {
   resendVerification: ()                   => api.post('/api/auth/resend-verification'),
 }
 
+export const guidesApi = {
+  // On-demand only — never called as part of initial plan generation.
+  // Stateless: no build/recommendation ID involved, works identically for
+  // an anonymous preview mod or a saved build's mod.
+  generate: (payload) => api.post('/api/guides/', payload),
+}
+
+export const vehiclesApi = {
+  getMakes:  ()           => api.get('/api/vehicles/makes'),
+  getModels: (make)       => api.get(`/api/vehicles/makes/${encodeURIComponent(make)}/models`),
+  lookup:    (make, model, year) =>
+    api.get('/api/vehicles/lookup', { params: { make, model, year } }),
+}
+
 export const adminApi = {
   stats:           ()     => api.get('/api/admin/stats'),
   users:           (params = {}) => api.get('/api/admin/users', { params }),

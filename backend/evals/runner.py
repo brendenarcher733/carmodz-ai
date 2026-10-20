@@ -4,6 +4,7 @@
 # and rolling everything up into a SuiteReport.
 
 import time
+import uuid
 
 from evals.cassettes import FakeAnthropicClient, load_cassette
 from evals.checks import (
@@ -40,11 +41,15 @@ def run_case(case: EvalCase, mode: str = "live", run_judge: bool = False) -> Eva
     if mode == "replay":
         client = FakeAnthropicClient(load_cassette(case.id))
 
+    session_id = f"eval-{case.id}"
+    trace_id = str(uuid.uuid4())
     start = time.monotonic()
     recs = _claude_build_recommendations(
         case.build,
         client=client,
         on_usage=lambda i, o: usage.update(input_tokens=i, output_tokens=o),
+        session_id=session_id,
+        trace_id=trace_id,
     )
     wall_latency_ms = (time.monotonic() - start) * 1000
 
@@ -73,7 +78,13 @@ def run_case(case: EvalCase, mode: str = "live", run_judge: bool = False) -> Eva
         checks.append(check_latency(case, latency_ms))
 
         if run_judge:
-            judge_result, judge_usage = check_llm_judge_plausibility(case, recs, client=None)
+            judge_result, judge_usage = check_llm_judge_plausibility(
+                case,
+                recs,
+                client=None,
+                session_id=session_id,
+                trace_id=trace_id,
+            )
             checks.append(judge_result)
 
     passed = all(c.passed for c in checks if c.severity == "blocking")

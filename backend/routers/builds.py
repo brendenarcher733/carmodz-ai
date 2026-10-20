@@ -4,7 +4,7 @@ import logging
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
-from core import analytics
+from core import analytics, posthog_logs
 from core.database import get_db
 from models.build import BuildCreate, BuildResponse, BuildStatusResponse
 from models.recommendation import ModPlan
@@ -40,6 +40,7 @@ async def _enqueue_generation_job(request: Request, db: Session, build, plan: st
     if job is not None:
         build.job_id = job.job_id
         db.commit()
+        posthog_logs.log_generation_job_enqueued(plan, defer_by or 0)
     else:
         # enqueue_job returns None if a job with the same _job_id already
         # exists and hasn't finished — not expected here since we never pass
@@ -68,7 +69,7 @@ async def create_new_build(
     Returns immediately (status='pending') — this used to block for 25-45s
     on a Claude round-trip. Poll GET /{id}/status until status='ready'."""
     build = create_build(db, data, current_user)
-    analytics.capture(current_user.id, "build_created", {
+    analytics.capture("build_created", {
         "year": data.year, "make": data.make, "model": data.model,
         "budget": data.budget, "goal": data.goal, "experience": data.experience,
         "categories": data.categories, "is_daily": data.is_daily,
@@ -120,6 +121,7 @@ async def retry_build(
     """Re-enqueue generation for a build stuck in status='failed'."""
     build = retry_build_generation(db, build_id, current_user.id)
     await _enqueue_generation_job(request, db, build, plan=current_user.plan)
+    analytics.capture("build_generation_retried")
     return build
 
 
@@ -143,7 +145,9 @@ def toggle_build_favourite(
     current_user: User = Depends(get_current_user),
 ):
     """Toggle the favourite flag on a build."""
-    return toggle_favourite(db, build_id, current_user.id)
+    build = toggle_favourite(db, build_id, current_user.id)
+    analytics.capture("build_favourite_toggled", {"is_favourite": build.is_favourite})
+    return build
 
 
 @router.delete("/{build_id}", status_code=204)
@@ -154,3 +158,4 @@ def remove_build(
 ):
     """Permanently delete a build and all its recommendations."""
     delete_build(db, build_id, current_user.id)
+    analytics.capture("build_deleted")

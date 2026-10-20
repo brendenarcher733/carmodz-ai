@@ -87,7 +87,8 @@ def check_forbidden_keywords(case: EvalCase, recs: list[dict]) -> CheckResult:
         )
 
     haystack = " ".join(
-        r["name"] + " " + r["description"] + " " + " ".join(r.get("brand_tips", []))
+        r["name"] + " " + r.get("why", "") + " " + r.get("impact", "") + " "
+        + " ".join(r.get("suggested_search_terms", []))
         for r in recs
     ).lower()
 

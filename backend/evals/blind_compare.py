@@ -33,10 +33,12 @@ import random
 import sys
 import time
 import json
+import uuid
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from core import analytics               # noqa: E402
 from core.config import settings          # noqa: E402
 from models.build import BuildCreate      # noqa: E402
 from services.ai_service import generate_build_recommendations  # noqa: E402
@@ -61,11 +63,18 @@ VEHICLES = [
 ]
 
 
-def bare_model_call(vehicle: dict) -> str:
+def bare_model_call(vehicle: dict, session_id: str, trace_id: str) -> str:
     """The 'raw ChatGPT/Claude' side — no system prompt, no schema, no
     tool-forcing, just the plain question a real person would type."""
-    import anthropic
-    client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+    posthog_client = analytics.client()
+    if posthog_client is None:
+        import anthropic
+        client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+        wrapped_client = False
+    else:
+        from posthog.ai.anthropic import Anthropic
+        client = Anthropic(api_key=settings.anthropic_api_key, posthog_client=posthog_client)
+        wrapped_client = True
 
     article = "an" if vehicle["experience"][0] in "aeiou" else "a"
     prompt = (
@@ -74,22 +83,33 @@ def bare_model_call(vehicle: dict) -> str:
         f"I'd say I'm {article} {vehicle['experience']} when it comes to modding cars."
     )
 
-    response = client.messages.create(
-        model=MODEL,
-        max_tokens=1500,
-        messages=[{"role": "user", "content": prompt}],
-    )
+    request_args = {
+        "model": MODEL,
+        "max_tokens": 1500,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    if wrapped_client:
+        request_args.update({
+            "posthog_trace_id": trace_id,
+            "posthog_properties": {"$ai_session_id": session_id},
+            "posthog_privacy_mode": False,
+        })
+    response = client.messages.create(**request_args)
     return "".join(block.text for block in response.content if block.type == "text").strip()
 
 
-def product_call(vehicle: dict) -> str:
+def product_call(vehicle: dict, session_id: str, trace_id: str) -> str:
     """The real product path — services/ai_service.py, completely
     unmodified, called exactly the way build_service.create_build calls it."""
     build = BuildCreate(
         title="blind-compare eval", notes="",
         **{k: v for k, v in vehicle.items()},
     )
-    recs = generate_build_recommendations(build)
+    recs = generate_build_recommendations(
+        build,
+        session_id=session_id,
+        trace_id=trace_id,
+    )
     if recs is None:
         return (
             "[The product's recommendation engine returned no result for this "
@@ -106,11 +126,15 @@ def product_call(vehicle: dict) -> str:
             f"({r['category']}, stage {r['stage']}, {r['difficulty']}) "
             f"— ${r['price_min']:,.0f}-${r['price_max']:,.0f}"
         )
-        lines.append(f"    {r['description']}")
-        for w in r.get("warnings") or []:
-            lines.append(f"    ⚠ {w}")
-        if r.get("brand_tips"):
-            lines.append(f"    Brands: {', '.join(r['brand_tips'])}")
+        lines.append(f"    {r.get('why', '')}")
+        if r.get("impact"):
+            lines.append(f"    Impact: {r['impact']}")
+        if r.get("compatibility_note"):
+            lines.append(f"    ⚠ {r['compatibility_note']}")
+        if r.get("tradeoff"):
+            lines.append(f"    Tradeoff: {r['tradeoff']}")
+        if r.get("suggested_search_terms"):
+            lines.append(f"    Search: {', '.join(r['suggested_search_terms'])}")
     return "\n".join(lines)
 
 
@@ -120,12 +144,14 @@ def run():
         sys.exit(1)
 
     results = []
+    session_id = f"blind-compare-{uuid.uuid4()}"
     for i, vehicle in enumerate(VEHICLES, 1):
         label = f"{vehicle['year']} {vehicle['make']} {vehicle['model']}"
         print(f"[{i}/{len(VEHICLES)}] {label} — product engine...", flush=True)
-        product_text = product_call(vehicle)
+        trace_id = str(uuid.uuid4())
+        product_text = product_call(vehicle, session_id, trace_id)
         print(f"[{i}/{len(VEHICLES)}] {label} — bare {MODEL}...", flush=True)
-        bare_text = bare_model_call(vehicle)
+        bare_text = bare_model_call(vehicle, session_id, trace_id)
 
         # Randomize A/B per vehicle so a human can't infer "left is always
         # the product" by the third example — that's the actual blinding.

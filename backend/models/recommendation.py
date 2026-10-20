@@ -18,15 +18,27 @@ class Recommendation(Base):
     build_id    = Column(Integer, ForeignKey("builds.id", ondelete="CASCADE"), nullable=False)
     name        = Column(String(200), nullable=False)
     category    = Column(String(100), nullable=False)
-    description = Column(Text, nullable=False)
     price_min   = Column(Float, nullable=False)
     price_max   = Column(Float, nullable=False)
     difficulty  = Column(String(50), nullable=False)  # easy|medium|hard
     stage       = Column(Integer, nullable=False)     # 1, 2, 3
     priority    = Column(Integer, nullable=False)     # 1=highest
-    warnings    = Column(JSON, default=list)          # list of warning strings
-    brand_tips  = Column(JSON, default=list)          # suggested brands
-    exact_product = Column(String(200), nullable=False, server_default="", default="")   # specific real product, e.g. "K&N 57-3516 69-Series Typhoon Cold Air Intake" — "" when the AI isn't confident enough to name one
+    # Short, structured fields — replaced a free-text `description` +
+    # `warnings`/`brand_tips` lists that let the model ramble, which is what
+    # drove slow generations and validation failures on one chatty field.
+    why                   = Column(Text, nullable=False)                                   # 1-2 sentences: why this mod, for this build
+    impact                = Column(String(200), nullable=False, server_default="", default="")  # 1 short sentence: what measurably improves
+    compatibility_note    = Column(String(200), nullable=False, server_default="", default="")  # 1 short sentence, or "" — a real fitment caveat
+    tradeoff               = Column(String(200), nullable=False, server_default="", default="")  # 1 short sentence, or "" — the honest downside
+    suggested_search_terms = Column(JSON, default=list)   # 1-3 short shopping search phrases, e.g. "K&N cold air intake"
+    # Phase 2 — vehicle-aware fitment (see services/fitment_service.py).
+    # Deliberately NOT AI-generated: computed by our own code after the AI
+    # response is already validated, never asked of the model. "unknown" is
+    # the honest default for anything we have no confident signal about —
+    # never upgraded to "verified" except by curated data (mock_ai.MOD_LIBRARY).
+    fitment_status = Column(String(20), nullable=False, server_default="unknown", default="unknown")
+    fitment_reason = Column(String(160), nullable=True)
+    fitment_source = Column(String(80), nullable=True)
     created_at  = Column(DateTime, default=datetime.utcnow)
 
     build = relationship("Build", back_populates="recommendations")
@@ -63,21 +75,30 @@ class ModRecommendation(BaseModel):
     # This was a latent bug in the pre-refactor prompt-only version too; the
     # enum constraint actually fixes it, not just preserves prior behavior.
     category:    Literal["performance", "handling", "sound", "cosmetic", "reliability", "interior"]
-    description: str = Field(..., min_length=1, max_length=1000)
     price_min:   float = Field(..., ge=0, le=200_000)
     price_max:   float = Field(..., ge=0, le=200_000)
     difficulty:  Literal["easy", "medium", "hard"]
     stage:       int = Field(..., ge=1, le=3)
     priority:    int = Field(..., ge=1, le=20)
-    warnings:    list[str] = Field(default=[], max_length=10)
-    brand_tips:  list[str] = Field(default=[], max_length=10)
-    # The specific, real, purchasable product — e.g. "K&N 57-3516 69-Series
-    # Typhoon Cold Air Intake" — this is what makes a shop link land on (or
-    # very near) the exact part instead of a generic category search. Left as
-    # "" when the model isn't confident a specific product genuinely fits
-    # this vehicle; a wrong guess here is worse than no guess, since the
-    # whole point is a buyer trusting the link enough to check out on it.
-    exact_product: str = Field(default="", max_length=150)
+    # Short, structured fields — deliberately replace a free-text `description`
+    # plus `warnings`/`brand_tips` lists (see git history) that let the model
+    # write paragraphs. Shorter fields mean less generated text per mod, which
+    # is the main lever on generation latency, and fewer ways for one chatty
+    # field to fail validation and discard an otherwise-good response.
+    why:                    str = Field(..., min_length=1, max_length=220)
+    impact:                 str = Field(default="", max_length=160)
+    compatibility_note:     str = Field(default="", max_length=160)
+    tradeoff:                str = Field(default="", max_length=160)
+    # Shopping search phrases (brand + product type, e.g. "K&N cold air
+    # intake") — not a guess at an exact SKU. Replaces the old `exact_product`
+    # single field, which pushed the model toward naming a specific part
+    # number/trim it often wasn't actually confident about.
+    suggested_search_terms: list[str] = Field(default=[], max_length=3)
+
+    @field_validator("suggested_search_terms")
+    @classmethod
+    def _cap_search_term_length(cls, v: list[str]) -> list[str]:
+        return [t[:80] for t in v]
 
     @field_validator("price_max")
     @classmethod
@@ -88,12 +109,37 @@ class ModRecommendation(BaseModel):
         return v
 
 
+class EvaluatedModRecommendation(ModRecommendation):
+    """ModRecommendation plus the three fitment fields — deliberately a
+    SEPARATE class, not fields added directly to ModRecommendation, because
+    ModRecommendation also backs the Anthropic tool schema
+    (ai_service.RECOMMENDATIONS_TOOL): adding fitment fields there would put
+    them in front of the model as something to fill in, which is exactly
+    what requirement 1 of the Phase 2 spec forbids ("Do not make these
+    verbose AI-generated fields. They are business-validation fields").
+    This class is never referenced by ModRecommendationsResponse, so it's
+    invisible to schema generation — these fields are only ever set by our
+    own code, after the AI's output has already been validated.
+
+    See services/fitment_service.py for how these are computed.
+    """
+    fitment_status: Literal["verified", "unknown", "incompatible"] = "unknown"
+    fitment_reason: Optional[str] = Field(default=None, max_length=160)
+    fitment_source: Optional[str] = Field(default=None, max_length=80)
+
+
 class ModRecommendationsResponse(BaseModel):
     """Wrapper required because tool input_schema must be a JSON object at the
     root — a bare JSON array isn't a valid top-level tool input shape."""
     model_config = ConfigDict(extra="forbid")
 
-    recommendations: list[ModRecommendation] = Field(..., min_length=4, max_length=12)
+    # 5-7 by default; the prompt allows fewer (down to 3) for small budgets
+    # rather than padding the list to hit a count. Note: Anthropic strict
+    # tool mode strips minItems/maxItems at generation time (see
+    # ai_service._STRICT_UNSUPPORTED_KEYS), so this bound isn't enforced on
+    # Claude's output structurally — it documents intent and is honored by
+    # the prompt plus services/ai_service.py's own repair/trim logic.
+    recommendations: list[ModRecommendation] = Field(..., min_length=3, max_length=7)
 
 
 class RecommendationResponse(ModRecommendation):
@@ -116,7 +162,7 @@ class ModPlan(BaseModel):
     goal:               str
     budget:             float
     # Mod recommendations
-    mods:               list[ModRecommendation]
+    mods:               list[EvaluatedModRecommendation]
     total_min:          float
     total_max:          float
     budget_remaining:   float
@@ -124,3 +170,9 @@ class ModPlan(BaseModel):
     summary:            str
     stage_breakdown:    dict[str, list[str]]   # {"Stage 1": ["mod name", ...]}
     used_mock_fallback: bool = False
+    # True only if this exact year/make/model matched the vehicle catalog
+    # (services/vehicle_service.check_vehicle) — False means "not yet in the
+    # catalog," not "wrong." A known-invalid year never reaches this far; see
+    # routers/plans.py and services/build_service.create_build, which reject
+    # that case before a plan is ever generated.
+    vehicle_verified:   bool = False
