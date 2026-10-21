@@ -92,7 +92,7 @@ export function ModCard({ mod, index, vehicle }) {
         )}
 
         {/* Shop links */}
-        <ShopLinks modName={mod.name} exactProduct={mod.suggested_search_terms?.[0]} vehicle={vehicle} />
+        <ShopLinks modName={mod.name} category={mod.category} exactProduct={mod.suggested_search_terms?.[0]} vehicle={vehicle} />
 
         {/* On-demand install guide — generated only if expanded */}
         <InstallGuidePanel mod={mod} vehicle={vehicle} />

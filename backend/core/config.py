@@ -109,6 +109,19 @@ class Settings(BaseSettings):
     def billing_configured(self) -> bool:
         return bool(self.stripe_secret_key and self.stripe_price_id_pro)
 
+    # Nearby-shop location search — same off-by-default pattern as every
+    # other optional integration above. Unset (true on every deploy today)
+    # means services/places_provider.py::get_places_provider() returns
+    # None and routers/shops.py reports "location search isn't configured"
+    # instead of making any live external call or inventing data.
+    places_provider:            str = Field(default="", alias="PLACES_PROVIDER")  # "" | "yelp"
+    places_api_key:              str = Field(default="", alias="PLACES_API_KEY")
+    places_search_radius_miles: int = Field(default=15, alias="PLACES_SEARCH_RADIUS_MILES")
+
+    @property
+    def places_configured(self) -> bool:
+        return bool(self.places_provider and self.places_api_key)
+
     # Soft-launch switch: default OFF so the free-tier caps (1 saved build,
     # 15 advisor messages/day — services/billing_service.py) stop blocking
     # anyone, without deleting the enforcement code or the Stripe

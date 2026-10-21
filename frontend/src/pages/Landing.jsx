@@ -317,33 +317,42 @@ export default function Landing() {
           FEATURES GRID — scroll reveal
       ═══════════════════════════════════════════ */}
       <section className="py-32 relative overflow-hidden">
-        <div className="container-content">
+        <div className="container-content relative">
+
+          {/* Silhouette — a sibling of the reveal-animated header below, not
+              a child of it. `.reveal` carries a `transform` (even at rest,
+              it's `translateY(0)`, not `none`) and briefly `opacity: 0`
+              before it scrolls into view, and either one alone creates a
+              new stacking context. A `mix-blend-mode` element trapped inside
+              one can't see the real page background to blend against — it
+              was compositing against an empty layer instead, which is what
+              rendered as a visible dark box rather than blending away. The
+              hero's silhouette was never nested this way, which is why only
+              this one showed the edge. */}
+          <div
+            className="hidden lg:block absolute pointer-events-none"
+            style={{
+              right: '-3rem', top: '-6rem', width: '40rem', height: '30rem',
+              backgroundImage: 'url(/images/features-accent.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center 55%',
+              mixBlendMode: 'screen',
+              opacity: 0.8,
+              WebkitMaskImage: 'radial-gradient(circle at 60% 50%, black 0%, black 52%, transparent 88%)',
+              maskImage: 'radial-gradient(circle at 60% 50%, black 0%, black 52%, transparent 88%)',
+            }}
+          />
 
           {/* Header — the silhouette sits in the empty space to the right
               of this max-w-lg block (there's room on anything wider than a
               tablet), faded out well before the bordered grid below so it
               never touches a tile. */}
-          <div ref={featuresRef} className="reveal mb-20 relative">
-            <div
-              className="hidden lg:block absolute pointer-events-none"
-              style={{
-                right: '-3rem', top: '-7rem', width: '40rem', height: '30rem',
-                backgroundImage: 'url(/images/features-accent.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center 55%',
-                mixBlendMode: 'screen',
-                opacity: 0.8,
-                WebkitMaskImage: 'radial-gradient(circle at 60% 50%, black 0%, black 52%, transparent 88%)',
-                maskImage: 'radial-gradient(circle at 60% 50%, black 0%, black 52%, transparent 88%)',
-              }}
-            />
-            <div className="relative z-10">
-              <p className="eyebrow mb-4">The platform</p>
-              <h2 className="font-display font-black text-white leading-[1.05] tracking-tight max-w-lg"
-                style={{ fontSize: 'clamp(2.4rem, 4vw, 3.2rem)' }}>
-                Built for enthusiasts.<br />Not spreadsheets.
-              </h2>
-            </div>
+          <div ref={featuresRef} className="reveal mb-20 relative z-10">
+            <p className="eyebrow mb-4">The platform</p>
+            <h2 className="font-display font-black text-white leading-[1.05] tracking-tight max-w-lg"
+              style={{ fontSize: 'clamp(2.4rem, 4vw, 3.2rem)' }}>
+              Built for enthusiasts.<br />Not spreadsheets.
+            </h2>
           </div>
 
           <div

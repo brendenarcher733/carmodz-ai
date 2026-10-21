@@ -206,6 +206,16 @@ export const guidesApi = {
   generate: (payload) => api.post('/api/guides/', payload),
 }
 
+export const shopsApi = {
+  // ZIP-based nearby-shop location search — a distinct feature from
+  // ShopLinks' online-retailer links (see lib/retailers.js). Always
+  // resolves to a 200 with a `status` field ("ok" | "not_configured" |
+  // "no_results" | "error") rather than throwing on the common "this
+  // deployment has no location provider configured" case — see
+  // components/ui/NearbyShopsPanel.jsx for how each status renders.
+  nearby: (zipCode, category) => api.post('/api/shops/nearby', { zip_code: zipCode, category }),
+}
+
 export const vehiclesApi = {
   getMakes:  ()           => api.get('/api/vehicles/makes'),
   getModels: (make)       => api.get(`/api/vehicles/makes/${encodeURIComponent(make)}/models`),

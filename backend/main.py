@@ -8,7 +8,7 @@ from core.config import settings
 from core.database import init_db
 from core.redis_pool import get_redis_pool
 from core.security import decode_access_token
-from routers import builds, advisor, auth, admin, billing, plans, vehicles, guides
+from routers import builds, advisor, auth, admin, billing, plans, vehicles, guides, shops
 
 
 @asynccontextmanager
@@ -93,6 +93,7 @@ app.include_router(admin.router)
 app.include_router(billing.router)
 app.include_router(vehicles.router)
 app.include_router(guides.router)
+app.include_router(shops.router)
 
 
 @app.get("/health", tags=["System"])

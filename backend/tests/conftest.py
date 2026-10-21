@@ -51,6 +51,7 @@ from core.security import hash_password  # noqa: E402
 from routers import auth as auth_router  # noqa: E402
 from routers import plans as plans_router  # noqa: E402
 from routers import guides as guides_router  # noqa: E402
+from routers import shops as shops_router  # noqa: E402
 
 # Every module-level RateLimiter instance in routers/auth.py — overridden to
 # a no-op for the default `client` fixture so ordinary auth/billing tests
@@ -68,6 +69,7 @@ _RATE_LIMITERS = [
     auth_router.verify_email_rate_limit,
     plans_router.preview_rate_limit,
     guides_router.guide_rate_limit,
+    shops_router.nearby_shops_rate_limit,
 ]
 
 
@@ -95,6 +97,23 @@ def _fresh_vehicle_catalog_cache():
         import redis as redis_sync
         client = redis_sync.from_url(settings.redis_url, socket_connect_timeout=1, socket_timeout=1)
         keys = list(client.scan_iter(match="vehicle_catalog:v1:*"))
+        if keys:
+            client.delete(*keys)
+        client.close()
+    except Exception:
+        pass
+    yield
+
+
+@pytest.fixture(autouse=True)
+def _fresh_nearby_shops_cache():
+    """Same reasoning as _fresh_vehicle_catalog_cache above, for the
+    nearby-shops cache (routers/shops.py, Redis key prefix "shops:v1:", see
+    services/places_provider.py)."""
+    try:
+        import redis as redis_sync
+        client = redis_sync.from_url(settings.redis_url, socket_connect_timeout=1, socket_timeout=1)
+        keys = list(client.scan_iter(match="shops:v1:*"))
         if keys:
             client.delete(*keys)
         client.close()
