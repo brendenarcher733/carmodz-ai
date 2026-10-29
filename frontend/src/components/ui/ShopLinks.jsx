@@ -37,7 +37,7 @@ export function ShopLinks({ modName, category, exactProduct, vehicle }) {
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between group"
+        className="focus-ring rounded-md tap-target md:min-h-0 w-full flex items-center justify-between group"
       >
         <div className="flex items-center gap-2">
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="text-accent">

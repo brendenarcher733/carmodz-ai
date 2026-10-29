@@ -1,17 +1,73 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
+import { Button } from '../components/ui/Button'
 import { ModCard } from '../components/ui/ModCard'
 import * as analytics from '../services/analytics'
+import { saveLocalPlan, getLocalPlan } from '../lib/savedPlan'
 
 export default function PlanPreview() {
   const { state } = useLocation()
-  const plan = state?.plan
-  const vehicle = state?.vehicle
 
-  useEffect(() => { if (plan) analytics.capture('plan_preview_viewed') }, [plan])
+  // Falls back to a previously-saved local plan only when there's no
+  // router state at all (a direct/refreshed visit) — see lib/savedPlan.js.
+  // A plan is only ever written there by an explicit "Save this build"
+  // click below, never silently, so this fallback only ever recovers a
+  // plan the user actually chose to keep.
+  const [recovered] = useState(() => (!state?.plan ? getLocalPlan() : null))
+  const plan    = state?.plan    || recovered?.plan
+  const vehicle = state?.vehicle || recovered?.vehicle
+
+  const [saved, setSaved]           = useState(() => Boolean(recovered))
+  const [shareState, setShareState] = useState('idle')   // 'idle' | 'copied' | 'error'
+
+  // `plan`'s reference is stable across re-renders triggered by `saved`/
+  // `shareState` changes (it's derived once from router state or the
+  // lazy-initialized `recovered`, never recreated) — this only re-fires if
+  // the actual plan changes, not on every render, so a save/share click
+  // afterward can't cause a duplicate view event.
+  useEffect(() => { if (plan) analytics.capture('plan_viewed') }, [plan])
 
   if (!plan) return <Navigate to="/planner" replace />
+
+  const handleSave = () => {
+    const success = saveLocalPlan(plan, vehicle)
+    if (success) setSaved(true)
+    // Fires on every click, success or not — a failed save (e.g. private
+    // browsing blocking localStorage) is still a meaningful funnel signal,
+    // not something to hide by only tracking the happy path.
+    analytics.capture('build_save_clicked', { success })
+  }
+
+  const handleShare = async () => {
+    const topMods = plan.mods.slice(0, 3).map(m => m.name).join(', ')
+    const text = `My ${vehicle?.year} ${vehicle?.make} ${vehicle?.model} mod plan from CarMods AI: ${topMods}. `
+      + `Estimated $${plan.total_min.toLocaleString()}–$${plan.total_max.toLocaleString()}.`
+    const url = window.location.origin   // the site itself, not this page — a refreshed/shared
+                                           // /plan/preview can't reload someone else's plan (no ID,
+                                           // no account behind it), so this invites them to build
+                                           // their own rather than overclaiming a shareable link.
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'My CarMods AI build plan', text, url })
+        analytics.capture('build_shared', { method: 'web_share' })
+      } catch {
+        // User dismissed the native share sheet — not an error.
+      }
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(`${text} ${url}`)
+      setShareState('copied')
+      analytics.capture('build_shared', { method: 'clipboard' })
+    } catch {
+      setShareState('error')
+    } finally {
+      setTimeout(() => setShareState('idle'), 2000)
+    }
+  }
 
   return (
     <div className="page-shell relative">
@@ -93,14 +149,30 @@ export default function PlanPreview() {
         </div>
 
         <Card padding="lg" className="text-center">
-          <p className="text-body text-sm mb-4">
-            This plan isn't saved — it lives on this page only. Refreshing or leaving starts you over.
+          <p className="text-body text-sm mb-5">
+            {saved
+              ? 'Saved on this device — it’ll be here next time you visit from this browser.'
+              : 'This plan lives on this page only — save it so refreshing or leaving doesn’t lose it.'}
           </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-5">
+            <Button onClick={handleSave} disabled={saved} variant="primary" size="lg">
+              {saved ? 'Saved ✓' : 'Save this build'}
+            </Button>
+            <Button onClick={handleShare} variant="secondary" size="lg">
+              {shareState === 'copied' ? 'Copied!' : shareState === 'error' ? "Couldn't copy" : 'Share this build'}
+            </Button>
+          </div>
+
           <Link
             to="/planner"
-            className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-7 py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-200"
+            onClick={() => analytics.capture('build_another_clicked')}
+            className="inline-flex items-center gap-1.5 text-body text-sm font-medium hover:text-white transition-colors"
           >
-            Plan another build
+            Build another car
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M3 9L9 3M5 3h4v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </Link>
         </Card>
       </div>

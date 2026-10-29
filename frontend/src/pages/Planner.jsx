@@ -550,6 +550,14 @@ export default function Planner() {
     analytics.capture('planner_step_viewed', { step_index: step, step_name: STEPS[step] })
   }, [step])
 
+  // A distinct, one-time funnel-entry event — empty deps means this fires
+  // once per mount, not once per step like planner_step_viewed above. Kept
+  // separate rather than inferring "started" from step_index===0 so a
+  // PostHog funnel can use this as its own unambiguous first step.
+  useEffect(() => {
+    analytics.capture('planner_started')
+  }, [])
+
   // The make/model grid on step 0 is tall enough that picking a platform
   // often leaves the page scrolled well past the top — without resetting
   // on step change, the next step's content renders underneath the fixed
@@ -577,6 +585,16 @@ export default function Planner() {
       }
       if (!user) {
         const plan = await plansApi.preview(payload)
+        // plansApi.preview() runs the full generation inline and only
+        // resolves once a real plan exists — accurate to fire here. The
+        // authenticated path below is deliberately NOT paired with this
+        // event: buildsApi.create() only enqueues generation (status
+        // 'pending'), it resolves well before a plan actually exists, so
+        // firing plan_generated there would be wrong, not just incomplete.
+        analytics.capture('plan_generated', {
+          year: payload.year, make: payload.make, model: payload.model,
+          budget: payload.budget, goal: payload.goal, path: 'preview',
+        })
         navigate('/plan/preview', { state: { plan, vehicle: { year: payload.year, make: payload.make, model: payload.model } } })
         return
       }
@@ -811,7 +829,7 @@ export default function Planner() {
               size="lg"
               onClick={() => {
                 if (step === 0) {
-                  analytics.capture('vehicle_selected', { year: form.year, make: form.make, model: form.model })
+                  analytics.capture('vehicle_submitted', { year: form.year, make: form.make, model: form.model })
                 }
                 setStep(p => p + 1)
               }}

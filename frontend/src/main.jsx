@@ -38,6 +38,17 @@ function RouteTracker() {
   return null
 }
 
+// Authentication (login/JWT/protected routes) already exists, but signup
+// is closed — /signup redirects straight to /login (no Signup.jsx exists;
+// building one is out of scope here, see pages/Login.jsx). Landing on
+// this route at all is real signal that someone wanted to sign up, so
+// it's tracked right at the redirect instead of needing a signup page to
+// exist first — same useEffect-on-mount pattern as RouteTracker above.
+function SignupRedirect() {
+  useEffect(() => { analytics.capture('signup_started') }, [])
+  return <Navigate to="/login" replace />
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -47,7 +58,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             redirects to login instead of 404ing for anyone with an old link. */}
         <Routes>
           <Route path="/login"           element={<Login />}          />
-          <Route path="/signup"          element={<Navigate to="/login" replace />} />
+          <Route path="/signup"          element={<SignupRedirect />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password"  element={<ResetPassword />}  />
           <Route path="/verify-email"    element={<VerifyEmail />}    />

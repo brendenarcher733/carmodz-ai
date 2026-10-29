@@ -1,5 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import * as analytics from '../services/analytics'
+
+/* One event name across every homepage CTA, distinguished by properties —
+   same convention Planner.jsx's planner_step_viewed uses (one event,
+   step_index/step_name properties) rather than a new event name per
+   button. `cta`/`placement` are the only metadata: which button, where on
+   the page — nothing about the visitor themselves. */
+const trackCta = (cta, placement) => () => analytics.capture('homepage_cta_clicked', { cta, placement })
 
 /* ─── Scroll-reveal hook ─── */
 function useReveal(threshold = 0.12) {
@@ -184,23 +192,26 @@ export default function Landing() {
               className="animate-fade-up anim-delay-1 font-display font-black text-white leading-[0.98] tracking-[-0.03em] mb-4"
               style={{ fontSize: 'clamp(2rem, 4.4vw, 3.2rem)' }}
             >
-              Build your dream car <span className="text-accent">the smart way.</span>
+              Get a personalized mod plan <span className="text-accent">for your car.</span>
             </h1>
             <p className="animate-fade-up anim-delay-2 text-body text-base md:text-lg mb-8">
               Tell us your car, budget, and goals. Get a personalized, staged mod roadmap
               with real costs, install difficulty, and performance gains, in about 60 seconds.
             </p>
-            <div className="animate-fade-up anim-delay-3 flex flex-wrap gap-4">
-              <Link to="/planner"
+            <div className="animate-fade-up anim-delay-3 flex flex-wrap items-center gap-x-6 gap-y-4">
+              <Link to="/planner" onClick={trackCta('start_my_build', 'hero')}
                 className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-200 shadow-glow">
                 Start My Build
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </Link>
-              <Link to="/example-build"
-                className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/[0.12] text-white font-display font-semibold text-base px-8 py-4 rounded-xl hover:bg-white/[0.09] hover:border-white/[0.2] transition-all duration-200">
-                See Example Build
+              <Link to="/example-build" onClick={trackCta('see_example_build', 'hero')}
+                className="inline-flex items-center gap-1.5 text-body text-sm font-medium hover:text-white transition-colors">
+                See an example build
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M3 9L9 3M5 3h4v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </Link>
             </div>
           </div>
@@ -286,14 +297,14 @@ export default function Landing() {
               </ul>
 
               <div className="flex flex-wrap gap-4 mb-6">
-                <Link to="/planner"
+                <Link to="/planner" onClick={trackCta('start_my_build', 'plan_preview_section')}
                   className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-200 shadow-glow">
                   Start My Build
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </Link>
-                <Link to="/example-build"
+                <Link to="/example-build" onClick={trackCta('see_example_build', 'plan_preview_section')}
                   className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/[0.12] text-white font-display font-semibold text-base px-8 py-4 rounded-xl hover:bg-white/[0.09] hover:border-white/[0.2] transition-all duration-200 backdrop-blur-sm">
                   See Example Build
                 </Link>
@@ -398,11 +409,11 @@ export default function Landing() {
               <p className="text-body text-lg">Park your first build in under 60 seconds.</p>
             </div>
             <div className="flex gap-3 flex-shrink-0">
-              <Link to="/planner"
+              <Link to="/planner" onClick={trackCta('start_my_build', 'bottom_cta_strip')}
                 className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-7 py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-200 shadow-glow">
                 Start My Build
               </Link>
-              <Link to="/advisor"
+              <Link to="/advisor" onClick={trackCta('talk_to_advisor', 'bottom_cta_strip')}
                 className="inline-flex items-center gap-2 border border-white/[0.1] text-body font-display font-medium text-base px-7 py-3.5 rounded-xl hover:border-white/[0.22] hover:text-white transition-all duration-200">
                 Talk to Advisor
               </Link>

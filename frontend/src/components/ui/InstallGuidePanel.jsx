@@ -50,7 +50,7 @@ export function InstallGuidePanel({ mod, vehicle }) {
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        className="focus-ring-ai rounded-md w-full flex items-center justify-between group"
+        className="focus-ring-ai rounded-md tap-target md:min-h-0 w-full flex items-center justify-between group"
       >
         <div className="flex items-center gap-2">
           {/* `text-ai` — this content is AI-assisted, same color convention
