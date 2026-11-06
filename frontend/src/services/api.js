@@ -97,6 +97,10 @@ api.interceptors.response.use(
 // Can take 25-60s on the AI path, so this call gets its own longer timeout.
 export const plansApi = {
   preview: (data) => api.post('/api/plans/preview', data, { timeout: 120000 }),
+  // "Email me this plan" — no account involved. The plan sent is whatever
+  // the caller already has in memory (an anonymous preview is never
+  // persisted, so there's nothing to look up by ID).
+  email: (email, plan) => api.post('/api/plans/email', { email, plan }),
 }
 
 export const buildsApi = {

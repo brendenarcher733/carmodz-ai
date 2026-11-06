@@ -68,6 +68,7 @@ _RATE_LIMITERS = [
     auth_router.resend_verification_rate_limit,
     auth_router.verify_email_rate_limit,
     plans_router.preview_rate_limit,
+    plans_router.email_plan_rate_limit,
     guides_router.guide_rate_limit,
     shops_router.nearby_shops_rate_limit,
 ]

@@ -5,6 +5,61 @@ import { Button } from '../components/ui/Button'
 import { ModCard } from '../components/ui/ModCard'
 import * as analytics from '../services/analytics'
 import { saveLocalPlan, getLocalPlan } from '../lib/savedPlan'
+import { plansApi } from '../services/api'
+
+/* ─── "Email me this plan" — a lightweight lead capture, not an account.
+   Sits as its own inline card directly under the plan output (the mods
+   list), separate from the Save/Share/Build-another card below it — this
+   is specifically "send me a copy," not "what do I do with this page." */
+function EmailPlanPrompt({ plan }) {
+  const [email, setEmail]   = useState('')
+  const [status, setStatus] = useState('idle')   // 'idle' | 'sending' | 'sent' | 'error'
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setStatus('sending')
+    try {
+      await plansApi.email(email, plan)
+      setStatus('sent')
+      analytics.capture('plan_email_submitted')
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  if (status === 'sent') {
+    return (
+      <Card padding="lg" className="mb-10 text-center">
+        <p className="text-body text-sm">Sent — check your inbox for a copy of this plan.</p>
+      </Card>
+    )
+  }
+
+  return (
+    <Card padding="lg" className="mb-10">
+      <p className="font-display font-semibold text-white text-sm mb-1">Email me this plan</p>
+      <p className="text-muted text-xs mb-4">We'll send a copy to your inbox — no account needed.</p>
+      <form onSubmit={handleSubmit} className="flex flex-wrap gap-3">
+        <input
+          type="email"
+          required
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          aria-label="Email address"
+          className="field-input flex-1 min-w-[200px] !py-2.5 !px-3.5 text-sm"
+        />
+        <Button type="submit" variant="secondary" size="lg" loading={status === 'sending'}>
+          Send
+        </Button>
+      </form>
+      {status === 'error' && (
+        <p role="alert" className="text-xs text-red-400 mt-2">Couldn't send that — try again.</p>
+      )}
+    </Card>
+  )
+}
 
 export default function PlanPreview() {
   const { state } = useLocation()
@@ -147,6 +202,8 @@ export default function PlanPreview() {
             <ModCard key={`${mod.name}-${i}`} mod={mod} index={i} vehicle={vehicle} />
           ))}
         </div>
+
+        <EmailPlanPrompt plan={plan} />
 
         <Card padding="lg" className="text-center">
           <p className="text-body text-sm mb-5">
