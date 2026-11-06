@@ -145,10 +145,113 @@ function StepBar({ current }) {
    hatch is "My vehicle isn't listed" below, which is an explicit opt-in to
    free text, not an automatic fallback. */
 
-function VehicleSelector({ form, set }) {
+/* ─── "My vehicle isn't listed" — a dead end, not a detour ───
+   Used to feed free-text make/model/year straight into plan generation
+   (vehicle_verified=false). It no longer does: nothing we don't actually
+   support should produce a plan, so this captures interest instead —
+   email + whatever they typed, see backend/models/vehicle_waitlist.py. */
+function UnsupportedVehicleWaitlist({ make, model, set, onBack }) {
+  const [email, setEmail]   = useState('')
+  const [status, setStatus] = useState('idle')   // 'idle' | 'sending' | 'sent' | 'error'
+
+  const vehicleLabel = [make, model].filter(Boolean).join(' ').trim()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setStatus('sending')
+    try {
+      await vehiclesApi.joinWaitlist(email, make.trim(), model.trim())
+      setStatus('sent')
+      analytics.capture('vehicle_waitlist_submitted', { make, model })
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  if (status === 'sent') {
+    return (
+      <div className="animate-fade-in">
+        <h2 className="font-display font-black text-white text-2xl tracking-tight mb-2">You're on the list.</h2>
+        <p className="text-body text-sm mb-8">
+          We'll email you when we add {vehicleLabel || 'your vehicle'} to CarMods AI.
+        </p>
+        <button
+          type="button"
+          onClick={onBack}
+          className="focus-ring rounded-md text-muted text-sm hover:text-body transition-colors"
+        >
+          ← Back to the vehicle list
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="animate-fade-in">
+      <h2 className="font-display font-black text-white text-2xl tracking-tight mb-2">
+        We don't support {vehicleLabel || 'your vehicle'} yet.
+      </h2>
+      <p className="text-body text-sm mb-8">Leave your email and we'll notify you when we add it.</p>
+
+      <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="field-label mb-2">Make</label>
+            <input
+              className="field-input"
+              placeholder="e.g. Yugo"
+              value={make}
+              onChange={e => set('make', e.target.value)}
+              required
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="field-label mb-2">Model</label>
+            <input
+              className="field-input"
+              placeholder="e.g. GV"
+              value={model}
+              onChange={e => set('model', e.target.value)}
+              required
+            />
+          </div>
+        </div>
+        <div>
+          <label className="field-label mb-2">Email</label>
+          <input
+            className="field-input"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        {status === 'error' && (
+          <p role="alert" className="text-xs text-red-400">Couldn't submit that — try again.</p>
+        )}
+
+        <Button type="submit" size="lg" loading={status === 'sending'}>
+          Notify me
+        </Button>
+      </form>
+
+      <button
+        type="button"
+        onClick={onBack}
+        className="focus-ring rounded-md text-muted text-sm hover:text-body transition-colors"
+      >
+        ← Back to the vehicle list
+      </button>
+    </div>
+  )
+}
+
+function VehicleSelector({ form, set, unlisted, setUnlisted }) {
   const [yearMode, setYearMode]   = useState('quick')
   const [search, setSearch]       = useState('')
-  const [unlisted, setUnlisted]   = useState(false)
 
   const [makes, setMakes]               = useState([])
   const [makesLoading, setMakesLoading] = useState(true)
@@ -245,59 +348,17 @@ function VehicleSelector({ form, set }) {
     set('year', '')
   }
 
+  // A vehicle outside the catalog dead-ends here now — no plan is
+  // generated for it. canAdvance() (below, in the parent Planner
+  // component) also returns false for step 0 while unlisted, so there's
+  // no way forward past this except submitting the waitlist or going
+  // back to the real vehicle list.
   if (unlisted) {
     return (
-      <div className="animate-fade-in">
-        <h2 className="font-display font-black text-white text-2xl tracking-tight mb-2">
-          Tell us about your vehicle.
-        </h2>
-        <p className="text-body text-sm mb-8">
-          Not in our catalog yet — we'll still build a plan, just without a verified-fitment guarantee.
-        </p>
-
-        <div className="space-y-4 mb-6">
-          <div>
-            <label className="field-label mb-2">Make</label>
-            <input
-              className="field-input"
-              placeholder="e.g. Yugo"
-              value={form.make}
-              onChange={e => set('make', e.target.value)}
-              autoFocus
-            />
-          </div>
-          <div>
-            <label className="field-label mb-2">Model</label>
-            <input
-              className="field-input"
-              placeholder="e.g. GV"
-              value={form.model}
-              onChange={e => set('model', e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="field-label mb-2">Year</label>
-            <input
-              className="field-input max-w-[140px]"
-              type="number"
-              inputMode="numeric"
-              placeholder="e.g. 1986"
-              min="1950"
-              max={CURRENT_YEAR + 1}
-              value={form.year}
-              onChange={e => set('year', e.target.value)}
-            />
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={exitUnlisted}
-          className="focus-ring rounded-md text-muted text-sm hover:text-body transition-colors"
-        >
-          ← Back to the vehicle list
-        </button>
-      </div>
+      <UnsupportedVehicleWaitlist
+        make={form.make} model={form.model} set={set}
+        onBack={exitUnlisted}
+      />
     )
   }
 
@@ -529,6 +590,11 @@ export default function Planner() {
   const [step,    setStep]    = useState(0)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(null)
+  // Lifted out of VehicleSelector so canAdvance() below can see it — a
+  // vehicle outside the catalog must never be able to advance past step 0
+  // into the rest of the wizard, since no plan should ever be generated
+  // for it (see UnsupportedVehicleWaitlist).
+  const [unlisted, setUnlisted] = useState(false)
   const [form,    setForm]    = useState({
     title: '', year: '', make: '', model: '',
     budget: '', goal: '', experience: 'intermediate',
@@ -568,7 +634,10 @@ export default function Planner() {
   }, [step])
 
   const canAdvance = () => {
-    if (step === 0) return form.year && form.make && form.model
+    // Unsupported-vehicle mode is a dead end, not step 0 of the wizard —
+    // submitting the waitlist is the only action available there (see
+    // UnsupportedVehicleWaitlist), never "Continue" into budget/goal/etc.
+    if (step === 0) return !unlisted && form.year && form.make && form.model
     if (step === 1) return form.budget > 0 && form.goal
     if (step === 2) return form.experience
     return true
@@ -639,7 +708,7 @@ export default function Planner() {
         <StepBar current={step} />
 
         {/* ── Step 0: Platform ── */}
-        {step === 0 && <VehicleSelector form={form} set={set} />}
+        {step === 0 && <VehicleSelector form={form} set={set} unlisted={unlisted} setUnlisted={setUnlisted} />}
 
         {/* ── Step 1: Budget & Goal ── */}
         {step === 1 && (
@@ -810,42 +879,48 @@ export default function Planner() {
           </div>
         )}
 
-        {/* ── Navigation ── */}
-        <div className="flex items-center justify-between gap-4 mt-10 pt-8 border-t border-white/[0.05]">
-          <button
-            type="button"
-            onClick={() => setStep(p => p - 1)}
-            disabled={step === 0}
-            className="tap-target md:min-h-0 md:min-w-0 inline-flex items-center gap-2 px-3 -ml-3 rounded-xl text-body text-sm font-medium hover:text-white hover:bg-white/[0.05] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Back
-          </button>
-
-          {step < 3 ? (
-            <Button
-              size="lg"
-              onClick={() => {
-                if (step === 0) {
-                  analytics.capture('vehicle_submitted', { year: form.year, make: form.make, model: form.model })
-                }
-                setStep(p => p + 1)
-              }}
-              disabled={!canAdvance()}
+        {/* ── Navigation — hidden entirely in unsupported-vehicle mode.
+             UnsupportedVehicleWaitlist has its own submit action ("Notify
+             me") and its own "← Back to the vehicle list" link; a disabled
+             Back + disabled Continue row here would just be redundant
+             chrome under it, not a real second path forward. ── */}
+        {!(step === 0 && unlisted) && (
+          <div className="flex items-center justify-between gap-4 mt-10 pt-8 border-t border-white/[0.05]">
+            <button
+              type="button"
+              onClick={() => setStep(p => p - 1)}
+              disabled={step === 0}
+              className="tap-target md:min-h-0 md:min-w-0 inline-flex items-center gap-2 px-3 -ml-3 rounded-xl text-body text-sm font-medium hover:text-white hover:bg-white/[0.05] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              Continue
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </Button>
-          ) : (
-            <Button size="xl" onClick={submit} loading={loading} className="shadow-glow">
-              Build My Garage
-            </Button>
-          )}
-        </div>
+              Back
+            </button>
+
+            {step < 3 ? (
+              <Button
+                size="lg"
+                onClick={() => {
+                  if (step === 0) {
+                    analytics.capture('vehicle_submitted', { year: form.year, make: form.make, model: form.model })
+                  }
+                  setStep(p => p + 1)
+                }}
+                disabled={!canAdvance()}
+              >
+                Continue
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Button>
+            ) : (
+              <Button size="xl" onClick={submit} loading={loading} className="shadow-glow">
+                Build My Garage
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -23,8 +23,11 @@ import logging
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
+from core import analytics
 from core.database import get_db
+from core.rate_limit import RateLimiter
 from models.vehicle import VehicleLookupResponse, VehicleMakeOut, VehicleModelOut, VehicleProductionRangeOut
+from models.vehicle_waitlist import VehicleWaitlistRequest, VehicleWaitlistResponse
 from services.vehicle_service import (
     VEHICLE_CATALOG_CACHE_TTL_SECONDS,
     check_vehicle,
@@ -33,10 +36,16 @@ from services.vehicle_service import (
     makes_cache_key,
     models_cache_key,
 )
+from services.vehicle_waitlist_service import submit_vehicle_waitlist
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/vehicles", tags=["Vehicles"])
+
+# No AI/email cost per call, but still a public write endpoint — same
+# defense-in-depth rate limiting every other anonymous-reachable write in
+# this app gets (routers/plans.py's email_plan_rate_limit, etc.).
+waitlist_rate_limit = RateLimiter(times=10, seconds=600, scope="vehicle_waitlist")
 
 
 async def _cache_get(redis, key: str) -> list | None:
@@ -133,3 +142,14 @@ def lookup_vehicle(
         production_ranges=ranges_out,
         message=result.message,
     )
+
+
+@router.post("/waitlist", response_model=VehicleWaitlistResponse, dependencies=[Depends(waitlist_rate_limit)])
+def join_vehicle_waitlist(data: VehicleWaitlistRequest, db: Session = Depends(get_db)):
+    """"My vehicle isn't listed" dead-ends here now, not at plan
+    generation — see pages/Planner.jsx's VehicleSelector. Pure capture, no
+    plan, no AI call, no email sent (see services/vehicle_waitlist_service.py
+    for why)."""
+    capture = submit_vehicle_waitlist(db, data)
+    analytics.capture("vehicle_waitlist_submitted", {"make": data.make, "model": data.model})
+    return VehicleWaitlistResponse(id=capture.id)

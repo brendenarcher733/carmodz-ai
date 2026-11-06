@@ -52,6 +52,7 @@ from routers import auth as auth_router  # noqa: E402
 from routers import plans as plans_router  # noqa: E402
 from routers import guides as guides_router  # noqa: E402
 from routers import shops as shops_router  # noqa: E402
+from routers import vehicles as vehicles_router  # noqa: E402
 
 # Every module-level RateLimiter instance in routers/auth.py — overridden to
 # a no-op for the default `client` fixture so ordinary auth/billing tests
@@ -71,6 +72,7 @@ _RATE_LIMITERS = [
     plans_router.email_plan_rate_limit,
     guides_router.guide_rate_limit,
     shops_router.nearby_shops_rate_limit,
+    vehicles_router.waitlist_rate_limit,
 ]
 
 

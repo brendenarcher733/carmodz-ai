@@ -225,6 +225,9 @@ export const vehiclesApi = {
   getModels: (make)       => api.get(`/api/vehicles/makes/${encodeURIComponent(make)}/models`),
   lookup:    (make, model, year) =>
     api.get('/api/vehicles/lookup', { params: { make, model, year } }),
+  // "My vehicle isn't listed" — a plain capture (email + what they typed),
+  // no plan generated. See pages/Planner.jsx's VehicleSelector.
+  joinWaitlist: (email, make, model) => api.post('/api/vehicles/waitlist', { email, make, model }),
 }
 
 export const adminApi = {
