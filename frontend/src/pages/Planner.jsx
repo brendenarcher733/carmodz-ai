@@ -189,7 +189,7 @@ function UnsupportedVehicleWaitlist({ make, model, set, onBack }) {
   return (
     <div className="animate-fade-in">
       <h2 className="font-display font-black text-white text-2xl tracking-tight mb-2">
-        We don't support {vehicleLabel || 'your vehicle'} yet.
+        We don't have deep data on {vehicleLabel || 'your vehicle'} yet.
       </h2>
       <p className="text-body text-sm mb-8">Leave your email and we'll notify you when we add it.</p>
 
