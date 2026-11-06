@@ -55,6 +55,14 @@ class Settings(BaseSettings):
     # same pattern as AI_PROVIDER=mock. Set EMAIL_PROVIDER=smtp + the SMTP_*
     # vars below to actually send (works with Gmail, SendGrid, Postmark, SES,
     # or any other SMTP-capable provider — no vendor lock-in).
+    #
+    # EMAIL_PROVIDER=brevo_api is the second real option, added after
+    # confirming live in production that Railway blocks outbound SMTP ports
+    # entirely (587 and Brevo's documented 2525 workaround both timed out at
+    # the socket level — see core/email.py). Brevo's HTTP API rides over
+    # port 443 like every other outbound call this app already makes
+    # successfully (Anthropic, PostHog), so it isn't subject to that block.
+    # Uses the same SMTP_FROM_EMAIL as the sender address either way.
     email_provider:   str = Field(default="mock", alias="EMAIL_PROVIDER")
     smtp_host:        str = Field(default="", alias="SMTP_HOST")
     smtp_port:        int = Field(default=587, alias="SMTP_PORT")
@@ -62,6 +70,7 @@ class Settings(BaseSettings):
     smtp_password:    str = Field(default="", alias="SMTP_PASSWORD")
     smtp_from_email:  str = Field(default="noreply@carmods.ai", alias="SMTP_FROM_EMAIL")
     smtp_use_tls:     bool = Field(default=True, alias="SMTP_USE_TLS")
+    brevo_api_key:    str = Field(default="", alias="BREVO_API_KEY")
 
     # Email-verification gating — both default to today's fully-open
     # behavior. Each is a config change, not a code change, by design:
