@@ -26,6 +26,7 @@ const GOALS = [
   { value: 'daily driver upgrades',    label: 'Daily Driver',       desc: 'Comfortable, reliable, noticeably better' },
   { value: 'budget performance build', label: 'Budget Build',       desc: 'Maximum impact per dollar' },
   { value: 'street performance',       label: 'Street Performance', desc: 'Fast on the street, still driveable' },
+  { value: 'handling and grip',        label: 'Handling',           desc: 'Grip, suspension, and cornering' },
   { value: 'track focused setup',      label: 'Track Build',        desc: 'Circuit performance, safety first' },
   { value: 'cosmetic upgrades',        label: 'Cosmetic',           desc: 'Looks, stance, and presence' },
   { value: 'sound upgrades',           label: 'Sound Build',        desc: 'Exhaust, audio, induction' },

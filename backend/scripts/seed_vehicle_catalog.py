@@ -78,41 +78,11 @@ CATALOG: dict[str, list[dict]] = {
         _single("LaFerrari", 2013, 2018, _wiki("LaFerrari")),
         _single("Enzo", 2002, 2004, _wiki("Ferrari Enzo")),
     ],
-    "Lamborghini": [
-        _single("Huracán", 2014, None, _wiki("Lamborghini Huracán")),
-        _single("Aventador", 2011, 2022, _wiki("Lamborghini Aventador")),
-        _single("Urus", 2018, None, _wiki("Lamborghini Urus")),
-        _single("Gallardo", 2003, 2013, _wiki("Lamborghini Gallardo")),
-        _single("Murciélago", 2001, 2010, _wiki("Lamborghini Murciélago")),
-    ],
-    "McLaren": [
-        _single("720S", 2017, 2022, _wiki("McLaren 720S")),
-        _single("570S", 2015, 2020, _wiki("McLaren 570S")),
-        _single("Senna", 2018, 2019, _wiki("McLaren Senna")),
-        _single("P1", 2013, 2015, _wiki("McLaren P1")),
-        _single("Artura", 2021, None, _wiki("McLaren Artura")),
-    ],
     "Aston Martin": [
         _single("DB11", 2016, 2023, _wiki("Aston Martin DB11")),
         _single("DBX", 2020, None, _wiki("Aston Martin DBX")),
         _single("Vantage", 2018, None, _wiki("Aston Martin Vantage (2018)")),
         _single("DBS Superleggera", 2018, 2023, _wiki("Aston Martin DBS Superleggera")),
-    ],
-    "Bugatti": [
-        _single("Veyron", 2005, 2015, _wiki("Bugatti Veyron")),
-        _single("Chiron", 2016, 2024, _wiki("Bugatti Chiron")),
-    ],
-    "Koenigsegg": [
-        _single("Agera", 2010, 2018, _wiki("Koenigsegg Agera")),
-        _single("Jesko", 2020, None, _wiki("Koenigsegg Jesko")),
-        _single("Regera", 2015, 2021, _wiki("Koenigsegg Regera")),
-    ],
-    "Pagani": [
-        _single("Huayra", 2011, None, _wiki("Pagani Huayra")),
-        _single("Zonda", 1999, 2017, _wiki("Pagani Zonda")),
-    ],
-    "Rimac": [
-        _single("Nevera", 2021, None, _wiki("Rimac Nevera")),
     ],
 
     # ── European Premium ──────────────────────────────────────────────────────
@@ -127,22 +97,6 @@ CATALOG: dict[str, list[dict]] = {
         _single("F-Type", 2013, 2024, _wiki("Jaguar F-Type")),
         _single("F-Pace", 2016, None, _wiki("Jaguar F-Pace")),
         _single("XE", 2015, 2023, _wiki("Jaguar XE")),
-    ],
-    "Bentley": [
-        _single("Continental GT", 2003, None, _wiki("Bentley Continental GT")),
-        _single("Bentayga", 2015, None, _wiki("Bentley Bentayga")),
-        _single("Flying Spur", 2005, None, _wiki("Bentley Flying Spur")),
-    ],
-    "Rolls-Royce": [
-        _single("Ghost", 2009, None, _wiki("Rolls-Royce Ghost")),
-        _single("Cullinan", 2018, None, _wiki("Rolls-Royce Cullinan")),
-        _single("Phantom", 2003, None, _wiki("Rolls-Royce Phantom (2003)")),
-        _single("Wraith", 2013, 2023, _wiki("Rolls-Royce Wraith")),
-    ],
-    "Maserati": [
-        _single("GranTurismo", 2007, None, _wiki("Maserati GranTurismo")),
-        _single("MC20", 2020, None, _wiki("Maserati MC20")),
-        _single("Ghibli", 2013, 2024, _wiki("Maserati Ghibli (M157)")),
     ],
     "Alfa Romeo": [
         _single("Giulia", 2016, None, _wiki("Alfa Romeo Giulia (952)")),
@@ -437,6 +391,35 @@ def _invalidate_cache() -> None:
         )
 
 
+def _deactivate_stale(db) -> dict:
+    """Mirrors check_vehicle's own framing (see services/vehicle_service.py):
+    deactivating a catalog entry means "stop vouching for this," not "erase
+    that it ever existed" — so a make/model removed from CATALOG is flipped
+    to is_active=False here, never deleted. Self-correcting on every run:
+    removing an entry from CATALOG and re-seeding is enough, no separate
+    cleanup script needed."""
+    normalized_catalog = {normalize_name(name): entries for name, entries in CATALOG.items()}
+    deactivated_makes = 0
+    deactivated_models = 0
+
+    for make in db.query(VehicleMake).filter(VehicleMake.is_active.is_(True)).all():
+        entries = normalized_catalog.get(make.normalized_name)
+        if entries is None:
+            make.is_active = False
+            deactivated_makes += 1
+            entries = []  # every model under a deactivated make is stale too
+
+        current_model_names = {normalize_name(e["name"]) for e in entries}
+        for model in db.query(VehicleModel).filter(
+            VehicleModel.make_id == make.id, VehicleModel.is_active.is_(True)
+        ).all():
+            if model.normalized_name not in current_model_names:
+                model.is_active = False
+                deactivated_models += 1
+
+    return {"deactivated_makes": deactivated_makes, "deactivated_models": deactivated_models}
+
+
 def seed(db=None) -> dict:
     """Idempotent: safe to run repeatedly. Matches existing rows by
     (make normalized_name), (make_id, model normalized_name), and
@@ -460,9 +443,11 @@ def seed(db=None) -> dict:
                 model_count += 1
                 range_count += n_ranges
 
+        deactivation_stats = _deactivate_stale(db)
+
         db.commit()
         _invalidate_cache()
-        stats = {"makes": make_count, "models": model_count, "ranges": range_count}
+        stats = {"makes": make_count, "models": model_count, "ranges": range_count, **deactivation_stats}
         logger.info("Vehicle catalog seed complete: %s", stats)
         return stats
     finally:
