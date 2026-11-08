@@ -24,6 +24,7 @@ from core.config import settings
 from models.recommendation import EvaluatedModRecommendation, ModRecommendation, ModRecommendationsResponse
 from services.fitment_service import evaluate_fitment
 from services.vehicle_service import normalize_name
+from services.verified_parts import get_verified_parts, get_platform_rules, has_verified_parts, is_verified_part
 
 logger = logging.getLogger(__name__)
 
@@ -283,16 +284,66 @@ def _parse_recommendations(
             )
             continue
 
+        # Override fitment for parts confirmed in the verified catalog.
+        verified_match, verified_data = is_verified_part(base.name, normalized_make, normalized_model)
+
+        rec_data = base.model_dump()
+
+        if verified_match and verified_data:
+            fitment_status = "verified"
+            fitment_reason = verified_data.get("fitment_note", f"Verified for {make} {model}.")
+            fitment_source = "verified_parts_catalog"
+            # Override AI-generated fields with catalog-researched values.
+            for field in [
+                "price_min", "price_max", "difficulty",
+                "why", "impact", "compatibility_note",
+                "tradeoff", "suggested_search_terms",
+            ]:
+                if field in verified_data:
+                    rec_data[field] = verified_data[field]
+        else:
+            fitment_status = fitment.status
+            fitment_reason = fitment.reason
+            fitment_source = fitment.source
+
         valid.append(EvaluatedModRecommendation(
-            **base.model_dump(),
-            fitment_status=fitment.status,
-            fitment_reason=fitment.reason,
-            fitment_source=fitment.source,
+            **rec_data,
+            fitment_status=fitment_status,
+            fitment_reason=fitment_reason,
+            fitment_source=fitment_source,
         ))
 
     valid = _dedupe_recommendations(valid)
     valid = _trim_to_budget(valid, budget)
     return valid
+
+
+def _build_verified_parts_section(parts: list[dict], rules: list[str], make: str, model: str) -> str:
+    """Build the verified-parts block appended to the recommendations prompt.
+    rules come from the catalog entry for this exact platform — never hardcoded here.
+    """
+    lines = [
+        f"\n\n--- VERIFIED PARTS FOR {make.upper()} {model.upper()} ---",
+        "IMPORTANT: You MUST recommend only from the verified parts list below for this vehicle.",
+        "These parts have been confirmed to fit this exact platform by the community and verified retailers.",
+        "Use the EXACT part names as written below — do not paraphrase or abbreviate.",
+        "",
+    ]
+    if rules:
+        lines.append("PLATFORM-SPECIFIC RULES FOR THIS VEHICLE:")
+        for rule in rules:
+            lines.append(f"• {rule}")
+        lines.append("")
+    lines.append("AVAILABLE VERIFIED PARTS (select the best subset for the stated budget):")
+    for part in sorted(parts, key=lambda p: (p["priority"], p["price_min"])):
+        lines.append(
+            f"• {part['name']} — ${part['price_min']}–${part['price_max']} "
+            f"— Stage {part['stage']} — {part['fitment_note']}"
+        )
+    lines.append(
+        "\nDo not recommend any parts not on this list for this vehicle and goal combination."
+    )
+    return "\n".join(lines)
 
 
 def _build_recommendations_prompt(build, vehicle_verified: bool = True) -> str:
@@ -312,7 +363,7 @@ def _build_recommendations_prompt(build, vehicle_verified: bool = True) -> str:
         "and note fitment uncertainty in compatibility_note where it's relevant."
     )
 
-    return f"""You are a car modification expert with deep knowledge of aftermarket parts.
+    base_prompt = f"""You are a car modification expert with deep knowledge of aftermarket parts.
 Recommend realistic aftermarket modifications for this specific vehicle by calling the
 submit_mod_recommendations tool.
 
@@ -346,6 +397,18 @@ write paragraphs, and do not repeat the same information across fields:
   e.g. "K&N cold air intake", "Borla S-Type cat-back exhaust") to help the user
   search for this part. These are search terms, NOT a guess at an exact SKU,
   part number, or model-year-specific product — never invent one.{unverified_note}"""
+
+    categories_list = build.categories if build.categories else ["performance", "handling"]
+    normalized_make = normalize_name(build.make)
+    normalized_model = normalize_name(build.model)
+
+    if has_verified_parts(normalized_make, normalized_model, categories_list):
+        verified = get_verified_parts(normalized_make, normalized_model, categories_list, build.budget)
+        rules = get_platform_rules(normalized_make, normalized_model)
+        if verified:
+            base_prompt += _build_verified_parts_section(verified, rules, build.make, build.model)
+
+    return base_prompt
 
 
 def generate_build_recommendations(
