@@ -73,7 +73,10 @@ export function ModCard({ mod, index, vehicle }) {
 
         {mod.compatibility_note && (
           <div className="mt-3 space-y-1.5">
-            <Alert variant="warning" className="!rounded-lg !py-2">
+            {/* A verified part's compatibility_note is researched context
+                ("pairs well with X"), not a caution — it shouldn't wear the
+                same warning triangle as an unconfirmed-fitment mod. */}
+            <Alert variant={mod.fitment_status === 'verified' ? 'success' : 'warning'} className="!rounded-lg !py-2">
               <span className="text-xs leading-snug">{mod.compatibility_note}</span>
             </Alert>
           </div>
