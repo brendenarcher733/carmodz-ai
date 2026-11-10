@@ -2,6 +2,7 @@
 # Authentication endpoints: signup, login, logout, refresh, me,
 # email verification, forgot/reset password.
 
+import logging
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -26,6 +27,7 @@ from models.user import (
 
 router  = APIRouter(prefix="/api/auth", tags=["Auth"])
 bearer  = HTTPBearer(auto_error=False)
+logger  = logging.getLogger(__name__)
 
 # Brute-force protection: existing limits on the endpoints that were already
 # here, plus new ones sized to each new endpoint's actual abuse profile.
@@ -274,7 +276,14 @@ def signup(data: UserCreate, request: Request, response: Response, db: Session =
     db.refresh(user)
 
     verify_token = _create_action_token(db, user, "verify_email", EMAIL_VERIFICATION_TTL_HOURS)
-    _send_verification_email(user, verify_token)
+    try:
+        _send_verification_email(user, verify_token)
+    except Exception:
+        # Non-fatal — the account is fully usable without a verified email
+        # (see require_verified_email() above). Logged, not silent: an email
+        # outage here should be visible in Railway logs even though it no
+        # longer blocks signup.
+        logger.warning("Failed to send verification email to user %s", user.id, exc_info=True)
 
     analytics.identify(user.id, {"email": user.email, "name": user.name})
     analytics.capture(user.id, "user_signed_up")
