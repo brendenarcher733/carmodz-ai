@@ -183,6 +183,8 @@ export const advisorApi = {
 export const authApi = {
   login: (email, password) =>
     api.post('/api/auth/login', { email, password }),
+  signup: (name, email, password) =>
+    api.post('/api/auth/signup', { name, email, password }),
   me: () => api.get('/api/auth/me'),
 
   // refresh_token itself travels as an httpOnly cookie the browser attaches

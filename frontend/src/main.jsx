@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import * as analytics from './services/analytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -15,6 +15,7 @@ import Builds          from './pages/Builds'
 import BuildDetail     from './pages/BuildDetail'
 import Advisor         from './pages/Advisor'
 import Login           from './pages/Login'
+import Signup          from './pages/Signup'
 import ForgotPassword  from './pages/ForgotPassword'
 import ResetPassword   from './pages/ResetPassword'
 import VerifyEmail     from './pages/VerifyEmail'
@@ -38,27 +39,15 @@ function RouteTracker() {
   return null
 }
 
-// Authentication (login/JWT/protected routes) already exists, but signup
-// is closed — /signup redirects straight to /login (no Signup.jsx exists;
-// building one is out of scope here, see pages/Login.jsx). Landing on
-// this route at all is real signal that someone wanted to sign up, so
-// it's tracked right at the redirect instead of needing a signup page to
-// exist first — same useEffect-on-mount pattern as RouteTracker above.
-function SignupRedirect() {
-  useEffect(() => { analytics.capture('signup_started') }, [])
-  return <Navigate to="/login" replace />
-}
-
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <RouteTracker />
-        {/* Login renders without the Navbar. Registration is closed — /signup
-            redirects to login instead of 404ing for anyone with an old link. */}
+        {/* Login and Signup render without the Navbar. */}
         <Routes>
           <Route path="/login"           element={<Login />}          />
-          <Route path="/signup"          element={<SignupRedirect />} />
+          <Route path="/signup"          element={<Signup />}         />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password"  element={<ResetPassword />}  />
           <Route path="/verify-email"    element={<VerifyEmail />}    />

@@ -37,6 +37,15 @@ export function AuthProvider({ children }) {
     return data
   }
 
+  const signup = async (name, email, password) => {
+    const data = await authApi.signup(name, email, password)
+    persistSession(data)
+    setUser(data.user)
+    analytics.identify(data.user)
+    analytics.startSessionRecording()
+    return data
+  }
+
   const logout = async () => {
     // Best-effort — the session should look logged-out locally even if the
     // network call fails, rather than leaving the user stuck.
@@ -56,6 +65,7 @@ export function AuthProvider({ children }) {
         user,
         ready,
         login,
+        signup,
         logout,
         resendVerification,
         emailVerified: !!user?.email_verified,
