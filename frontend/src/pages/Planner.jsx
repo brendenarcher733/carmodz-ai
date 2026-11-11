@@ -712,6 +712,12 @@ export default function Planner() {
         setShowUpgradePrompt(true)
         return
       }
+      if (e.status === 422) {
+        setLoading(false)
+        setUnlisted(true)
+        setStep(0)
+        return
+      }
       setError(e.message)
       setLoading(false)
     }
