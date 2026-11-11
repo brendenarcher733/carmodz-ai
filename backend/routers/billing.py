@@ -1,5 +1,5 @@
 # routers/billing.py
-# Stripe Checkout + Billing Portal + webhook for the $10/mo Pro tier.
+# Stripe Checkout + Billing Portal + webhook for the $5/mo Pro tier.
 #
 # Deliberately pure redirect-based Checkout — the backend creates a Session
 # and hands back its URL; the frontend just navigates there. No Stripe.js,

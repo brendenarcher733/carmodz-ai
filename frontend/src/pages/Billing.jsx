@@ -121,7 +121,7 @@ export default function Billing() {
                       {isPro ? 'Pro' : 'Free'}
                     </span>
                     <Badge variant={isPro ? 'accent' : 'default'} size="sm">
-                      {isPro ? '$10/mo' : 'current plan'}
+                      {isPro ? '$5/mo' : 'current plan'}
                     </Badge>
                   </div>
                   {isPro && usage?.subscription_cancel_at && (
@@ -151,7 +151,7 @@ export default function Billing() {
 
             {!isPro && (
               <Card padding="lg">
-                <p className="eyebrow mb-3">Pro — $10/mo</p>
+                <p className="eyebrow mb-3">Pro — $5/mo</p>
                 <ul className="space-y-2 text-sm text-body">
                   <li>Unlimited saved builds</li>
                   <li>Unlimited advisor chat</li>

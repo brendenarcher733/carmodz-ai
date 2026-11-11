@@ -6,6 +6,7 @@ import * as analytics from '../services/analytics'
 import { Spinner } from '../components/ui/Spinner'
 import { Button } from '../components/ui/Button'
 import { Alert } from '../components/ui/Alert'
+import UpgradePromptModal from '../components/UpgradePromptModal'
 import clsx from 'clsx'
 
 /* ─── Vehicle data ───
@@ -591,6 +592,7 @@ export default function Planner() {
   const [step,    setStep]    = useState(0)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(null)
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false)
   // Lifted out of VehicleSelector so canAdvance() below can see it — a
   // vehicle outside the catalog must never be able to advance past step 0
   // into the rest of the wizard, since no plan should ever be generated
@@ -654,6 +656,18 @@ export default function Planner() {
         budget: parseFloat(form.budget),
       }
       if (!user) {
+        if (localStorage.getItem('cm_preview_used')) {
+          analytics.capture('plan_limit_hit')
+          // Must clear loading here — nothing else will. This branch
+          // doesn't navigate away (the modal opens in place), and the
+          // existing catch/finally only resets loading on an error, not on
+          // this early return. Without this, BuildingOverlay (also
+          // fixed inset-0 z-50) stays mounted forever underneath/alongside
+          // the modal.
+          setLoading(false)
+          setShowUpgradePrompt(true)
+          return
+        }
         const plan = await plansApi.preview(payload)
         // plansApi.preview() runs the full generation inline and only
         // resolves once a real plan exists — accurate to fire here. The
@@ -666,6 +680,7 @@ export default function Planner() {
           budget: payload.budget, goal: payload.goal, path: 'preview',
         })
         navigate('/plan/preview', { state: { plan, vehicle: { year: payload.year, make: payload.make, model: payload.model } } })
+        localStorage.setItem('cm_preview_used', 'true')
         return
       }
       const build = await buildsApi.create(payload)
@@ -691,6 +706,9 @@ export default function Planner() {
   return (
     <div className="page-shell min-h-screen relative">
       {loading && <BuildingOverlay vehicle={vehicleLabel} />}
+      {showUpgradePrompt && (
+        <UpgradePromptModal onClose={() => setShowUpgradePrompt(false)} />
+      )}
 
       {/* Atmospheric background */}
       <div className="page-glow absolute top-0 inset-x-0 h-[32rem] pointer-events-none" />
