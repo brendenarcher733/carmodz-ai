@@ -152,11 +152,16 @@ function StepBar({ current }) {
    (vehicle_verified=false). It no longer does: nothing we don't actually
    support should produce a plan, so this captures interest instead —
    email + whatever they typed, see backend/models/vehicle_waitlist.py. */
-function UnsupportedVehicleWaitlist({ make, model, set, onBack }) {
+function UnsupportedVehicleWaitlist({ make, model, year, set, onBack }) {
   const [email, setEmail]   = useState('')
   const [status, setStatus] = useState('idle')   // 'idle' | 'sending' | 'sent' | 'error'
 
-  const vehicleLabel = [make, model].filter(Boolean).join(' ').trim()
+  // year is only ever non-empty here when this fired from a known model
+  // whose year fell outside every verified range (see the year input's
+  // onBlur below) — the free-text "my vehicle isn't listed" path always
+  // clears year, so this never shows a stray year next to a make/model that
+  // was never actually resolved against the catalog.
+  const vehicleLabel = [year, make, model].filter(Boolean).join(' ').trim()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -358,7 +363,7 @@ function VehicleSelector({ form, set, unlisted, setUnlisted }) {
   if (unlisted) {
     return (
       <UnsupportedVehicleWaitlist
-        make={form.make} model={form.model} set={set}
+        make={form.make} model={form.model} year={form.year} set={set}
         onBack={exitUnlisted}
       />
     )
@@ -523,6 +528,15 @@ function VehicleSelector({ form, set, unlisted, setUnlisted }) {
                 max={yearInputBounds.max}
                 value={form.year}
                 onChange={e => set('year', e.target.value)}
+                onBlur={() => {
+                  // Known model, year outside every verified range — same
+                  // dead-end as an unlisted make/model (a flat 422 on submit
+                  // teaches the user nothing and loses their email), so it
+                  // gets the same waitlist treatment. Checked on blur, not on
+                  // every keystroke, so this doesn't fire while they're still
+                  // mid-way through typing a real year.
+                  if (selectedModel && form.year && !isYearValid(form.year)) setUnlisted(true)
+                }}
                 autoFocus
               />
               <button type="button" onClick={() => setYearMode('quick')} className="focus-ring rounded-md text-muted text-sm hover:text-body transition-colors">
