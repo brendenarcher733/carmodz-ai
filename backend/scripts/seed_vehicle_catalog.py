@@ -192,7 +192,12 @@ CATALOG: dict[str, list[dict]] = {
     ],
     "Honda": [
         _single("Civic Type R", 1997, None, _wiki("Honda Civic Type R")),
-        _single("Civic Si", 1999, None, _wiki("Honda Civic Si")),
+        {
+            "name": "Civic Si",
+            "ranges": [
+                {"generation_label": "11th Gen (FE1)", "start": 2022, "end": None, "source_url": _wiki("Honda Civic Si")},
+            ],
+        },
         _single("S2000", 1999, 2009, _wiki("Honda S2000")),
         {
             "name": "NSX",
@@ -394,13 +399,22 @@ def _invalidate_cache() -> None:
 def _deactivate_stale(db) -> dict:
     """Mirrors check_vehicle's own framing (see services/vehicle_service.py):
     deactivating a catalog entry means "stop vouching for this," not "erase
-    that it ever existed" — so a make/model removed from CATALOG is flipped
-    to is_active=False here, never deleted. Self-correcting on every run:
-    removing an entry from CATALOG and re-seeding is enough, no separate
-    cleanup script needed."""
+    that it ever existed" — so a make/model/range removed or changed in
+    CATALOG is flipped to is_active=False here, never deleted. Self-correcting
+    on every run: editing CATALOG and re-seeding is enough, no separate
+    cleanup script needed.
+
+    Also handles a RANGE changing within a model that otherwise still exists
+    (e.g. Civic Si narrowing from a single 1999-present span to an 11th-gen-
+    only 2022-present one) — not just a whole make/model disappearing. Without
+    this, re-seeding only ADDS the new range row; the old one stays active
+    alongside it, and check_vehicle still matches years that were supposed to
+    stop being verified (found via a 2020 Civic Si still resolving VERIFIED
+    after a range-only catalog edit)."""
     normalized_catalog = {normalize_name(name): entries for name, entries in CATALOG.items()}
     deactivated_makes = 0
     deactivated_models = 0
+    deactivated_ranges = 0
 
     for make in db.query(VehicleMake).filter(VehicleMake.is_active.is_(True)).all():
         entries = normalized_catalog.get(make.normalized_name)
@@ -409,15 +423,30 @@ def _deactivate_stale(db) -> dict:
             deactivated_makes += 1
             entries = []  # every model under a deactivated make is stale too
 
-        current_model_names = {normalize_name(e["name"]) for e in entries}
+        current_entries_by_name = {normalize_name(e["name"]): e for e in entries}
         for model in db.query(VehicleModel).filter(
             VehicleModel.make_id == make.id, VehicleModel.is_active.is_(True)
         ).all():
-            if model.normalized_name not in current_model_names:
+            entry = current_entries_by_name.get(model.normalized_name)
+            if entry is None:
                 model.is_active = False
                 deactivated_models += 1
+                continue
 
-    return {"deactivated_makes": deactivated_makes, "deactivated_models": deactivated_models}
+            current_ranges = {(r["start"], r["end"]) for r in entry["ranges"]}
+            for prange in db.query(VehicleProductionRange).filter(
+                VehicleProductionRange.vehicle_model_id == model.id,
+                VehicleProductionRange.is_active.is_(True),
+            ).all():
+                if (prange.production_year_start, prange.production_year_end) not in current_ranges:
+                    prange.is_active = False
+                    deactivated_ranges += 1
+
+    return {
+        "deactivated_makes": deactivated_makes,
+        "deactivated_models": deactivated_models,
+        "deactivated_ranges": deactivated_ranges,
+    }
 
 
 def seed(db=None) -> dict:

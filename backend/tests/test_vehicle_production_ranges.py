@@ -9,6 +9,7 @@
 
 import pytest
 
+import scripts.seed_vehicle_catalog as seed_module
 from scripts.seed_vehicle_catalog import seed
 from services.vehicle_service import VehicleCheckStatus, check_vehicle
 
@@ -93,14 +94,58 @@ def test_gr_supra_before_its_range_is_invalid(db):
 
 
 # ── A normal continuous-production model, for contrast ──────────────────────
+# Civic Si used to be this example, but it's now generation-gated below —
+# Civic Type R (still one unbroken _single() range) takes its place.
 
 def test_continuous_model_every_sampled_year_in_range_is_valid(db):
     for year in (1999, 2010, 2020, 2026):
-        assert check_vehicle(db, "Honda", "Civic Si", year).status is VehicleCheckStatus.VERIFIED
+        assert check_vehicle(db, "Honda", "Civic Type R", year).status is VehicleCheckStatus.VERIFIED
 
 
 def test_continuous_model_before_its_start_is_invalid(db):
-    assert check_vehicle(db, "Honda", "Civic Si", 1990).status is VehicleCheckStatus.INVALID_YEAR
+    assert check_vehicle(db, "Honda", "Civic Type R", 1990).status is VehicleCheckStatus.INVALID_YEAR
+
+
+# ── Civic Si — generation-gated to the 11th gen (FE1, 2022+) only. The
+#    verified-parts catalog (services/verified_parts.py) is researched
+#    specifically for this chassis; a pre-2022 Si must never be treated as
+#    verified, or it silently inherits parts/fitment data for a car it isn't.
+
+def test_10th_gen_civic_si_is_invalid_year(db):
+    assert check_vehicle(db, "Honda", "Civic Si", 2020).status is VehicleCheckStatus.INVALID_YEAR
+
+
+def test_11th_gen_civic_si_is_valid(db):
+    assert check_vehicle(db, "Honda", "Civic Si", 2023).status is VehicleCheckStatus.VERIFIED
+
+
+def test_reseeding_after_a_range_narrows_deactivates_the_stale_range(db, monkeypatch):
+    """Reproduces the actual live-deploy bug this fix caused: a model that
+    stays in CATALOG but has its range narrowed (Civic Si: single 1999-present
+    -> 11th-gen-only 2022-present) must have its OLD range row deactivated on
+    re-seed, not just gain a new row alongside it. Without this, a 2020 Si
+    kept resolving VERIFIED via the still-active stale range even after the
+    catalog edit — confirmed by reproducing it against a real sqlite file
+    before this fix existed."""
+    wide_catalog = {
+        "Honda": [{"name": "Civic Si", "ranges": [
+            {"generation_label": None, "start": 1999, "end": None, "source_url": "https://example.com"},
+        ]}],
+    }
+    monkeypatch.setattr(seed_module, "CATALOG", wide_catalog)
+    seed_module.seed(db)
+    assert check_vehicle(db, "Honda", "Civic Si", 2020).status is VehicleCheckStatus.VERIFIED
+
+    narrow_catalog = {
+        "Honda": [{"name": "Civic Si", "ranges": [
+            {"generation_label": "11th Gen (FE1)", "start": 2022, "end": None, "source_url": "https://example.com"},
+        ]}],
+    }
+    monkeypatch.setattr(seed_module, "CATALOG", narrow_catalog)
+    stats = seed_module.seed(db)
+    assert stats["deactivated_ranges"] == 1
+    assert check_vehicle(db, "Honda", "Civic Si", 2020).status is VehicleCheckStatus.INVALID_YEAR
+    assert check_vehicle(db, "Honda", "Civic Si", 2023).status is VehicleCheckStatus.VERIFIED
 
 
 # ── Unknown model / known model invalid year, against the real catalog ─────

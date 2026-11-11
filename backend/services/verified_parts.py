@@ -19,6 +19,8 @@ from __future__ import annotations
 VERIFIED_PARTS: dict[tuple[str, str], dict] = {
 
     ("honda", "civic si"): {
+        "min_year": 2022,
+        "max_year": None,   # None means open-ended
 
         # Platform-specific rules injected into the LLM prompt.
         # Only assert facts that are true for the 2022–2025 Civic Si (FE1):
@@ -222,8 +224,22 @@ VERIFIED_PARTS: dict[tuple[str, str], dict] = {
 
 # ── Lookup helpers ─────────────────────────────────────────────────────────────
 
+def _year_in_range(platform: dict, year: int | None) -> bool:
+    """Return False if year is outside this platform's verified range."""
+    if year is None:
+        return True  # caller didn't supply a year; don't filter
+    min_y = platform.get("min_year")
+    max_y = platform.get("max_year")
+    if min_y is not None and year < min_y:
+        return False
+    if max_y is not None and year > max_y:
+        return False
+    return True
+
+
 def get_verified_parts(
-    make: str, model: str, categories: list[str], budget: float | None = None
+    make: str, model: str, categories: list[str],
+    budget: float | None = None, year: int | None = None
 ) -> list[dict]:
     """Return verified parts for a platform + category combination.
     make/model should be normalized (lowercase, stripped).
@@ -231,6 +247,8 @@ def get_verified_parts(
     """
     key = (make.lower().strip(), model.lower().strip())
     platform = VERIFIED_PARTS.get(key, {})
+    if not _year_in_range(platform, year):
+        return []
     result: list[dict] = []
     for cat in categories:
         for part in platform.get(cat, []):
@@ -241,25 +259,32 @@ def get_verified_parts(
     return result
 
 
-def get_platform_rules(make: str, model: str) -> list[str]:
+def get_platform_rules(make: str, model: str, year: int | None = None) -> list[str]:
     """Return platform-specific prompt rules for this make/model, or empty list.
     Rules are only asserted when they come from the catalog entry for this exact
     platform — never generated generically.
     """
     key = (make.lower().strip(), model.lower().strip())
-    return VERIFIED_PARTS.get(key, {}).get("rules", [])
+    platform = VERIFIED_PARTS.get(key, {})
+    if not _year_in_range(platform, year):
+        return []
+    return platform.get("rules", [])
 
 
-def is_verified_part(name: str, make: str, model: str) -> tuple[bool, dict | None]:
+def is_verified_part(
+    name: str, make: str, model: str, year: int | None = None
+) -> tuple[bool, dict | None]:
     """Check whether a part name matches a verified part for this platform.
     Returns (True, part_dict) on match, (False, None) otherwise.
     Case-insensitive exact match on name.
     """
     key = (make.lower().strip(), model.lower().strip())
     platform = VERIFIED_PARTS.get(key, {})
+    if not _year_in_range(platform, year):
+        return False, None
     name_lower = name.lower().strip()
     for key_cat, parts in platform.items():
-        if key_cat == "rules":
+        if key_cat in ("rules", "min_year", "max_year"):
             continue
         for part in parts:
             if part["name"].lower().strip() == name_lower:
@@ -267,8 +292,12 @@ def is_verified_part(name: str, make: str, model: str) -> tuple[bool, dict | Non
     return False, None
 
 
-def has_verified_parts(make: str, model: str, categories: list[str]) -> bool:
+def has_verified_parts(
+    make: str, model: str, categories: list[str], year: int | None = None
+) -> bool:
     """Return True if a verified list exists for this platform + any of these categories."""
     key = (make.lower().strip(), model.lower().strip())
     platform = VERIFIED_PARTS.get(key, {})
+    if not _year_in_range(platform, year):
+        return False
     return any(cat in platform for cat in categories)

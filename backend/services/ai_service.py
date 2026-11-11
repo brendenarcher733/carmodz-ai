@@ -226,7 +226,8 @@ def _trim_to_budget(recs: list, budget: float):
 
 
 def _parse_recommendations(
-    raw: dict, budget: float, make: str = "", model: str = "", vehicle_verified: bool = True
+    raw: dict, budget: float, make: str = "", model: str = "", vehicle_verified: bool = True,
+    year: int | None = None,
 ) -> list[EvaluatedModRecommendation]:
     """Turn a raw AI response into a list of valid EvaluatedModRecommendation
     objects, repairing or dropping individual bad items rather than
@@ -285,7 +286,7 @@ def _parse_recommendations(
             continue
 
         # Override fitment for parts confirmed in the verified catalog.
-        verified_match, verified_data = is_verified_part(base.name, normalized_make, normalized_model)
+        verified_match, verified_data = is_verified_part(base.name, normalized_make, normalized_model, year=year)
 
         rec_data = base.model_dump()
 
@@ -402,9 +403,9 @@ write paragraphs, and do not repeat the same information across fields:
     normalized_make = normalize_name(build.make)
     normalized_model = normalize_name(build.model)
 
-    if has_verified_parts(normalized_make, normalized_model, categories_list):
-        verified = get_verified_parts(normalized_make, normalized_model, categories_list, build.budget)
-        rules = get_platform_rules(normalized_make, normalized_model)
+    if has_verified_parts(normalized_make, normalized_model, categories_list, year=build.year):
+        verified = get_verified_parts(normalized_make, normalized_model, categories_list, build.budget, year=build.year)
+        rules = get_platform_rules(normalized_make, normalized_model, year=build.year)
         if verified:
             base_prompt += _build_verified_parts_section(verified, rules, build.make, build.model)
 
@@ -517,7 +518,8 @@ def _claude_build_recommendations(
         # JSON parsing. No regex, no markdown-fence stripping, no manual
         # json.loads: structured output replaces all of that.
         recs = _parse_recommendations(
-            tool_use.input, build.budget, make=build.make, model=build.model, vehicle_verified=vehicle_verified
+            tool_use.input, build.budget, make=build.make, model=build.model, vehicle_verified=vehicle_verified,
+            year=build.year,
         )
         if not recs:
             logger.warning(
@@ -593,7 +595,8 @@ def _openai_build_recommendations(
         raw = json.loads(resp.choices[0].message.content)
 
         recs = _parse_recommendations(
-            raw, build.budget, make=build.make, model=build.model, vehicle_verified=vehicle_verified
+            raw, build.budget, make=build.make, model=build.model, vehicle_verified=vehicle_verified,
+            year=build.year,
         )
         if not recs:
             logger.warning(
