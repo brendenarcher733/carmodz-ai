@@ -89,7 +89,13 @@ api.interceptors.response.use(
       if (!location.pathname.startsWith('/login')) location.assign('/login')
     }
 
-    return Promise.reject(new Error(extractErrorMessage(err)))
+    // .status preserved so callers that need to distinguish error types
+    // (e.g. a 403 build-limit hit vs. any other failure) don't have to
+    // fragile-match on message text — existing .message-only consumers are
+    // unaffected.
+    const error = new Error(extractErrorMessage(err))
+    error.status = err.response?.status
+    return Promise.reject(error)
   }
 )
 

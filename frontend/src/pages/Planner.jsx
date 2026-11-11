@@ -686,6 +686,18 @@ export default function Planner() {
       const build = await buildsApi.create(payload)
       navigate(`/builds/${build.id}`)
     } catch (e) {
+      // The authenticated equivalent of the anonymous preview-limit gate
+      // above: a real 403 from services/billing_service.enforce_build_limit
+      // (ENFORCE_USAGE_LIMITS=true, FREE_BUILD_LIMIT=1). Same modal, same
+      // event — UpgradePromptModal adapts its own copy/CTA for a logged-in
+      // user. Any other error (network, validation) still falls through to
+      // the plain error alert below.
+      if (user && e.status === 403) {
+        analytics.capture('plan_limit_hit')
+        setLoading(false)
+        setShowUpgradePrompt(true)
+        return
+      }
       setError(e.message)
       setLoading(false)
     }
