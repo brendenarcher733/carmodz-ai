@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from models.build import Build, BuildCreate
 from models.user import User
 from models.recommendation import Recommendation, EvaluatedModRecommendation
+from services.ai_service import _SHORT_TEXT_FIELD_LIMITS, _clean_short_text, _MAX_SEARCH_TERMS, _MAX_SEARCH_TERM_LEN
 from services.mock_ai import build_mod_plan
 from services.billing_service import enforce_build_limit
 from services.vehicle_service import VehicleCheckStatus, check_vehicle
@@ -158,13 +159,26 @@ def get_build_plan(db: Session, build_id: int, user_id: int):
         )
 
     recs = db.query(Recommendation).filter(Recommendation.build_id == build_id).all()
+    # Re-validating stored rows through EvaluatedModRecommendation on every
+    # read must never crash on a value that was already persisted — found
+    # live: a build whose "why" was saved at 241 chars (over the current
+    # 220-char limit, from before/outside the generation path's own
+    # sanitize step) made this endpoint 500 on every single load, forever,
+    # with no way to self-heal. Reusing ai_service's own write-path limits
+    # here closes that: any already-stored or future row gets the same
+    # truncation on the way out that new AI output already gets on the way in.
     mods = [
         EvaluatedModRecommendation(
             name=r.name, category=r.category,
             price_min=r.price_min, price_max=r.price_max,
             difficulty=r.difficulty, stage=r.stage, priority=r.priority,
-            why=r.why, impact=r.impact or "", compatibility_note=r.compatibility_note or "",
-            tradeoff=r.tradeoff or "", suggested_search_terms=r.suggested_search_terms or [],
+            why=_clean_short_text(r.why, _SHORT_TEXT_FIELD_LIMITS["why"]),
+            impact=_clean_short_text(r.impact or "", _SHORT_TEXT_FIELD_LIMITS["impact"]),
+            compatibility_note=_clean_short_text(r.compatibility_note or "", _SHORT_TEXT_FIELD_LIMITS["compatibility_note"]),
+            tradeoff=_clean_short_text(r.tradeoff or "", _SHORT_TEXT_FIELD_LIMITS["tradeoff"]),
+            suggested_search_terms=[
+                t.strip()[:_MAX_SEARCH_TERM_LEN] for t in (r.suggested_search_terms or []) if isinstance(t, str) and t.strip()
+            ][:_MAX_SEARCH_TERMS],
             fitment_status=r.fitment_status or "unknown",
             fitment_reason=r.fitment_reason, fitment_source=r.fitment_source,
         )
