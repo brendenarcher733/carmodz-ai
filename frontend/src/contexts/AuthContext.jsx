@@ -46,6 +46,16 @@ export function AuthProvider({ children }) {
     return data
   }
 
+  const refreshUser = async () => {
+    try {
+      const freshUser = await authApi.me();
+      localStorage.setItem('cm_user', JSON.stringify(freshUser));
+      setUser(freshUser);
+    } catch (err) {
+      console.error('refreshUser failed:', err);
+    }
+  };
+
   const logout = async () => {
     // Best-effort — the session should look logged-out locally even if the
     // network call fails, rather than leaving the user stuck.
@@ -67,6 +77,7 @@ export function AuthProvider({ children }) {
         login,
         signup,
         logout,
+        refreshUser,
         resendVerification,
         emailVerified: !!user?.email_verified,
       }}

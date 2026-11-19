@@ -33,7 +33,7 @@ function UsageRow({ label, used, limit }) {
 }
 
 export default function Billing() {
-  const { user } = useAuth()
+  const { user, refreshUser } = useAuth()
   const [searchParams] = useSearchParams()
   const [usage, setUsage] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -50,6 +50,14 @@ export default function Billing() {
   const isPro = user?.plan === 'pro'
   const success = searchParams.get('success') === '1'
   const canceled = searchParams.get('canceled') === '1'
+
+  useEffect(() => {
+    if (!success) return;
+    const timer = setTimeout(() => {
+      refreshUser();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [success])
 
   const handleUpgrade = async () => {
     setBusy(true)
