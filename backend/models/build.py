@@ -50,6 +50,8 @@ class Build(Base):
     error_message     = Column(Text, nullable=True)
     status_updated_at = Column(DateTime, default=datetime.utcnow)
 
+    stage_messages = Column(JSON, default=dict)  # {1: "message...", 2: "message..."}
+
     # One build → many recommendations
     recommendations = relationship("Recommendation", back_populates="build",
                                    cascade="all, delete-orphan")

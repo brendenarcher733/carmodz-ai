@@ -4,7 +4,7 @@
 from datetime import datetime
 from typing import Literal, Optional
 
-from sqlalchemy import Column, Integer, String, Float, JSON, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Float, JSON, DateTime, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -40,6 +40,11 @@ class Recommendation(Base):
     fitment_reason = Column(String(160), nullable=True)
     fitment_source = Column(String(80), nullable=True)
     created_at  = Column(DateTime, default=datetime.utcnow)
+
+    completed       = Column(Boolean, default=False, nullable=False, server_default="0")
+    completed_at    = Column(DateTime, nullable=True)
+    completed_by    = Column(String(10), nullable=True)   # "diy" | "shop" | null
+    completion_note = Column(Text, nullable=True)
 
     build = relationship("Build", back_populates="recommendations")
 
