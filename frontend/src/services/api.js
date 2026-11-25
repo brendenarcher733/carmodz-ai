@@ -123,6 +123,8 @@ export const buildsApi = {
   delete:          (id)   => api.delete(`/api/builds/${id}`),
   toggleFavourite: (id)   => api.patch(`/api/builds/${id}/favourite`),
   stats:           ()     => api.get('/api/builds/stats'),
+  completeMod: (buildId, recId, body) =>
+    api.patch(`/api/builds/${buildId}/recommendations/${recId}/complete`, body),
 }
 
 export const advisorApi = {

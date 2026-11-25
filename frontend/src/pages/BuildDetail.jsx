@@ -133,6 +133,7 @@ export default function BuildDetail() {
   const { status, retry } = useBuildStatus(id)
   const [retrying, setRetrying] = useState(false)
   const [build, setBuild] = useState(null)
+  const [stageMessages, setStageMessages] = useState({})
 
   // Fetched once for vehicle context during the generating state —
   // useBuildStatus intentionally only returns the lightweight status shape,
@@ -141,6 +142,15 @@ export default function BuildDetail() {
     if (!id) return
     buildsApi.get(id).then(setBuild).catch(() => {})
   }, [id])
+
+  // Syncs in once `build` actually loads, rather than reading build.stage_messages
+  // as a useState initializer — build starts null (this fetch is async and
+  // independent of the plan/status fetches below), and a useState initializer
+  // only ever runs on the very first render, so it would never pick up the
+  // real value once the fetch resolves.
+  useEffect(() => {
+    if (build?.stage_messages) setStageMessages(build.stage_messages)
+  }, [build])
 
   const isReady = status?.status === 'ready'
   const { plan, loading, error } = useBuildPlan(id, { enabled: isReady })
@@ -370,9 +380,30 @@ export default function BuildDetail() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {mods.map((mod, i) => (
-                  <ModCard key={mod.name} mod={mod} index={i} vehicle={vehicle} />
+                  <ModCard
+                    key={mod.name}
+                    mod={mod}
+                    index={i}
+                    vehicle={vehicle}
+                    buildId={id}
+                    onStageComplete={(stage, msg) =>
+                      setStageMessages(prev => ({ ...prev, [stage]: msg }))
+                    }
+                  />
                 ))}
               </div>
+
+              {stageMessages[stageNum] && (
+                <div className="mt-4 p-4 rounded-xl border border-ai/20 bg-ai/[0.06] flex gap-3">
+                  <div className="w-1 rounded-full bg-ai/40 flex-shrink-0" />
+                  <div>
+                    <div className="font-mono text-xs text-ai uppercase tracking-wider mb-1.5">
+                      Stage {stageNum} complete — before you start Stage {stageNum + 1}
+                    </div>
+                    <p className="text-sm text-body leading-relaxed">{stageMessages[stageNum]}</p>
+                  </div>
+                </div>
+              )}
             </section>
           )
         })}

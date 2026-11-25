@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, JSON, DateTime, Text, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from core.database import Base
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 
 
@@ -119,6 +119,24 @@ class BuildResponse(BaseModel):
     job_id:             Optional[str] = None
     used_mock_fallback: bool = False
     error_message:      Optional[str] = None
+
+    # Per-stage LLM-generated transition messages (see
+    # routers/builds.py's complete_recommendation), keyed by stage number
+    # as a string. Maps straight off Build.stage_messages via
+    # from_attributes — without this, a message generated in one session
+    # would vanish on the next page load even though it's correctly
+    # persisted, since nothing else exposes this column to the frontend.
+    stage_messages: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator("stage_messages", mode="before")
+    @classmethod
+    def _null_stage_messages_to_empty_dict(cls, v):
+        # Every build that existed before this column was added has it
+        # stored as SQL NULL, not {} — confirmed live: validating that
+        # straight against dict[str, str] 500s GET /api/builds/{id} for
+        # every single pre-existing build. None here means "no messages
+        # yet", same as an empty dict, not a data problem.
+        return v if v is not None else {}
 
     class Config:
         from_attributes = True
