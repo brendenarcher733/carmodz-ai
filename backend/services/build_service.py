@@ -181,6 +181,8 @@ def get_build_plan(db: Session, build_id: int, user_id: int):
             ][:_MAX_SEARCH_TERMS],
             fitment_status=r.fitment_status or "unknown",
             fitment_reason=r.fitment_reason, fitment_source=r.fitment_source,
+            id=r.id, completed=r.completed, completed_at=r.completed_at,
+            completed_by=r.completed_by, completion_note=r.completion_note,
         )
         for r in recs
     ]

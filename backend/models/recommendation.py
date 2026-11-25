@@ -132,6 +132,20 @@ class EvaluatedModRecommendation(ModRecommendation):
     fitment_reason: Optional[str] = Field(default=None, max_length=160)
     fitment_source: Optional[str] = Field(default=None, max_length=80)
 
+    # DB identity + completion state (see models/recommendation.py's
+    # Recommendation ORM columns) — needed so the frontend's mod-card
+    # checkmark has a rec_id to PATCH /complete against, and can render
+    # the real current completion state instead of always starting unchecked.
+    # Optional, not required — this class is also constructed before any DB
+    # row exists at all (fresh AI/mock output, anonymous previews, which are
+    # never persisted). None here means "nothing to mark complete yet", not
+    # a data-integrity gap.
+    id: Optional[int] = None
+    completed: bool = False
+    completed_at: Optional[datetime] = None
+    completed_by: Optional[str] = None
+    completion_note: Optional[str] = None
+
 
 class ModRecommendationsResponse(BaseModel):
     """Wrapper required because tool input_schema must be a JSON object at the
