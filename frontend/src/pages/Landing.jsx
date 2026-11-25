@@ -32,9 +32,9 @@ export default function Landing() {
 
           {/* Headline — left aligned */}
           <div className="mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent/20 bg-accent/[0.06] mb-7">
-              <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-              <span className="font-mono text-xs text-accent uppercase tracking-widest">Honda Civic Si</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/20 bg-white/[0.04] mb-7">
+              <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-pulse" />
+              <span className="font-mono text-xs text-muted uppercase tracking-widest">Honda Civic Si</span>
             </div>
 
             <h1 className="font-display font-black text-7xl md:text-8xl leading-[1.0] tracking-tight mb-5">
@@ -73,7 +73,7 @@ export default function Landing() {
                 src="/images/civic-si-2022.jpg"
                 alt="2022 Honda Civic Si"
                 className="w-full h-auto object-contain"
-                style={{ mixBlendMode: 'lighten', filter: 'saturate(1.3) hue-rotate(-8deg) brightness(1.1)' }}
+                style={{ mixBlendMode: 'lighten', filter: 'saturate(1.4) hue-rotate(-10deg) brightness(1.35)' }}
               />
               <div className="absolute bottom-4 left-5">
                 <span className="font-mono text-xs text-white/50 uppercase tracking-widest">2022 Honda Civic Si</span>
@@ -128,7 +128,7 @@ export default function Landing() {
 
               <div className="px-6 py-3 border-t border-white/[0.05] flex items-center justify-between">
                 <span className="font-mono text-xs text-muted">5 mods · 2 stages · $2,330–$3,450 total</span>
-                <span className="font-mono text-xs text-accent">Claude AI</span>
+                <span className="font-mono text-xs text-ai">Claude AI</span>
               </div>
             </div>
           </div>
