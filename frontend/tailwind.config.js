@@ -97,6 +97,10 @@ export default {
         'shimmer':   'shimmer 2s linear infinite',
         'spin-slow': 'spin 3s linear infinite',
         'float':     'float 4s ease-in-out infinite',
+        // Magic UI's BorderBeam — duration is set per-instance via the
+        // --duration CSS custom property (see components/magicui/BorderBeam.jsx),
+        // not hardcoded here, so multiple beams on a page can run at different speeds.
+        'border-beam': 'border-beam calc(var(--duration)*1s) infinite linear',
       },
       keyframes: {
         fadeUp: {
@@ -118,6 +122,9 @@ export default {
         float: {
           '0%,100%': { transform: 'translateY(0)' },
           '50%':     { transform: 'translateY(-8px)' },
+        },
+        'border-beam': {
+          '100%': { offsetDistance: '100%' },
         },
       },
     },

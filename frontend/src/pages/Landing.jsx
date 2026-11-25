@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { BorderBeam } from '../components/magicui/BorderBeam'
 
 const STEPS = [
   {
@@ -24,6 +25,16 @@ export default function Landing() {
 
       {/* ── Hero ── */}
       <section className="relative flex flex-col items-center justify-center px-6 md:px-16 pt-32 pb-20 overflow-hidden">
+
+        {/* Car background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <img
+            src="/images/build-hero.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-[0.09]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-obsidian/70 via-transparent to-obsidian/90" />
+        </div>
 
         {/* Background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-accent/[0.07] rounded-full blur-[140px] pointer-events-none" />
@@ -65,6 +76,7 @@ export default function Landing() {
           <div className="absolute inset-0 bg-accent/[0.06] rounded-3xl blur-2xl scale-105 pointer-events-none" />
 
           <div className="relative bg-surface border border-white/[0.08] rounded-2xl overflow-hidden">
+            <BorderBeam size={300} duration={10} colorFrom="#f97316" colorTo="transparent" />
             {/* Build header */}
             <div className="px-6 py-4 border-b border-white/[0.05] flex items-center justify-between">
               <div>
