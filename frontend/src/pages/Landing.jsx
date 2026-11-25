@@ -24,7 +24,7 @@ export default function Landing() {
     <div className="min-h-screen bg-obsidian text-white">
 
       {/* ── Hero ── */}
-      <section className="relative px-6 md:px-10 pt-16 pb-12 overflow-hidden">
+      <section className="relative px-6 md:px-10 pt-24 pb-12 overflow-hidden">
 
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-accent/[0.06] rounded-full blur-[150px] pointer-events-none" />
 
@@ -139,7 +139,7 @@ export default function Landing() {
       </section>
 
       {/* ── Stage tracker showcase ── */}
-      <section className="px-6 md:px-16 py-28 border-t border-white/[0.05]">
+      <section className="px-6 md:px-16 pt-10 pb-28 border-t border-white/[0.05]">
         <div className="max-w-4xl mx-auto">
           <div className="mb-12">
             <div className="font-mono text-xs text-ai uppercase tracking-widest mb-4">What makes this different</div>
