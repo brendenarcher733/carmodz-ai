@@ -32,9 +32,9 @@ export default function Landing() {
 
           {/* Headline — left aligned */}
           <div className="mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-ai/20 bg-ai/[0.06] mb-7">
-              <div className="w-1.5 h-1.5 rounded-full bg-ai animate-pulse" />
-              <span className="font-mono text-xs text-ai uppercase tracking-widest">Honda Civic Si</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent/20 bg-accent/[0.06] mb-7">
+              <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              <span className="font-mono text-xs text-accent uppercase tracking-widest">Honda Civic Si</span>
             </div>
 
             <h1 className="font-display font-black text-7xl md:text-8xl leading-[1.0] tracking-tight mb-5">
@@ -68,11 +68,11 @@ export default function Landing() {
             {/* Civic photo — lighten blend drops the pure-black studio backdrop so it
                 merges into the page with no visible edge; hue-rotate nudges the car's
                 paint (~#E8591A) toward the site's accent orange (#FF6B00) */}
-            <div className="relative rounded-2xl h-64 md:h-[27rem] overflow-hidden">
+            <div className="relative rounded-2xl overflow-hidden flex items-center justify-center">
               <img
                 src="/images/civic-si-2022.jpg"
                 alt="2022 Honda Civic Si"
-                className="absolute inset-0 w-full h-full object-cover object-center"
+                className="w-full h-auto object-contain"
                 style={{ mixBlendMode: 'lighten', filter: 'saturate(1.3) hue-rotate(7deg)' }}
               />
               <div className="absolute bottom-4 left-5">
