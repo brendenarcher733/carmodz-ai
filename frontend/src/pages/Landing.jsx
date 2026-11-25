@@ -24,7 +24,14 @@ export default function Landing() {
 
       {/* ── Hero ── */}
       <section className="relative min-h-[90vh] flex items-center px-6 md:px-16 overflow-hidden">
-        <div className="page-glow-ai absolute inset-0 pointer-events-none" />
+        <div className="absolute inset-0 pointer-events-none">
+          <img
+            src="/images/build-hero.jpg"
+            alt=""
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-auto object-contain opacity-60"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-obsidian via-obsidian/70 to-transparent" />
+        </div>
 
         <div className="relative max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-ai/20 bg-ai/[0.06] mb-10">
@@ -35,7 +42,7 @@ export default function Landing() {
           <h1 className="font-display font-black text-6xl md:text-7xl leading-[1.0] tracking-tight mb-8">
             Your build.<br />
             Stage by stage.<br />
-            <span className="text-ai">No wasted money.</span>
+            <span className="text-accent">No wasted money.</span>
           </h1>
 
           <p className="text-body text-lg leading-relaxed mb-10 max-w-lg">
