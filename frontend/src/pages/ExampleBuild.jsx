@@ -14,7 +14,7 @@ const DEMO = {
   model: 'Civic Si',
   goal:  'Fun Daily Driver',
   summary:
-    "Your 2018 Civic Si is already a capable platform with the K20C1 turbo motor. With a $2,500 budget we're targeting Stage 1 mods that dramatically improve driving engagement without sacrificing reliability or daily usability. Start with tires — they transform the car immediately and cost less than most people expect. The rear motor mount kills torque steer and makes the chassis feel planted. Intake and exhaust add character. Then an ECU tune ties everything together and wakes the engine up properly.",
+    "Your 2018 Civic Si is already a capable platform with the L15B7 1.5L turbo motor. With a $2,500 budget we're targeting Stage 1 mods that dramatically improve driving engagement without sacrificing reliability or daily usability. Start with tires — they transform the car immediately and cost less than most people expect. The rear motor mount kills torque steer and makes the chassis feel planted. Intake and exhaust add character. Then an ECU tune ties everything together and wakes the engine up properly.",
   total_min: 1710,
   total_max: 2950,
   hpMin: 35,
@@ -51,7 +51,7 @@ const DEMO = {
     {
       name:        'Cold Air Intake',
       category:    'performance',
-      why:         "Improves throttle response and adds an aggressive induction sound on the K20C1 turbocharged motor.",
+      why:         "Improves throttle response and adds an aggressive induction sound on the L15B7 turbocharged motor.",
       impact:      "+5-10 hp with better mid-range torque delivery.",
       price_min:   180,
       price_max:   350,
@@ -79,7 +79,7 @@ const DEMO = {
     {
       name:        'ECU Tune',
       category:    'performance',
-      why:         "The best horsepower-per-dollar modification on the K20C1 platform, and ties the whole Stage 1 build together.",
+      why:         "The best horsepower-per-dollar modification on the L15B7 platform, and ties the whole Stage 1 build together.",
       impact:      "+20-35 hp and noticeably more torque across the rev range on 93 octane.",
       price_min:   400,
       price_max:   650,
