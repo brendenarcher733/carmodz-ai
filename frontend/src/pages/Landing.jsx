@@ -23,124 +23,103 @@ export default function Landing() {
     <div className="min-h-screen bg-obsidian text-white">
 
       {/* ── Hero ── */}
-      <section className="relative min-h-screen flex items-center px-6 md:px-16 py-24 overflow-hidden">
-        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <section className="relative flex flex-col items-center justify-center px-6 md:px-16 pt-32 pb-20 overflow-hidden">
 
-          {/* Left: copy */}
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-ai/20 bg-ai/[0.06] mb-10">
-              <div className="w-1.5 h-1.5 rounded-full bg-ai animate-pulse" />
-              <span className="font-mono text-xs text-ai uppercase tracking-widest">Honda Civic Si</span>
-            </div>
+        {/* Background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-accent/[0.07] rounded-full blur-[140px] pointer-events-none" />
 
-            <h1 className="font-display font-black text-6xl md:text-7xl leading-[1.0] tracking-tight mb-8">
-              Your build.<br />
-              Stage by stage.<br />
-              <span className="text-accent">No wasted money.</span>
-            </h1>
-
-            <p className="text-body text-lg leading-relaxed mb-10 max-w-lg">
-              Reddit has 47 conflicting answers. YouTube covers someone else's car.
-              ChatGPT doesn't know your 1.5T from the Type R.
-              We do — and we'll walk you through every stage of your build.
-            </p>
-
-            <div className="flex items-center gap-6 flex-wrap">
-              <Link
-                to="/planner"
-                className="inline-flex items-center gap-2 px-7 py-4 bg-accent hover:bg-accent/90 text-black font-display font-bold rounded-xl transition-all duration-200 text-base"
-              >
-                Start My Build
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </Link>
-              <Link to="/example-build" className="text-muted hover:text-white text-sm transition-colors">
-                See an example build ↗
-              </Link>
-            </div>
+        {/* Headline */}
+        <div className="relative text-center max-w-3xl mx-auto mb-14">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-ai/20 bg-ai/[0.06] mb-8">
+            <div className="w-1.5 h-1.5 rounded-full bg-ai animate-pulse" />
+            <span className="font-mono text-xs text-ai uppercase tracking-widest">Honda Civic Si</span>
           </div>
 
-          {/* Right: live product UI */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-accent/5 rounded-3xl blur-3xl scale-110 pointer-events-none" />
+          <h1 className="font-display font-black text-7xl md:text-8xl leading-[1.0] tracking-tight mb-6">
+            Know what to<br />
+            <span className="text-accent">mod next.</span>
+          </h1>
 
-            <div className="relative bg-surface border border-white/[0.07] rounded-2xl overflow-hidden">
-              {/* Build header */}
-              <div className="px-5 py-4 border-b border-white/[0.05] flex items-start justify-between">
-                <div>
-                  <div className="font-mono text-xs text-muted uppercase tracking-wider mb-1">Your build</div>
-                  <div className="font-display font-bold text-white text-lg leading-tight">2022 Honda Civic Si</div>
-                  <div className="text-muted text-sm">Street Performance</div>
-                </div>
-                <div className="text-right">
-                  <div className="font-mono text-xs text-muted uppercase tracking-wider mb-1">Budget</div>
-                  <div className="font-mono text-white font-semibold">$2,500</div>
-                </div>
-              </div>
+          <p className="text-body text-lg leading-relaxed mb-10 max-w-lg mx-auto">
+            Build a plan around your car, budget, and goals.
+          </p>
 
-              {/* Stage pills */}
-              <div className="px-5 py-3 border-b border-white/[0.05] flex gap-3">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent" />
-                  <span className="font-mono text-xs text-accent">Stage 1</span>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/[0.08]">
-                  <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                  <span className="font-mono text-xs text-muted">Stage 2</span>
-                </div>
-              </div>
-
-              {/* Mod list */}
-              <div className="divide-y divide-white/[0.04]">
-                {[
-                  { name: 'Performance Tires',  cost: '$600–$900', done: true,  by: 'Shop' },
-                  { name: 'Rear Motor Mount',   cost: '$80–$150',  done: true,  by: 'DIY'  },
-                  { name: 'Cold Air Intake',    cost: '$250–$400', done: false             },
-                ].map((mod) => (
-                  <div
-                    key={mod.name}
-                    className={`flex items-center gap-3 px-5 py-3.5 ${mod.done ? 'opacity-50' : ''}`}
-                  >
-                    <div className={`w-6 h-6 rounded-full border flex items-center justify-center flex-shrink-0 ${
-                      mod.done
-                        ? 'bg-green-500/20 border-green-500/40 text-green-400'
-                        : 'border-white/20'
-                    }`}>
-                      {mod.done && (
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-white">{mod.name}</div>
-                      {mod.by && (
-                        <div className="font-mono text-xs text-muted uppercase tracking-wider">{mod.by}</div>
-                      )}
-                    </div>
-                    <div className="font-mono text-xs text-muted flex-shrink-0">{mod.cost}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Stage transition message */}
-              <div className="mx-4 mb-4 mt-1 p-3.5 rounded-xl border border-ai/20 bg-ai/[0.06] flex gap-2.5">
-                <div className="w-0.5 rounded-full bg-ai/40 flex-shrink-0 self-stretch" />
-                <div>
-                  <div className="font-mono text-xs text-ai uppercase tracking-wider mb-1">
-                    Stage 1 complete — before Stage 2
-                  </div>
-                  <p className="text-xs text-body leading-relaxed">
-                    Tires and motor mount are solid. Confirm your 1.5T has the correct
-                    FE1 bracket before buying the intake — some early builds need a minor mod.
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="flex items-center justify-center gap-5 flex-wrap">
+            <Link
+              to="/planner"
+              className="inline-flex items-center gap-2 px-7 py-4 bg-accent hover:bg-accent/90 text-black font-display font-bold rounded-xl transition-all duration-200 text-base"
+            >
+              Plan my build
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
+            <Link to="/example-build" className="text-muted hover:text-white text-sm transition-colors">
+              See an example ↗
+            </Link>
           </div>
-
         </div>
+
+        {/* Product preview */}
+        <div className="relative w-full max-w-2xl mx-auto">
+          <div className="absolute inset-0 bg-accent/[0.06] rounded-3xl blur-2xl scale-105 pointer-events-none" />
+
+          <div className="relative bg-surface border border-white/[0.08] rounded-2xl overflow-hidden">
+            {/* Build header */}
+            <div className="px-6 py-4 border-b border-white/[0.05] flex items-center justify-between">
+              <div>
+                <div className="font-display font-bold text-white">2022 Honda Civic Si</div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="font-mono text-xs text-muted">Street Performance</span>
+                  <span className="text-white/20">·</span>
+                  <span className="font-mono text-xs text-muted">Beginner</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="font-mono text-xs text-muted uppercase tracking-wider mb-0.5">Budget</div>
+                <div className="font-mono text-white font-semibold">$2,500</div>
+              </div>
+            </div>
+
+            {/* Mod list */}
+            <div className="divide-y divide-white/[0.04]">
+              {[
+                { n: 1, name: 'Performance Tires',  diff: 'Easy',   s: 1, cost: '$600–$900'   },
+                { n: 2, name: 'Rear Motor Mount',   diff: 'Easy',   s: 1, cost: '$80–$150'    },
+                { n: 3, name: 'Cold Air Intake',    diff: 'Easy',   s: 1, cost: '$250–$400'   },
+                { n: 4, name: 'Cat-Back Exhaust',   diff: 'Medium', s: 1, cost: '$700–$1,200' },
+                { n: 5, name: 'ECU Tune (Hondata)', diff: 'Medium', s: 2, cost: '$700–$800'   },
+              ].map((mod) => (
+                <div key={mod.n} className="flex items-center gap-4 px-6 py-3.5">
+                  <span className="font-display font-black text-white/20 text-sm w-5 flex-shrink-0">
+                    #{mod.n}
+                  </span>
+                  <span className="flex-1 text-sm font-medium text-white">{mod.name}</span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`font-mono text-xs px-2 py-0.5 rounded-md ${
+                      mod.diff === 'Easy'
+                        ? 'bg-green-500/10 text-green-400'
+                        : 'bg-yellow-500/10 text-yellow-400'
+                    }`}>
+                      {mod.diff}
+                    </span>
+                    <span className="font-mono text-xs text-muted px-2 py-0.5 rounded-md bg-white/[0.04]">
+                      S{mod.s}
+                    </span>
+                    <span className="font-mono text-xs text-muted w-24 text-right">{mod.cost}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-3 border-t border-white/[0.05] flex items-center justify-between">
+              <span className="font-mono text-xs text-muted">5 mods · 2 stages · $2,330–$3,450 total</span>
+              <span className="font-mono text-xs text-ai">Claude AI</span>
+            </div>
+          </div>
+        </div>
+
       </section>
 
       {/* ── Stage tracker showcase ── */}
