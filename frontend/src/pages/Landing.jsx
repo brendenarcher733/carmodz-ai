@@ -1,424 +1,242 @@
-import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import * as analytics from '../services/analytics'
 
-/* One event name across every homepage CTA, distinguished by properties —
-   same convention Planner.jsx's planner_step_viewed uses (one event,
-   step_index/step_name properties) rather than a new event name per
-   button. `cta`/`placement` are the only metadata: which button, where on
-   the page — nothing about the visitor themselves. */
-const trackCta = (cta, placement) => () => analytics.capture('homepage_cta_clicked', { cta, placement })
-
-/* ─── Scroll-reveal hook ─── */
-function useReveal(threshold = 0.12) {
-  const ref = useRef(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) el.classList.add('visible') },
-      { threshold },
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [threshold])
-  return ref
-}
-
-/* ─── Data ─── */
-const FEATURES = [
-  { num: '01', title: 'Your Digital Garage',     desc: 'Every build lives in your personal garage. Track progress, budget, and upgrades across multiple vehicles, all in one place.' },
-  { num: '02', title: 'Platform Intelligence',   desc: 'Recommendations built around your exact platform. A WRX build is not a GTI build. We know the difference.' },
-  { num: '03', title: 'Staged Build Roadmap',    desc: 'Stage 1 → 2 → 3. Start with the highest-impact, most affordable mods first. Scale up when you\'re ready.' },
-  { num: '04', title: 'Honest Trade-offs',       desc: "We tell you when a mod isn't worth the money, needs other mods done first, or is better left to a professional." },
-  { num: '05', title: 'Performance Advisor',     desc: 'Ask anything. Mod order, brand picks, budget breakdowns, compatibility. An expert tuner in your pocket.' },
-  { num: '06', title: 'Real Investment Numbers', desc: 'Actual price ranges, not guesses. See exactly what your build costs before you spend a dollar.' },
+const STEPS = [
+  {
+    num: '01',
+    title: 'Tell us your build',
+    desc: 'Your Civic Si, your budget, your goal. Beginner or experienced. We ask the right questions.',
+  },
+  {
+    num: '02',
+    title: 'Get a verified plan',
+    desc: 'A staged roadmap with real parts, real costs, and fitment confirmed for your exact car. Not a guess.',
+  },
+  {
+    num: '03',
+    title: 'Track it, stage by stage',
+    desc: 'Check off mods as you complete them. When a stage is done, we tell you what to check before the next one.',
+  },
 ]
 
-const EXAMPLE = {
-  vehicle: '2018 Honda Civic Si', goal: 'Fun Daily Driver',
-  budget: '$2,500', hpGain: '+35–55 HP', stage: 'Stage 1 of 2',
-  mods: [
-    { rank: 1, name: 'Performance Tires',  cost: '$600–$900',  diff: 'Easy',   diffCls: 'text-stage-1', stage: 1 },
-    { rank: 2, name: 'Rear Motor Mount',   cost: '$80–$150',   diff: 'Easy',   diffCls: 'text-stage-1', stage: 1 },
-    { rank: 3, name: 'Cold Air Intake',    cost: '$180–$350',  diff: 'Easy',   diffCls: 'text-stage-1', stage: 1 },
-    { rank: 4, name: 'Cat-Back Exhaust',   cost: '$450–$900',  diff: 'Medium', diffCls: 'text-stage-2', stage: 1 },
-    { rank: 5, name: 'ECU Tune',           cost: '$400–$650',  diff: 'Easy',   diffCls: 'text-stage-1', stage: 2 },
-  ],
-}
-
-const STATS = [
-  { num: '30+', label: 'Mod Categories' },
-  { num: 'AI',  label: 'Claude Powered' },
-  { num: '3',   label: 'Build Stages'   },
-  { num: '∞',   label: 'Saved Builds'   },
-]
-
-const VALUE_BULLETS = [
-  'Get a step-by-step mod roadmap built for your car',
-  'See cost, install difficulty, and performance gains upfront',
-  'Avoid mismatched parts and money wasted on wrong mods',
-]
-
-/* ─── Example build card (same as before) ─── */
-function ExampleCard() {
-  return (
-    <div
-      className="w-full rounded-2xl overflow-hidden shadow-card-lg animate-fade-up anim-delay-3"
-      style={{
-        background: 'rgba(16,18,24,0.88)',
-        backdropFilter: 'blur(32px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-        border: '1px solid rgba(255,255,255,0.09)',
-      }}
-    >
-      <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.025)' }}>
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div>
-            <div className="font-display font-black text-white text-base leading-tight">{EXAMPLE.vehicle}</div>
-            <div className="font-mono text-xs text-muted mt-0.5">{EXAMPLE.goal}</div>
-          </div>
-          <div className="text-right flex-shrink-0">
-            <div className="font-display font-black text-accent text-base leading-tight">{EXAMPLE.budget}</div>
-            <div className="font-mono text-xs text-muted mt-0.5">total budget</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
-            <span className="font-mono text-xs text-accent font-semibold">{EXAMPLE.hpGain} est.</span>
-          </div>
-          <div className="w-px h-3 bg-white/10" />
-          <span className="font-mono text-xs text-muted">{EXAMPLE.stage}</span>
-          <div className="w-px h-3 bg-white/10" />
-          <span className="font-mono text-xs text-muted">{EXAMPLE.mods.length} upgrades planned</span>
-        </div>
-      </div>
-
-      <div
-        className="grid grid-cols-[20px_1fr_auto] md:grid-cols-[24px_1fr_auto_auto_auto] gap-x-2 md:gap-x-3 px-4 md:px-5 py-2"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.015)' }}
-      >
-        <span className="font-mono text-xs text-muted">#</span>
-        <span className="font-mono text-xs text-muted">Modification</span>
-        <span className="font-mono text-xs text-muted text-right">Cost</span>
-        <span className="hidden md:inline font-mono text-xs text-muted text-right">Difficulty</span>
-        <span className="hidden md:inline font-mono text-xs text-muted text-right">Stage</span>
-      </div>
-
-      {EXAMPLE.mods.map((mod, i) => (
-        <div key={mod.name}
-          className="grid grid-cols-[20px_1fr_auto] md:grid-cols-[24px_1fr_auto_auto_auto] gap-x-2 md:gap-x-3 px-4 md:px-5 py-3 hover:bg-white/[0.03] transition-colors items-center"
-          style={{ borderBottom: i < EXAMPLE.mods.length - 1 ? '1px solid rgba(255,255,255,0.04)' : undefined }}>
-          <span className="font-mono text-xs font-bold text-accent">#{mod.rank}</span>
-          <div className="min-w-0">
-            <span className="text-sm text-white font-medium block truncate">{mod.name}</span>
-            <span className={`md:hidden font-mono text-[10px] font-semibold ${mod.diffCls}`}>{mod.diff} · S{mod.stage}</span>
-          </div>
-          <span className="font-mono text-xs text-muted text-right whitespace-nowrap">{mod.cost}</span>
-          <span className={`hidden md:inline font-mono text-xs font-semibold text-right ${mod.diffCls}`}>{mod.diff}</span>
-          <span className="hidden md:inline font-mono text-xs text-muted bg-white/[0.05] px-2 py-0.5 rounded text-right">S{mod.stage}</span>
-        </div>
-      ))}
-
-      <div className="flex items-center justify-between px-5 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.015)' }}>
-        <span className="font-mono text-xs text-muted">Generated by CarMods AI</span>
-        <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-stage-1" />
-          <span className="font-mono text-xs text-stage-1">Stage 1 ready</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-
-/* ─── Main page ─── */
 export default function Landing() {
-  /* Refs for scroll-reveal sections */
-  const statsRef    = useReveal(0.2)
-  const planRef     = useReveal(0.1)
-  const featuresRef = useReveal(0.05)
-  const ctaRef      = useReveal(0.2)
-
   return (
-    <div className="bg-obsidian">
+    <div className="min-h-screen bg-obsidian text-white">
 
-      {/* ═══════════════════════════════════════════
-          HEADLINE — copy reads first against a dark, uncluttered left/upper
-          field; the silhouette is a supporting element anchored lower-right,
-          height-capped so it can't dominate the fold or cross into the
-          headline. A radial mask keeps its own top-left corner dark (so it
-          has no visible box edge cutting across the copy) and a diagonal
-          charcoal scrim sits above everything so the headline never needs
-          to compete with it. Mobile drops the absolute composition for a
-          plain stacked image below the copy — see the `md:hidden` block.
-      ═══════════════════════════════════════════ */}
-      <section className="relative overflow-hidden">
-        <div className="page-glow absolute inset-0 pointer-events-none" />
+      {/* ── Hero ── */}
+      <section className="relative min-h-[90vh] flex items-center px-6 md:px-16 overflow-hidden">
+        <div className="page-glow-ai absolute inset-0 pointer-events-none" />
 
-        {/* Silhouette — desktop/tablet only, anchored lower-right, capped height */}
-        <div
-          className="hidden md:block absolute bottom-0 right-0 pointer-events-none"
-          style={{
-            width: 'min(58%, 780px)',
-            height: 'clamp(260px, 36vw, 440px)',
-            backgroundImage: 'url(/images/build-hero.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center 46%',
-            mixBlendMode: 'screen',
-            opacity: 0.5,
-            WebkitMaskImage: 'radial-gradient(circle at 76% 82%, black 0%, black 38%, transparent 76%)',
-            maskImage: 'radial-gradient(circle at 76% 82%, black 0%, black 38%, transparent 76%)',
-          }}
-        />
-
-        {/* Charcoal scrim — strongest over the left/upper-left copy column,
-            fading out toward the lower-right where the silhouette sits. */}
-        <div
-          className="hidden md:block absolute inset-0 pointer-events-none"
-          style={{
-            background: 'linear-gradient(115deg, rgba(9,9,9,0.97) 0%, rgba(9,9,9,0.92) 28%, rgba(9,9,9,0.55) 52%, rgba(9,9,9,0.1) 75%, rgba(9,9,9,0.3) 100%)',
-          }}
-        />
-
-        <div className="container-content pt-32 md:pt-40 pb-20 md:pb-28 relative z-10">
-          <div className="max-w-xl">
-            <div className="animate-fade-up inline-flex items-center gap-2.5 bg-white/[0.05] border border-white/[0.1] text-body text-xs font-semibold tracking-[0.14em] uppercase px-4 py-2 rounded-full mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-              AI-Powered Build Planning
-            </div>
-            <h1
-              className="animate-fade-up anim-delay-1 font-display font-black text-white leading-[0.98] tracking-[-0.03em] mb-4"
-              style={{ fontSize: 'clamp(2rem, 4.4vw, 3.2rem)' }}
-            >
-              Get a personalized mod plan <span className="text-accent">for your car.</span>
-            </h1>
-            <p className="animate-fade-up anim-delay-2 text-body text-base md:text-lg mb-8">
-              Tell us your car, budget, and goals. Get a personalized, staged mod roadmap
-              with real costs, install difficulty, and performance gains, in about 60 seconds.
-            </p>
-            <div className="animate-fade-up anim-delay-3 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <Link to="/planner" onClick={trackCta('start_my_build', 'hero')}
-                className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-200 shadow-glow">
-                Start My Build
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Link>
-              <Link to="/example-build" onClick={trackCta('see_example_build', 'hero')}
-                className="inline-flex items-center gap-1.5 text-body text-sm font-medium hover:text-white transition-colors">
-                See an example build
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M3 9L9 3M5 3h4v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Link>
-            </div>
+        <div className="relative max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-ai/20 bg-ai/[0.06] mb-10">
+            <div className="w-1.5 h-1.5 rounded-full bg-ai animate-pulse" />
+            <span className="font-mono text-xs text-ai uppercase tracking-widest">Honda Civic Si</span>
           </div>
 
-          {/* Silhouette — mobile only, stacked below the copy, in flow */}
-          <div
-            className="md:hidden mt-10 h-56 relative"
-            style={{
-              backgroundImage: 'url(/images/build-hero.jpg)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center 46%',
-              mixBlendMode: 'screen',
-              opacity: 0.55,
-            }}
-          >
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(9,9,9,0.9) 0%, transparent 55%)' }} />
+          <h1 className="font-display font-black text-6xl md:text-7xl leading-[1.0] tracking-tight mb-8">
+            Your build.<br />
+            Stage by stage.<br />
+            <span className="text-ai">No wasted money.</span>
+          </h1>
+
+          <p className="text-body text-lg leading-relaxed mb-10 max-w-lg">
+            Reddit has 47 conflicting answers. YouTube covers someone else's car.
+            ChatGPT doesn't know your 1.5T from the Type R.
+            We do — and we'll walk you through every stage of your build.
+          </p>
+
+          <div className="flex items-center gap-6 flex-wrap">
+            <Link
+              to="/planner"
+              className="inline-flex items-center gap-2 px-7 py-4 bg-accent hover:bg-accent/90 text-black font-display font-bold rounded-xl transition-all duration-200 text-base"
+            >
+              Start My Build
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
+            <Link to="/example-build" className="text-muted hover:text-white text-sm transition-colors">
+              See an example build ↗
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════
-          STATS BAR — scroll reveal
-      ═══════════════════════════════════════════ */}
-      <div
-        ref={statsRef}
-        className="reveal-stagger"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(19,21,25,0.5)' }}
-      >
-        <div className="container-content">
-          <div className="grid grid-cols-2 md:grid-cols-4" style={{ borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
-            {STATS.map(({ num, label }) => (
-              <div key={label} className="text-center py-6 px-4" style={{ borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="font-display font-black text-accent text-3xl leading-none mb-2">{num}</div>
-                <div className="font-mono text-xs text-muted uppercase tracking-[0.14em]">{label}</div>
+      {/* ── Stage tracker showcase ── */}
+      <section className="px-6 md:px-16 py-28 border-t border-white/[0.05]">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-12">
+            <div className="font-mono text-xs text-ai uppercase tracking-widest mb-4">What makes this different</div>
+            <h2 className="font-display font-black text-4xl md:text-5xl leading-tight mb-5">
+              Your plan follows you.<br />
+              <span className="text-muted font-black">Not the other way around.</span>
+            </h2>
+            <p className="text-body text-base leading-relaxed max-w-xl">
+              Most tools give you a list and disappear. This one stays with you.
+              Check off each mod as you complete it. When a stage is done,
+              we tell you exactly what to check before you start the next one.
+            </p>
+          </div>
+
+          {/* Mock stage tracker */}
+          <div className="bg-surface border border-white/[0.07] rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/[0.05] flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-ai" />
+              <span className="font-display font-bold text-ai text-sm">Stage 1</span>
+              <span className="text-muted text-sm">Foundation — best return on investment</span>
+              <div className="flex-1" />
+              <span className="font-mono text-xs text-muted">2 of 3 complete</span>
+            </div>
+
+            <div className="divide-y divide-white/[0.05]">
+              {[
+                { name: 'Performance Tires', cost: '$600–$900', done: true, by: 'Shop' },
+                { name: 'Rear Motor Mount', cost: '$80–$150', done: true, by: 'DIY' },
+                { name: 'Cold Air Intake', cost: '$250–$400', done: false },
+              ].map((mod) => (
+                <div
+                  key={mod.name}
+                  className={`flex items-center gap-4 px-6 py-4 ${mod.done ? 'opacity-50' : ''}`}
+                >
+                  <div className={`w-6 h-6 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                    mod.done
+                      ? 'bg-green-500/20 border-green-500/40 text-green-400'
+                      : 'border-white/20'
+                  }`}>
+                    {mod.done && (
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-white">{mod.name}</div>
+                    {mod.by && (
+                      <div className="font-mono text-xs text-muted uppercase tracking-wider mt-0.5">{mod.by}</div>
+                    )}
+                  </div>
+                  <div className="font-mono text-xs text-muted">{mod.cost}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mx-6 mb-6 mt-3 p-4 rounded-xl border border-ai/20 bg-ai/[0.06] flex gap-3">
+              <div className="w-1 rounded-full bg-ai/40 flex-shrink-0" />
+              <div>
+                <div className="font-mono text-xs text-ai uppercase tracking-wider mb-1.5">
+                  Stage 1 complete — before you start Stage 2
+                </div>
+                <p className="text-sm text-body leading-relaxed">
+                  Tires and motor mount are solid. Before adding the intake,
+                  confirm your 1.5T has the correct FE1 bracket version —
+                  some early builds need a minor modification. Ten minutes to
+                  verify saves you a return shipping headache.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── How it works ── */}
+      <section className="px-6 md:px-16 py-28 border-t border-white/[0.05]">
+        <div className="max-w-4xl mx-auto">
+          <div className="font-mono text-xs text-muted uppercase tracking-widest mb-16">How it works</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {STEPS.map((step) => (
+              <div key={step.num}>
+                <div className="font-display font-black text-6xl text-white/[0.07] mb-5 leading-none">
+                  {step.num}
+                </div>
+                <h3 className="font-display font-bold text-xl text-white mb-3">{step.title}</h3>
+                <p className="text-body text-sm leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ═══════════════════════════════════════════
-          PLAN PREVIEW — the build planner pitch, with a live example
-          of the AI-generated mod roadmap.
-      ═══════════════════════════════════════════ */}
-      <section ref={planRef} className="reveal py-28" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="container-content">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-16 items-center">
+      {/* ── Pricing ── */}
+      <section className="px-6 md:px-16 py-28 border-t border-white/[0.05]">
+        <div className="max-w-4xl mx-auto">
+          <div className="font-mono text-xs text-muted uppercase tracking-widest mb-4">Pricing</div>
+          <h2 className="font-display font-black text-4xl md:text-5xl mb-16">Simple. No surprises.</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-            {/* LEFT — Copy */}
-            <div>
-              <div className="inline-flex items-center gap-2.5 bg-white/[0.05] border border-white/[0.1] text-body text-xs font-semibold tracking-[0.14em] uppercase px-4 py-2 rounded-full mb-8">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                The build planner
-              </div>
-
-              <h2
-                className="font-display font-black text-white leading-[0.96] tracking-[-0.03em] mb-6"
-                style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.6rem)' }}
-              >
-                Now get a real mod roadmap
-                <br />
-                <span className="text-accent" style={{ textShadow: '0 0 60px rgba(255,107,0,0.35), 0 0 120px rgba(255,107,0,0.15)' }}>
-                  Before You Waste Money.
-                </span>
-              </h2>
-
-              <p className="text-body text-lg leading-relaxed max-w-lg mb-8">
-                CarMods AI creates a personalized mod roadmap for your car, budget, goals, and skill level,
-                including upgrade order, estimated costs, install difficulty, and performance impact.
-              </p>
-
-              <ul className="space-y-3 mb-10">
-                {VALUE_BULLETS.map(b => (
-                  <li key={b} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-accent/[0.12] border border-accent/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                        <path d="M2 5l2.5 2.5 3.5-4" stroke="#FF6B00" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <span className="text-body text-base leading-snug">{b}</span>
+            {/* Free */}
+            <div className="bg-surface border border-white/[0.07] rounded-2xl p-8">
+              <div className="font-mono text-xs text-muted uppercase tracking-wider mb-8">Free</div>
+              <div className="font-display font-black text-5xl text-white mb-1">$0</div>
+              <div className="text-muted text-sm mb-10">Forever</div>
+              <ul className="space-y-4 mb-10">
+                {[
+                  '1 saved build',
+                  'Full stage tracker',
+                  '15 advisor messages / day',
+                  'Verified parts & fitment',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm text-body">
+                    <div className="w-1.5 h-1.5 rounded-full bg-white/30 flex-shrink-0" />
+                    {item}
                   </li>
                 ))}
               </ul>
-
-              <div className="flex flex-wrap gap-4 mb-6">
-                <Link to="/planner" onClick={trackCta('start_my_build', 'plan_preview_section')}
-                  className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-8 py-4 rounded-xl hover:bg-accent-bright transition-all duration-200 shadow-glow">
-                  Start My Build
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </Link>
-                <Link to="/example-build" onClick={trackCta('see_example_build', 'plan_preview_section')}
-                  className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/[0.12] text-white font-display font-semibold text-base px-8 py-4 rounded-xl hover:bg-white/[0.09] hover:border-white/[0.2] transition-all duration-200 backdrop-blur-sm">
-                  See Example Build
-                </Link>
-              </div>
-
-              <p className="text-muted text-sm">
-                Built for real car enthusiasts, from daily drivers to full performance builds.
-              </p>
+              <Link
+                to="/planner"
+                className="block text-center py-3.5 border border-white/[0.12] hover:border-white/30 rounded-xl text-sm text-white transition-colors"
+              >
+                Start for free
+              </Link>
             </div>
 
-            {/* RIGHT — Example build card */}
-            <div className="relative">
-              <ExampleCard />
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════
-          FEATURES GRID — scroll reveal
-      ═══════════════════════════════════════════ */}
-      <section className="py-32 relative overflow-hidden">
-        <div className="container-content relative">
-
-          {/* Silhouette — a sibling of the reveal-animated header below, not
-              a child of it. `.reveal` carries a `transform` (even at rest,
-              it's `translateY(0)`, not `none`) and briefly `opacity: 0`
-              before it scrolls into view, and either one alone creates a
-              new stacking context. A `mix-blend-mode` element trapped inside
-              one can't see the real page background to blend against — it
-              was compositing against an empty layer instead, which is what
-              rendered as a visible dark box rather than blending away. The
-              hero's silhouette was never nested this way, which is why only
-              this one showed the edge. */}
-          <div
-            className="hidden lg:block absolute pointer-events-none"
-            style={{
-              right: '-3rem', top: '-6rem', width: '40rem', height: '30rem',
-              backgroundImage: 'url(/images/features-accent.png)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center 55%',
-              mixBlendMode: 'screen',
-              opacity: 0.8,
-              WebkitMaskImage: 'radial-gradient(circle at 60% 50%, black 0%, black 52%, transparent 88%)',
-              maskImage: 'radial-gradient(circle at 60% 50%, black 0%, black 52%, transparent 88%)',
-            }}
-          />
-
-          {/* Header — the silhouette sits in the empty space to the right
-              of this max-w-lg block (there's room on anything wider than a
-              tablet), faded out well before the bordered grid below so it
-              never touches a tile. */}
-          <div ref={featuresRef} className="reveal mb-20 relative z-10">
-            <p className="eyebrow mb-4">The platform</p>
-            <h2 className="font-display font-black text-white leading-[1.05] tracking-tight max-w-lg"
-              style={{ fontSize: 'clamp(2.4rem, 4vw, 3.2rem)' }}>
-              Built for enthusiasts.<br />Not spreadsheets.
-            </h2>
-          </div>
-
-          <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 rounded-2xl overflow-hidden reveal-stagger"
-            style={{ border: '1px solid rgba(255,255,255,0.06)' }}
-            ref={el => {
-              if (!el) return
-              const obs = new IntersectionObserver(
-                ([e]) => { if (e.isIntersecting) el.classList.add('visible') },
-                { threshold: 0.05 }
-              )
-              obs.observe(el)
-            }}
-          >
-            {FEATURES.map(f => (
-              <div key={f.num}
-                className="p-8 group hover:bg-elevated transition-colors duration-300"
-                style={{ borderRight: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <div className="font-mono text-xs text-muted mb-6 group-hover:text-accent transition-colors duration-300">{f.num}</div>
-                <h3 className="font-display font-semibold text-white text-base mb-3 leading-snug">{f.title}</h3>
-                <p className="text-body text-sm leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════
-          CTA STRIP — scroll reveal
-      ═══════════════════════════════════════════ */}
-      <section
-        ref={ctaRef}
-        className="reveal py-28"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
-      >
-        <div className="container-content">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-10">
-            <div>
-              <h2 className="font-display font-black text-white mb-3 leading-tight"
-                style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)' }}>
-                Your garage is waiting.
-              </h2>
-              <p className="text-body text-lg">Park your first build in under 60 seconds.</p>
-            </div>
-            <div className="flex gap-3 flex-shrink-0">
-              <Link to="/planner" onClick={trackCta('start_my_build', 'bottom_cta_strip')}
-                className="inline-flex items-center gap-2 bg-accent text-obsidian font-display font-black text-base px-7 py-3.5 rounded-xl hover:bg-accent-bright transition-all duration-200 shadow-glow">
+            {/* Pro */}
+            <div className="bg-surface border border-ai/25 rounded-2xl p-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-ai/[0.07] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+              <div className="font-mono text-xs text-ai uppercase tracking-wider mb-8">Pro</div>
+              <div className="font-display font-black text-5xl text-white mb-1">$5</div>
+              <div className="text-muted text-sm mb-10">per month</div>
+              <ul className="space-y-4 mb-10">
+                {[
+                  'Unlimited saved builds',
+                  'Full stage tracker on all builds',
+                  'Unlimited advisor messages',
+                  'Priority support',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm text-body">
+                    <div className="w-1.5 h-1.5 rounded-full bg-ai flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                to="/planner"
+                className="block text-center py-3.5 bg-accent hover:bg-accent/90 rounded-xl text-sm font-bold text-black transition-colors"
+              >
                 Start My Build
               </Link>
-              <Link to="/advisor" onClick={trackCta('talk_to_advisor', 'bottom_cta_strip')}
-                className="inline-flex items-center gap-2 border border-white/[0.1] text-body font-display font-medium text-base px-7 py-3.5 rounded-xl hover:border-white/[0.22] hover:text-white transition-all duration-200">
-                Talk to Advisor
-              </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── Closing CTA ── */}
+      <section className="px-6 md:px-16 py-28 border-t border-white/[0.05]">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="font-display font-black text-5xl md:text-6xl leading-tight mb-6">
+            Your Civic Si deserves<br />
+            <span className="text-ai">a real plan.</span>
+          </h2>
+          <p className="text-body text-base mb-10">
+            Free to start. No credit card needed.
+          </p>
+          <Link
+            to="/planner"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-accent hover:bg-accent/90 text-black font-display font-bold rounded-xl transition-all duration-200 text-base"
+          >
+            Start My Build
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </Link>
         </div>
       </section>
 
