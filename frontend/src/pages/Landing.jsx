@@ -31,9 +31,10 @@ export default function Landing() {
           <img
             src="/images/build-hero.jpg"
             alt=""
-            className="absolute inset-0 w-full h-full object-cover opacity-[0.09]"
+            className="absolute right-0 top-0 w-3/4 h-full object-cover object-left opacity-[0.05]"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-obsidian/70 via-transparent to-obsidian/90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-obsidian/80 via-obsidian/30 to-obsidian/90" />
+          <div className="absolute inset-0 bg-gradient-to-r from-obsidian via-obsidian/50 to-transparent" />
         </div>
 
         {/* Background glow */}
