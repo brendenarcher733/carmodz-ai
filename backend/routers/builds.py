@@ -200,11 +200,14 @@ def complete_recommendation(
         ).all()
         existing_messages = build.stage_messages or {}
         if next_recs and not existing_messages.get(str(rec.stage)):
-            stage_message = generate_stage_transition_message(
-                build, rec.stage, next_recs
-            )
-            existing_messages[str(rec.stage)] = stage_message
-            build.stage_messages = existing_messages
+            try:
+                stage_message = generate_stage_transition_message(
+                    build, rec.stage, next_recs
+                )
+                existing_messages[str(rec.stage)] = stage_message
+                build.stage_messages = existing_messages
+            except Exception as e:
+                logger.error(f"Stage transition message failed for build {build_id}: {e}")
 
     db.commit()
 
