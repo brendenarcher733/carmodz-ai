@@ -139,7 +139,7 @@ export default function Landing() {
       </section>
 
       {/* ── Stage tracker showcase ── */}
-      <section className="px-6 md:px-16 pt-10 pb-28 border-t border-white/[0.05]">
+      <section className="px-6 md:px-16 pt-10 pb-16 border-t border-white/[0.05]">
         <div className="max-w-4xl mx-auto">
           <div className="mb-12">
             <div className="font-mono text-xs text-ai uppercase tracking-widest mb-4">What makes this different</div>
@@ -233,7 +233,7 @@ export default function Landing() {
       </section>
 
       {/* ── Pricing ── */}
-      <section className="px-6 md:px-16 py-28 border-t border-white/[0.05]">
+      <section className="px-6 md:px-16 pt-28 pb-16 border-t border-white/[0.05]">
         <div className="max-w-4xl mx-auto">
           <div className="font-mono text-xs text-muted uppercase tracking-widest mb-4">Pricing</div>
           <h2 className="font-display font-black text-4xl md:text-5xl mb-16">Simple. No surprises.</h2>
@@ -300,7 +300,7 @@ export default function Landing() {
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="font-display font-black text-5xl md:text-6xl leading-tight mb-6">
             Your Civic Si deserves<br />
-            <span className="text-ai">a real plan.</span>
+            <span className="text-accent">a real plan.</span>
           </h2>
           <p className="text-body text-base mb-10">
             Free to start. No credit card needed.
