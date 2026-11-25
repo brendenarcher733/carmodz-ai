@@ -33,7 +33,7 @@ export default function Landing() {
           {/* Headline — left aligned */}
           <div className="mb-10">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/20 bg-white/[0.04] mb-7">
-              <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-accent" />
               <span className="font-mono text-xs text-muted uppercase tracking-widest">Honda Civic Si</span>
             </div>
 
