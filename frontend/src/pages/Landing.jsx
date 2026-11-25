@@ -24,11 +24,11 @@ export default function Landing() {
     <div className="min-h-screen bg-obsidian text-white">
 
       {/* ── Hero ── */}
-      <section className="relative px-6 md:px-16 pt-16 pb-12 overflow-hidden">
+      <section className="relative px-6 md:px-10 pt-16 pb-12 overflow-hidden">
 
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-accent/[0.06] rounded-full blur-[150px] pointer-events-none" />
 
-        <div className="relative max-w-5xl mx-auto">
+        <div className="relative max-w-6xl mx-auto">
 
           {/* Headline — left aligned */}
           <div className="mb-10">
@@ -73,7 +73,7 @@ export default function Landing() {
                 src="/images/civic-si-2022.jpg"
                 alt="2022 Honda Civic Si"
                 className="w-full h-auto object-contain"
-                style={{ mixBlendMode: 'lighten', filter: 'saturate(1.3) hue-rotate(7deg)' }}
+                style={{ mixBlendMode: 'lighten', filter: 'saturate(1.3) hue-rotate(-8deg) brightness(1.1)' }}
               />
               <div className="absolute bottom-4 left-5">
                 <span className="font-mono text-xs text-white/50 uppercase tracking-widest">2022 Honda Civic Si</span>
@@ -128,7 +128,7 @@ export default function Landing() {
 
               <div className="px-6 py-3 border-t border-white/[0.05] flex items-center justify-between">
                 <span className="font-mono text-xs text-muted">5 mods · 2 stages · $2,330–$3,450 total</span>
-                <span className="font-mono text-xs text-ai">Claude AI</span>
+                <span className="font-mono text-xs text-accent">Claude AI</span>
               </div>
             </div>
           </div>
