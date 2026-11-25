@@ -24,24 +24,22 @@ export default function Landing() {
     <div className="min-h-screen bg-obsidian text-white">
 
       {/* ── Hero ── */}
-      <section className="relative flex flex-col items-center justify-center px-6 md:px-16 pt-32 pb-20 overflow-hidden">
+      <section className="relative flex flex-col items-center px-6 md:px-16 pt-20 pb-16 overflow-hidden">
 
-        {/* Car background */}
-        <div className="absolute inset-0 pointer-events-none">
+        {/* Car — bottom, fading upward */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <img
             src="/images/build-hero.jpg"
             alt=""
-            className="absolute right-0 top-0 w-3/4 h-full object-cover object-left opacity-[0.05]"
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-5xl opacity-[0.12]"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-obsidian/80 via-obsidian/30 to-obsidian/90" />
-          <div className="absolute inset-0 bg-gradient-to-r from-obsidian via-obsidian/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-obsidian via-transparent to-obsidian/70" />
         </div>
 
-        {/* Background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-accent/[0.07] rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-accent/[0.08] rounded-full blur-[120px] pointer-events-none" />
 
         {/* Headline */}
-        <div className="relative text-center max-w-3xl mx-auto mb-14">
+        <div className="relative text-center max-w-3xl mx-auto mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-ai/20 bg-ai/[0.06] mb-8">
             <div className="w-1.5 h-1.5 rounded-full bg-ai animate-pulse" />
             <span className="font-mono text-xs text-ai uppercase tracking-widest">Honda Civic Si</span>
