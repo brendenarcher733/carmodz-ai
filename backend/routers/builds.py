@@ -1,15 +1,19 @@
 # routers/builds.py
 import logging
+from datetime import datetime
+from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from core import analytics, posthog_logs
 from core.database import get_db
 from models.build import BuildCreate, BuildResponse, BuildStatusResponse
-from models.recommendation import ModPlan
+from models.recommendation import ModPlan, Recommendation
 from models.user import User
 from routers.auth import get_current_user
+from services.ai_service import generate_stage_transition_message
 from services.build_service import (
     create_build, get_build, get_all_builds, delete_build, get_build_plan,
     toggle_favourite, get_garage_stats, retry_build_generation,
@@ -148,6 +152,73 @@ def toggle_build_favourite(
     build = toggle_favourite(db, build_id, current_user.id)
     analytics.capture("build_favourite_toggled", {"is_favourite": build.is_favourite})
     return build
+
+
+class CompleteModRequest(BaseModel):
+    completed_by: Optional[str] = None   # "diy" | "shop" | null
+    completion_note: Optional[str] = None
+
+
+@router.patch("/{build_id}/recommendations/{rec_id}/complete")
+def complete_recommendation(
+    build_id: int,
+    rec_id: int,
+    body: CompleteModRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Mark a single mod as done (DIY or shop), and generate a one-time
+    stage-transition message once every mod in that stage is complete."""
+    build = get_build(db, build_id, current_user.id)
+
+    rec = db.query(Recommendation).filter(
+        Recommendation.id == rec_id,
+        Recommendation.build_id == build_id
+    ).first()
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recommendation not found")
+
+    rec.completed = True
+    rec.completed_at = datetime.utcnow()
+    rec.completed_by = body.completed_by
+    rec.completion_note = body.completion_note
+    db.flush()
+
+    stage_recs = db.query(Recommendation).filter(
+        Recommendation.build_id == build_id,
+        Recommendation.stage == rec.stage
+    ).all()
+
+    stage_message = None
+    stage_complete = all(r.completed for r in stage_recs)
+
+    if stage_complete:
+        next_stage = rec.stage + 1
+        next_recs = db.query(Recommendation).filter(
+            Recommendation.build_id == build_id,
+            Recommendation.stage == next_stage
+        ).all()
+        existing_messages = build.stage_messages or {}
+        if next_recs and not existing_messages.get(str(rec.stage)):
+            stage_message = generate_stage_transition_message(
+                build, rec.stage, next_recs
+            )
+            existing_messages[str(rec.stage)] = stage_message
+            build.stage_messages = existing_messages
+
+    db.commit()
+
+    return {
+        "recommendation": {
+            "id": rec.id,
+            "completed": rec.completed,
+            "completed_at": rec.completed_at,
+            "completed_by": rec.completed_by,
+            "completion_note": rec.completion_note,
+        },
+        "stage_complete": stage_complete,
+        "stage_message": stage_message,
+    }
 
 
 @router.delete("/{build_id}", status_code=204)

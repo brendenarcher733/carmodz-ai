@@ -891,3 +891,50 @@ def _ai_chat(
     except Exception:
         logger.exception("OpenAI chat call failed, falling back to mock")
         return _mock_chat(message, vehicle)
+
+
+def generate_stage_transition_message(build, completed_stage: int, next_recs: list) -> str:
+    """Short, specific congratulations + what's-next note, generated once per
+    stage completion (see routers/builds.py's complete_recommendation, which
+    dedupes on build.stage_messages so this never fires twice for the same
+    stage). Uses a small, cheap model — this is a short celebratory note, not
+    a structured recommendations call, so none of the tool-forcing/retry/
+    observability machinery generate_build_recommendations uses applies here."""
+    next_mods = "\n".join(
+        f"- {r.name} (${r.price_min}–${r.price_max}, {r.difficulty})"
+        for r in next_recs
+    )
+    prompt = f"""A {build.year} {build.make} {build.model} owner just completed \
+Stage {completed_stage} of their {build.goal} build.
+
+Stage {completed_stage + 1} includes:
+{next_mods}
+
+Write 3-5 sentences:
+1. Confirm they're ready to move to Stage {completed_stage + 1}
+2. What to check or do before starting these specific mods
+3. Any sequencing or fitment warning specific to this car
+
+Be direct and specific. No generic filler."""
+
+    import anthropic
+    client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+    response = client.messages.create(
+        model="claude-haiku-5-5",
+        # 2048, not 300 — confirmed live: this model spends a substantial,
+        # variable chunk of its output budget on an internal ThinkingBlock
+        # before the visible text (observed 300-839 thinking tokens across
+        # several calls for this exact prompt). At max_tokens=300 the whole
+        # budget went to thinking and the response had NO text block at all;
+        # at 1024 it produced text but got cut off mid-sentence. 2048 leaves
+        # enough headroom for thinking plus a complete 3-5 sentence answer.
+        max_tokens=2048,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    # content[0] isn't reliably the text block — confirmed live: this model
+    # sometimes puts a ThinkingBlock first, same shape issue
+    # _claude_build_recommendations already works around for tool_use blocks.
+    text_block = next((b for b in response.content if b.type == "text"), None)
+    if text_block is None:
+        raise ValueError("Claude returned no text block for the stage-transition message")
+    return text_block.text
