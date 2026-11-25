@@ -24,113 +24,113 @@ export default function Landing() {
     <div className="min-h-screen bg-obsidian text-white">
 
       {/* ── Hero ── */}
-      <section className="relative flex flex-col items-center px-6 md:px-16 pt-20 pb-16 overflow-hidden">
+      <section className="relative px-6 md:px-16 pt-16 pb-12 overflow-hidden">
 
-        {/* Car — bottom, fading upward */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <img
-            src="/images/build-hero.jpg"
-            alt=""
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-5xl opacity-[0.12]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-obsidian via-transparent to-obsidian/70" />
-        </div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-accent/[0.06] rounded-full blur-[150px] pointer-events-none" />
 
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-accent/[0.08] rounded-full blur-[120px] pointer-events-none" />
+        <div className="relative max-w-5xl mx-auto">
 
-        {/* Headline */}
-        <div className="relative text-center max-w-3xl mx-auto mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-ai/20 bg-ai/[0.06] mb-8">
-            <div className="w-1.5 h-1.5 rounded-full bg-ai animate-pulse" />
-            <span className="font-mono text-xs text-ai uppercase tracking-widest">Honda Civic Si</span>
-          </div>
-
-          <h1 className="font-display font-black text-7xl md:text-8xl leading-[1.0] tracking-tight mb-6">
-            Know what to<br />
-            <span className="text-accent">mod next.</span>
-          </h1>
-
-          <p className="text-body text-lg leading-relaxed mb-10 max-w-lg mx-auto">
-            Build a plan around your car, budget, and goals.
-          </p>
-
-          <div className="flex items-center justify-center gap-5 flex-wrap">
-            <Link
-              to="/planner"
-              className="inline-flex items-center gap-2 px-7 py-4 bg-accent hover:bg-accent/90 text-black font-display font-bold rounded-xl transition-all duration-200 text-base"
-            >
-              Plan my build
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </Link>
-            <Link to="/example-build" className="text-muted hover:text-white text-sm transition-colors">
-              See an example ↗
-            </Link>
-          </div>
-        </div>
-
-        {/* Product preview */}
-        <div className="relative w-full max-w-2xl mx-auto">
-          <div className="absolute inset-0 bg-accent/[0.06] rounded-3xl blur-2xl scale-105 pointer-events-none" />
-
-          <div className="relative bg-surface border border-white/[0.08] rounded-2xl overflow-hidden">
-            <BorderBeam size={300} duration={10} colorFrom="#f97316" colorTo="transparent" />
-            {/* Build header */}
-            <div className="px-6 py-4 border-b border-white/[0.05] flex items-center justify-between">
-              <div>
-                <div className="font-display font-bold text-white">2022 Honda Civic Si</div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="font-mono text-xs text-muted">Street Performance</span>
-                  <span className="text-white/20">·</span>
-                  <span className="font-mono text-xs text-muted">Beginner</span>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="font-mono text-xs text-muted uppercase tracking-wider mb-0.5">Budget</div>
-                <div className="font-mono text-white font-semibold">$2,500</div>
-              </div>
+          {/* Headline — left aligned */}
+          <div className="mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-ai/20 bg-ai/[0.06] mb-7">
+              <div className="w-1.5 h-1.5 rounded-full bg-ai animate-pulse" />
+              <span className="font-mono text-xs text-ai uppercase tracking-widest">Honda Civic Si</span>
             </div>
 
-            {/* Mod list */}
-            <div className="divide-y divide-white/[0.04]">
-              {[
-                { n: 1, name: 'Performance Tires',  diff: 'Easy',   s: 1, cost: '$600–$900'   },
-                { n: 2, name: 'Rear Motor Mount',   diff: 'Easy',   s: 1, cost: '$80–$150'    },
-                { n: 3, name: 'Cold Air Intake',    diff: 'Easy',   s: 1, cost: '$250–$400'   },
-                { n: 4, name: 'Cat-Back Exhaust',   diff: 'Medium', s: 1, cost: '$700–$1,200' },
-                { n: 5, name: 'ECU Tune (Hondata)', diff: 'Medium', s: 2, cost: '$700–$800'   },
-              ].map((mod) => (
-                <div key={mod.n} className="flex items-center gap-4 px-6 py-3.5">
-                  <span className="font-display font-black text-white/20 text-sm w-5 flex-shrink-0">
-                    #{mod.n}
-                  </span>
-                  <span className="flex-1 text-sm font-medium text-white">{mod.name}</span>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className={`font-mono text-xs px-2 py-0.5 rounded-md ${
-                      mod.diff === 'Easy'
-                        ? 'bg-green-500/10 text-green-400'
-                        : 'bg-yellow-500/10 text-yellow-400'
-                    }`}>
-                      {mod.diff}
-                    </span>
-                    <span className="font-mono text-xs text-muted px-2 py-0.5 rounded-md bg-white/[0.04]">
-                      S{mod.s}
-                    </span>
-                    <span className="font-mono text-xs text-muted w-24 text-right">{mod.cost}</span>
+            <h1 className="font-display font-black text-7xl md:text-8xl leading-[1.0] tracking-tight mb-5">
+              Know what to<br />
+              <span className="text-accent">mod next.</span>
+            </h1>
+
+            <p className="text-body text-xl leading-relaxed mb-8 max-w-xl">
+              Build a plan around your car, budget, and goals.
+            </p>
+
+            <div className="flex items-center gap-5">
+              <Link
+                to="/planner"
+                className="inline-flex items-center gap-2 px-7 py-4 bg-accent hover:bg-accent/90 text-black font-display font-bold rounded-xl transition-all duration-200 text-base"
+              >
+                Plan my build
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </Link>
+              <Link to="/example-build" className="text-muted hover:text-white text-sm transition-colors">
+                See an example ↗
+              </Link>
+            </div>
+          </div>
+
+          {/* Car — above the card */}
+          <div className="relative rounded-2xl overflow-hidden mb-5">
+            <img
+              src="/images/civic-si-2022.jpg"
+              alt="2022 Honda Civic Si"
+              className="w-full h-56 md:h-72 object-cover object-center"
+              style={{ filter: 'saturate(1.4) brightness(0.85)' }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-obsidian/60 via-transparent to-obsidian/60" />
+            <div className="absolute inset-0 bg-gradient-to-b from-obsidian/20 via-transparent to-obsidian/70" />
+            <div className="absolute bottom-4 left-5">
+              <span className="font-mono text-xs text-white/50 uppercase tracking-widest">2022 Honda Civic Si</span>
+            </div>
+          </div>
+
+          {/* Product card */}
+          <div className="relative max-w-2xl">
+            <div className="absolute inset-0 bg-accent/[0.05] rounded-3xl blur-2xl scale-105 pointer-events-none" />
+
+            <div className="relative bg-surface border border-white/[0.08] rounded-2xl overflow-hidden">
+              <BorderBeam size={300} duration={10} colorFrom="#f97316" colorTo="transparent" />
+
+              <div className="px-6 py-4 border-b border-white/[0.05] flex items-center justify-between">
+                <div>
+                  <div className="font-display font-bold text-white">2022 Honda Civic Si</div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="font-mono text-xs text-muted">Street Performance</span>
+                    <span className="text-white/20">·</span>
+                    <span className="font-mono text-xs text-muted">Beginner</span>
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className="text-right">
+                  <div className="font-mono text-xs text-muted uppercase tracking-wider mb-0.5">Budget</div>
+                  <div className="font-mono text-white font-semibold">$2,500</div>
+                </div>
+              </div>
 
-            {/* Footer */}
-            <div className="px-6 py-3 border-t border-white/[0.05] flex items-center justify-between">
-              <span className="font-mono text-xs text-muted">5 mods · 2 stages · $2,330–$3,450 total</span>
-              <span className="font-mono text-xs text-ai">Claude AI</span>
+              <div className="divide-y divide-white/[0.04]">
+                {[
+                  { n: 1, name: 'Performance Tires',  diff: 'Easy',   s: 1, cost: '$600–$900'   },
+                  { n: 2, name: 'Rear Motor Mount',   diff: 'Easy',   s: 1, cost: '$80–$150'    },
+                  { n: 3, name: 'Cold Air Intake',    diff: 'Easy',   s: 1, cost: '$250–$400'   },
+                  { n: 4, name: 'Cat-Back Exhaust',   diff: 'Medium', s: 1, cost: '$700–$1,200' },
+                  { n: 5, name: 'ECU Tune (Hondata)', diff: 'Medium', s: 2, cost: '$700–$800'   },
+                ].map((mod) => (
+                  <div key={mod.n} className="flex items-center gap-4 px-6 py-3.5">
+                    <span className="font-display font-black text-white/20 text-sm w-5 flex-shrink-0">#{mod.n}</span>
+                    <span className="flex-1 text-sm font-medium text-white">{mod.name}</span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className={`font-mono text-xs px-2 py-0.5 rounded-md ${
+                        mod.diff === 'Easy'
+                          ? 'bg-green-500/10 text-green-400'
+                          : 'bg-yellow-500/10 text-yellow-400'
+                      }`}>{mod.diff}</span>
+                      <span className="font-mono text-xs text-muted px-2 py-0.5 rounded-md bg-white/[0.04]">S{mod.s}</span>
+                      <span className="font-mono text-xs text-muted w-24 text-right">{mod.cost}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="px-6 py-3 border-t border-white/[0.05] flex items-center justify-between">
+                <span className="font-mono text-xs text-muted">5 mods · 2 stages · $2,330–$3,450 total</span>
+                <span className="font-mono text-xs text-ai">Claude AI</span>
+              </div>
             </div>
           </div>
-        </div>
 
+        </div>
       </section>
 
       {/* ── Stage tracker showcase ── */}
