@@ -23,48 +23,123 @@ export default function Landing() {
     <div className="min-h-screen bg-obsidian text-white">
 
       {/* ── Hero ── */}
-      <section className="relative min-h-[90vh] flex items-center px-6 md:px-16 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <img
-            src="/images/build-hero.jpg"
-            alt=""
-            className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-auto object-contain opacity-60"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-obsidian via-obsidian/70 to-transparent" />
-        </div>
+      <section className="relative min-h-screen flex items-center px-6 md:px-16 py-24 overflow-hidden">
+        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-        <div className="relative max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-ai/20 bg-ai/[0.06] mb-10">
-            <div className="w-1.5 h-1.5 rounded-full bg-ai animate-pulse" />
-            <span className="font-mono text-xs text-ai uppercase tracking-widest">Honda Civic Si</span>
+          {/* Left: copy */}
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-ai/20 bg-ai/[0.06] mb-10">
+              <div className="w-1.5 h-1.5 rounded-full bg-ai animate-pulse" />
+              <span className="font-mono text-xs text-ai uppercase tracking-widest">Honda Civic Si</span>
+            </div>
+
+            <h1 className="font-display font-black text-6xl md:text-7xl leading-[1.0] tracking-tight mb-8">
+              Your build.<br />
+              Stage by stage.<br />
+              <span className="text-accent">No wasted money.</span>
+            </h1>
+
+            <p className="text-body text-lg leading-relaxed mb-10 max-w-lg">
+              Reddit has 47 conflicting answers. YouTube covers someone else's car.
+              ChatGPT doesn't know your 1.5T from the Type R.
+              We do — and we'll walk you through every stage of your build.
+            </p>
+
+            <div className="flex items-center gap-6 flex-wrap">
+              <Link
+                to="/planner"
+                className="inline-flex items-center gap-2 px-7 py-4 bg-accent hover:bg-accent/90 text-black font-display font-bold rounded-xl transition-all duration-200 text-base"
+              >
+                Start My Build
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </Link>
+              <Link to="/example-build" className="text-muted hover:text-white text-sm transition-colors">
+                See an example build ↗
+              </Link>
+            </div>
           </div>
 
-          <h1 className="font-display font-black text-6xl md:text-7xl leading-[1.0] tracking-tight mb-8">
-            Your build.<br />
-            Stage by stage.<br />
-            <span className="text-accent">No wasted money.</span>
-          </h1>
+          {/* Right: live product UI */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-accent/5 rounded-3xl blur-3xl scale-110 pointer-events-none" />
 
-          <p className="text-body text-lg leading-relaxed mb-10 max-w-lg">
-            Reddit has 47 conflicting answers. YouTube covers someone else's car.
-            ChatGPT doesn't know your 1.5T from the Type R.
-            We do — and we'll walk you through every stage of your build.
-          </p>
+            <div className="relative bg-surface border border-white/[0.07] rounded-2xl overflow-hidden">
+              {/* Build header */}
+              <div className="px-5 py-4 border-b border-white/[0.05] flex items-start justify-between">
+                <div>
+                  <div className="font-mono text-xs text-muted uppercase tracking-wider mb-1">Your build</div>
+                  <div className="font-display font-bold text-white text-lg leading-tight">2022 Honda Civic Si</div>
+                  <div className="text-muted text-sm">Street Performance</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-mono text-xs text-muted uppercase tracking-wider mb-1">Budget</div>
+                  <div className="font-mono text-white font-semibold">$2,500</div>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-6 flex-wrap">
-            <Link
-              to="/planner"
-              className="inline-flex items-center gap-2 px-7 py-4 bg-accent hover:bg-accent/90 text-black font-display font-bold rounded-xl transition-all duration-200 text-base"
-            >
-              Start My Build
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </Link>
-            <Link to="/example-build" className="text-muted hover:text-white text-sm transition-colors">
-              See an example build ↗
-            </Link>
+              {/* Stage pills */}
+              <div className="px-5 py-3 border-b border-white/[0.05] flex gap-3">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+                  <span className="font-mono text-xs text-accent">Stage 1</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/[0.08]">
+                  <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+                  <span className="font-mono text-xs text-muted">Stage 2</span>
+                </div>
+              </div>
+
+              {/* Mod list */}
+              <div className="divide-y divide-white/[0.04]">
+                {[
+                  { name: 'Performance Tires',  cost: '$600–$900', done: true,  by: 'Shop' },
+                  { name: 'Rear Motor Mount',   cost: '$80–$150',  done: true,  by: 'DIY'  },
+                  { name: 'Cold Air Intake',    cost: '$250–$400', done: false             },
+                ].map((mod) => (
+                  <div
+                    key={mod.name}
+                    className={`flex items-center gap-3 px-5 py-3.5 ${mod.done ? 'opacity-50' : ''}`}
+                  >
+                    <div className={`w-6 h-6 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                      mod.done
+                        ? 'bg-green-500/20 border-green-500/40 text-green-400'
+                        : 'border-white/20'
+                    }`}>
+                      {mod.done && (
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-white">{mod.name}</div>
+                      {mod.by && (
+                        <div className="font-mono text-xs text-muted uppercase tracking-wider">{mod.by}</div>
+                      )}
+                    </div>
+                    <div className="font-mono text-xs text-muted flex-shrink-0">{mod.cost}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Stage transition message */}
+              <div className="mx-4 mb-4 mt-1 p-3.5 rounded-xl border border-ai/20 bg-ai/[0.06] flex gap-2.5">
+                <div className="w-0.5 rounded-full bg-ai/40 flex-shrink-0 self-stretch" />
+                <div>
+                  <div className="font-mono text-xs text-ai uppercase tracking-wider mb-1">
+                    Stage 1 complete — before Stage 2
+                  </div>
+                  <p className="text-xs text-body leading-relaxed">
+                    Tires and motor mount are solid. Confirm your 1.5T has the correct
+                    FE1 bracket before buying the intake — some early builds need a minor mod.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
       </section>
 
