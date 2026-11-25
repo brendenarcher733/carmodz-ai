@@ -73,7 +73,7 @@ export default function Landing() {
                 src="/images/civic-si-2022.jpg"
                 alt="2022 Honda Civic Si"
                 className="w-full h-auto object-contain"
-                style={{ mixBlendMode: 'lighten', filter: 'sepia(1) saturate(2.5) hue-rotate(8deg) brightness(1.15)' }}
+                style={{ mixBlendMode: 'lighten', filter: 'brightness(1.5) saturate(1.1)' }}
               />
               <div className="absolute bottom-4 left-5">
                 <span className="font-mono text-xs text-white/50 uppercase tracking-widest">2022 Honda Civic Si</span>
