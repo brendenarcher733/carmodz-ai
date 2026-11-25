@@ -65,20 +65,16 @@ export default function Landing() {
           {/* Car + build widget — side by side, right under the CTA */}
           <div className="grid md:grid-cols-[0.95fr,1.15fr] gap-6 items-start">
 
-            {/* Civic photo — darkened and feathered so its background melts into the page */}
+            {/* Civic photo — lighten blend drops the pure-black studio backdrop so it
+                merges into the page with no visible edge; hue-rotate nudges the car's
+                paint (~#E8591A) toward the site's accent orange (#FF6B00) */}
             <div className="relative rounded-2xl h-64 md:h-[27rem] overflow-hidden">
               <img
                 src="/images/civic-si-2022.jpg"
                 alt="2022 Honda Civic Si"
                 className="absolute inset-0 w-full h-full object-cover object-center"
-                style={{
-                  filter: 'saturate(1.25) brightness(0.45) contrast(1.08)',
-                  maskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 50%, transparent 100%)',
-                  WebkitMaskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 50%, transparent 100%)',
-                }}
+                style={{ mixBlendMode: 'lighten', filter: 'saturate(1.3) hue-rotate(7deg)' }}
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-obsidian/10 via-transparent to-obsidian" />
-              <div className="absolute inset-0 bg-gradient-to-r from-obsidian/70 via-transparent to-obsidian/70" />
               <div className="absolute bottom-4 left-5">
                 <span className="font-mono text-xs text-white/50 uppercase tracking-widest">2022 Honda Civic Si</span>
               </div>
