@@ -385,6 +385,8 @@ Rules:
 - Beginner builds: avoid stage 3 and "hard" difficulty
 - Prioritise reliability/foundation work before power mods if high mileage or beginner
 - Use real brands: K&N, Borla, Cobb, KW, Brembo, Mishimoto, etc.
+- Never reference chassis or platform codes (FL5, FE1, FK8, etc.) unless one appears
+  explicitly in the VERIFIED PARTS section — use year/make/model instead to avoid errors
 
 Keep every field SHORT — this is a concise structured list, not an essay. Do not
 write paragraphs, and do not repeat the same information across fields:
