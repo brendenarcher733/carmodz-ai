@@ -62,26 +62,33 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Car — above the card */}
-          <div className="relative rounded-2xl overflow-hidden mb-5">
-            <img
-              src="/images/civic-si-2022.jpg"
-              alt="2022 Honda Civic Si"
-              className="w-full h-56 md:h-72 object-cover object-center"
-              style={{ filter: 'saturate(1.4) brightness(0.85)' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-obsidian/60 via-transparent to-obsidian/60" />
-            <div className="absolute inset-0 bg-gradient-to-b from-obsidian/20 via-transparent to-obsidian/70" />
-            <div className="absolute bottom-4 left-5">
-              <span className="font-mono text-xs text-white/50 uppercase tracking-widest">2022 Honda Civic Si</span>
+          {/* Car + build widget — side by side, right under the CTA */}
+          <div className="grid md:grid-cols-[0.95fr,1.15fr] gap-6 items-start">
+
+            {/* Civic photo — darkened and feathered so its background melts into the page */}
+            <div className="relative rounded-2xl h-64 md:h-[27rem] overflow-hidden">
+              <img
+                src="/images/civic-si-2022.jpg"
+                alt="2022 Honda Civic Si"
+                className="absolute inset-0 w-full h-full object-cover object-center"
+                style={{
+                  filter: 'saturate(1.25) brightness(0.45) contrast(1.08)',
+                  maskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 50%, transparent 100%)',
+                  WebkitMaskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 50%, transparent 100%)',
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-obsidian/10 via-transparent to-obsidian" />
+              <div className="absolute inset-0 bg-gradient-to-r from-obsidian/70 via-transparent to-obsidian/70" />
+              <div className="absolute bottom-4 left-5">
+                <span className="font-mono text-xs text-white/50 uppercase tracking-widest">2022 Honda Civic Si</span>
+              </div>
             </div>
-          </div>
 
-          {/* Product card */}
-          <div className="relative max-w-2xl">
-            <div className="absolute inset-0 bg-accent/[0.05] rounded-3xl blur-2xl scale-105 pointer-events-none" />
+            {/* Product card */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-accent/[0.05] rounded-3xl blur-2xl scale-105 pointer-events-none" />
 
-            <div className="relative bg-surface border border-white/[0.08] rounded-2xl overflow-hidden">
+              <div className="relative bg-surface border border-white/[0.08] rounded-2xl overflow-hidden">
               <BorderBeam size={300} duration={10} colorFrom="#f97316" colorTo="transparent" />
 
               <div className="px-6 py-4 border-b border-white/[0.05] flex items-center justify-between">
@@ -128,6 +135,8 @@ export default function Landing() {
                 <span className="font-mono text-xs text-ai">Claude AI</span>
               </div>
             </div>
+          </div>
+
           </div>
 
         </div>
