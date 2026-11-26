@@ -147,103 +147,72 @@ function StepBar({ current }) {
    hatch is "My vehicle isn't listed" below, which is an explicit opt-in to
    free text, not an automatic fallback. */
 
-/* ─── "My vehicle isn't listed" — a dead end, not a detour ───
-   Used to feed free-text make/model/year straight into plan generation
-   (vehicle_verified=false). It no longer does: nothing we don't actually
-   support should produce a plan, so this captures interest instead —
-   email + whatever they typed, see backend/models/vehicle_waitlist.py. */
-function UnsupportedVehicleWaitlist({ make, model, year, set, onBack }) {
-  const [email, setEmail]   = useState('')
-  const [status, setStatus] = useState('idle')   // 'idle' | 'sending' | 'sent' | 'error'
-
-  // year is only ever non-empty here when this fired from a known model
-  // whose year fell outside every verified range (see the year input's
-  // onBlur below) — the free-text "my vehicle isn't listed" path always
-  // clears year, so this never shows a stray year next to a make/model that
-  // was never actually resolved against the catalog.
-  const vehicleLabel = [year, make, model].filter(Boolean).join(' ').trim()
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setStatus('sending')
-    try {
-      await vehiclesApi.joinWaitlist(email, make.trim(), model.trim())
-      setStatus('sent')
-      analytics.capture('vehicle_waitlist_submitted', { make, model })
-    } catch {
-      setStatus('error')
-    }
-  }
-
-  if (status === 'sent') {
-    return (
-      <div className="animate-fade-in">
-        <h2 className="font-display font-black text-white text-2xl tracking-tight mb-2">You're on the list.</h2>
-        <p className="text-body text-sm mb-8">
-          We'll email you when we add {vehicleLabel || 'your vehicle'} to CarMods AI.
-        </p>
-        <button
-          type="button"
-          onClick={onBack}
-          className="focus-ring rounded-md text-muted text-sm hover:text-body transition-colors"
-        >
-          ← Back to the vehicle list
-        </button>
-      </div>
-    )
-  }
-
+/* ─── "My vehicle isn't listed" — free-text entry that continues ───
+   A vehicle outside the catalog still gets a plan: the backend treats it as
+   unverified (see services/vehicle_service.check_vehicle) and tells the
+   model not to claim exact fitment. Dead-ending here used to lose most
+   planner visitors at step 0, since the catalog only covers a few models
+   per make. The waitlist email is kept, but optional — it's sent when they
+   press Continue (see Planner below), not required to get a plan. */
+function UnlistedVehicleForm({ form, set, onBack }) {
   return (
     <div className="animate-fade-in">
       <h2 className="font-display font-black text-white text-2xl tracking-tight mb-2">
-        We don't have deep data on {vehicleLabel || 'your vehicle'} yet.
+        Tell us your car.
       </h2>
-      <p className="text-body text-sm mb-8">Leave your email and we'll notify you when we add it.</p>
+      <p className="text-body text-sm mb-8">
+        We don't have verified data for every model yet, so your plan will use general platform
+        knowledge — double-check exact part fitment before buying.
+      </p>
 
-      <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-        <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-4 mb-6">
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="field-label mb-2">Year</label>
+            <input
+              className="field-input"
+              type="number"
+              inputMode="numeric"
+              placeholder="2015"
+              min={1950}
+              max={CURRENT_YEAR + 1}
+              value={form.year}
+              onChange={e => set('year', e.target.value)}
+              autoFocus
+            />
+          </div>
           <div>
             <label className="field-label mb-2">Make</label>
             <input
               className="field-input"
-              placeholder="e.g. Yugo"
-              value={make}
+              placeholder="e.g. Ford"
+              value={form.make}
               onChange={e => set('make', e.target.value)}
-              required
-              autoFocus
             />
           </div>
           <div>
             <label className="field-label mb-2">Model</label>
             <input
               className="field-input"
-              placeholder="e.g. GV"
-              value={model}
+              placeholder="e.g. Focus ST"
+              value={form.model}
               onChange={e => set('model', e.target.value)}
-              required
             />
           </div>
         </div>
         <div>
-          <label className="field-label mb-2">Email</label>
+          <label className="field-label mb-2">
+            Email <span className="text-muted normal-case tracking-normal">(optional — we'll tell you when we add verified data)</span>
+          </label>
           <input
             className="field-input"
             type="email"
             placeholder="you@example.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
+            value={form.waitlist_email}
+            onChange={e => set('waitlist_email', e.target.value)}
           />
         </div>
-
-        {status === 'error' && (
-          <p role="alert" className="text-xs text-red-400">Couldn't submit that — try again.</p>
-        )}
-
-        <Button type="submit" size="lg" loading={status === 'sending'}>
-          Notify me
-        </Button>
-      </form>
+      </div>
 
       <button
         type="button"
@@ -355,18 +324,8 @@ function VehicleSelector({ form, set, unlisted, setUnlisted }) {
     set('year', '')
   }
 
-  // A vehicle outside the catalog dead-ends here now — no plan is
-  // generated for it. canAdvance() (below, in the parent Planner
-  // component) also returns false for step 0 while unlisted, so there's
-  // no way forward past this except submitting the waitlist or going
-  // back to the real vehicle list.
   if (unlisted) {
-    return (
-      <UnsupportedVehicleWaitlist
-        make={form.make} model={form.model} year={form.year} set={set}
-        onBack={exitUnlisted}
-      />
-    )
+    return <UnlistedVehicleForm form={form} set={set} onBack={exitUnlisted} />
   }
 
   return (
@@ -528,15 +487,6 @@ function VehicleSelector({ form, set, unlisted, setUnlisted }) {
                 max={yearInputBounds.max}
                 value={form.year}
                 onChange={e => set('year', e.target.value)}
-                onBlur={() => {
-                  // Known model, year outside every verified range — same
-                  // dead-end as an unlisted make/model (a flat 422 on submit
-                  // teaches the user nothing and loses their email), so it
-                  // gets the same waitlist treatment. Checked on blur, not on
-                  // every keystroke, so this doesn't fire while they're still
-                  // mid-way through typing a real year.
-                  if (selectedModel && form.year && !isYearValid(form.year)) setUnlisted(true)
-                }}
                 autoFocus
               />
               <button type="button" onClick={() => setYearMode('quick')} className="focus-ring rounded-md text-muted text-sm hover:text-body transition-colors">
@@ -607,13 +557,12 @@ export default function Planner() {
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(null)
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false)
-  // Lifted out of VehicleSelector so canAdvance() below can see it — a
-  // vehicle outside the catalog must never be able to advance past step 0
-  // into the rest of the wizard, since no plan should ever be generated
-  // for it (see UnsupportedVehicleWaitlist).
+  // Lifted out of VehicleSelector so canAdvance() and the Continue handler
+  // below can see it — step 0 validates free text instead of a catalog pick
+  // while this is on (see UnlistedVehicleForm).
   const [unlisted, setUnlisted] = useState(false)
   const [form,    setForm]    = useState({
-    title: '', year: '', make: '', model: '',
+    title: '', year: '', make: '', model: '', waitlist_email: '',
     budget: '', goal: '', experience: 'intermediate',
     categories: [], is_daily: true, notes: '',
   })
@@ -651,20 +600,34 @@ export default function Planner() {
   }, [step])
 
   const canAdvance = () => {
-    // Unsupported-vehicle mode is a dead end, not step 0 of the wizard —
-    // submitting the waitlist is the only action available there (see
-    // UnsupportedVehicleWaitlist), never "Continue" into budget/goal/etc.
-    if (step === 0) return !unlisted && form.year && form.make && form.model
+    if (step === 0) {
+      if (!unlisted) return form.year && form.make && form.model
+      const y = Number(form.year)
+      return y >= 1950 && y <= CURRENT_YEAR + 1 && form.make.trim() && form.model.trim()
+    }
     if (step === 1) return form.budget > 0 && form.goal
     if (step === 2) return form.experience
     return true
   }
 
+  const submitVehicle = () => {
+    analytics.capture('vehicle_submitted', { year: form.year, make: form.make, model: form.model, unlisted })
+    // Best-effort — a failed waitlist signup must never block the plan.
+    if (unlisted && form.waitlist_email.trim()) {
+      vehiclesApi.joinWaitlist(form.waitlist_email.trim(), form.make.trim(), form.model.trim())
+        .then(() => analytics.capture('vehicle_waitlist_submitted', { make: form.make, model: form.model }))
+        .catch(() => {})
+    }
+  }
+
   const submit = async () => {
     setLoading(true); setError(null)
     try {
+      const { waitlist_email, ...rest } = form
       const payload = {
-        ...form,
+        ...rest,
+        make:   form.make.trim(),
+        model:  form.model.trim(),
         title:  form.title || `${form.year} ${form.make} ${form.model}`,
         year:   parseInt(form.year),
         budget: parseFloat(form.budget),
@@ -712,12 +675,8 @@ export default function Planner() {
         setShowUpgradePrompt(true)
         return
       }
-      if (e.status === 422) {
-        setLoading(false)
-        setUnlisted(true)
-        setStep(0)
-        return
-      }
+      // A 422 here means a known model in a year it was never produced —
+      // the backend's message lists the verified years, shown on review.
       setError(e.message)
       setLoading(false)
     }
@@ -930,48 +889,40 @@ export default function Planner() {
           </div>
         )}
 
-        {/* ── Navigation — hidden entirely in unsupported-vehicle mode.
-             UnsupportedVehicleWaitlist has its own submit action ("Notify
-             me") and its own "← Back to the vehicle list" link; a disabled
-             Back + disabled Continue row here would just be redundant
-             chrome under it, not a real second path forward. ── */}
-        {!(step === 0 && unlisted) && (
-          <div className="flex items-center justify-between gap-4 mt-10 pt-8 border-t border-white/[0.05]">
-            <button
-              type="button"
-              onClick={() => setStep(p => p - 1)}
-              disabled={step === 0}
-              className="tap-target md:min-h-0 md:min-w-0 inline-flex items-center gap-2 px-3 -ml-3 rounded-xl text-body text-sm font-medium hover:text-white hover:bg-white/[0.05] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Back
-            </button>
+        {/* ── Navigation ── */}
+        <div className="flex items-center justify-between gap-4 mt-10 pt-8 border-t border-white/[0.05]">
+          <button
+            type="button"
+            onClick={() => setStep(p => p - 1)}
+            disabled={step === 0}
+            className="tap-target md:min-h-0 md:min-w-0 inline-flex items-center gap-2 px-3 -ml-3 rounded-xl text-body text-sm font-medium hover:text-white hover:bg-white/[0.05] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Back
+          </button>
 
-            {step < 3 ? (
-              <Button
-                size="lg"
-                onClick={() => {
-                  if (step === 0) {
-                    analytics.capture('vehicle_submitted', { year: form.year, make: form.make, model: form.model })
-                  }
-                  setStep(p => p + 1)
-                }}
-                disabled={!canAdvance()}
-              >
-                Continue
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Button>
-            ) : (
-              <Button size="xl" onClick={submit} loading={loading} className="shadow-glow">
-                Build My Garage
-              </Button>
-            )}
-          </div>
-        )}
+          {step < 3 ? (
+            <Button
+              size="lg"
+              onClick={() => {
+                if (step === 0) submitVehicle()
+                setStep(p => p + 1)
+              }}
+              disabled={!canAdvance()}
+            >
+              Continue
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Button>
+          ) : (
+            <Button size="xl" onClick={submit} loading={loading} className="shadow-glow">
+              Build My Garage
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )

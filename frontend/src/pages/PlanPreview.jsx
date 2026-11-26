@@ -193,6 +193,13 @@ export default function PlanPreview() {
           </div>
         </Card>
 
+        {plan.vehicle_verified === false && (
+          <p className="text-amber-400/80 text-sm mb-6">
+            We don't have verified data for this exact vehicle yet, so this plan uses general platform
+            knowledge. Confirm part fitment for your car before buying.
+          </p>
+        )}
+
         {plan.budget_warning && (
           <p className="text-body text-sm mb-6">{plan.budget_warning}</p>
         )}
