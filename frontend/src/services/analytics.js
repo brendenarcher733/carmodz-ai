@@ -4,8 +4,10 @@
 // and the app behaves identically to before this existed.
 import posthog from 'posthog-js'
 
-const KEY  = import.meta.env.VITE_POSTHOG_KEY
-const HOST = import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com'
+// Trimmed because a stray newline pasted into the Vercel env var silently
+// produced an invalid token and every event was rejected.
+const KEY  = import.meta.env.VITE_POSTHOG_KEY?.trim()
+const HOST = import.meta.env.VITE_POSTHOG_HOST?.trim() || 'https://us.i.posthog.com'
 
 let initialized = false
 
