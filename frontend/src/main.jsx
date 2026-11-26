@@ -31,10 +31,17 @@ analytics.init()
 // autocapture pageview (which only fires once) can't see them — this
 // fires a $pageview on every client-side navigation instead, which is what
 // makes page-level drop-off/funnel analysis possible at all.
+// The planner funnel is where anonymous visitors drop off before they ever
+// sign up, so replay starts on entering it rather than only on login.
+const REPLAY_PATHS = ['/planner', '/plan/preview', '/example-build']
+
 function RouteTracker() {
   const location = useLocation()
   useEffect(() => {
     analytics.capture('$pageview', { path: location.pathname })
+    if (REPLAY_PATHS.some(p => location.pathname.startsWith(p))) {
+      analytics.startSessionRecording()
+    }
   }, [location.pathname])
   return null
 }
