@@ -7,7 +7,11 @@ import posthog from 'posthog-js'
 // Trimmed because a stray newline pasted into the Vercel env var silently
 // produced an invalid token and every event was rejected.
 const KEY  = import.meta.env.VITE_POSTHOG_KEY?.trim()
-const HOST = import.meta.env.VITE_POSTHOG_HOST?.trim() || 'https://us.i.posthog.com'
+// Production goes through a same-origin proxy (/cmz, rewritten to PostHog in
+// vercel.json) so ad blockers that block *.posthog.com don't drop events.
+// The Vite dev server has no such rewrite, so dev talks to PostHog directly.
+const HOST = import.meta.env.VITE_POSTHOG_HOST?.trim()
+  || (import.meta.env.PROD ? '/cmz' : 'https://us.i.posthog.com')
 
 let initialized = false
 
@@ -15,6 +19,9 @@ export function init() {
   if (!KEY || initialized) return
   posthog.init(KEY, {
     api_host: HOST,
+    // Needed once api_host is a proxy, so toolbar/replay links still
+    // point at the PostHog app rather than at /cmz.
+    ui_host: 'https://us.posthog.com',
     // Route changes are captured explicitly (see RouteTracker in main.jsx) —
     // this SPA never does a full page load between routes, so PostHog's own
     // autocapture pageview (which fires once, on script load) would miss
